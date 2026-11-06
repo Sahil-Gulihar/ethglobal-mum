@@ -26,13 +26,21 @@ Card rails can't give a merchant final settlement in seconds to a wallet they co
 
 ## Payment and refund explorer links
 
-Real testnet transactions from the demo flow (official USDT):
+Real testnet transactions from the first live run of the demo flow on Whitechain Sepolia (official USDT, real app:
+dashboard signup, backend-signed registration, store order, indexer, signed webhooks). Order `order_c3956bc0f34ad6f6`
+(Tasting Sachet 0.99 + Masala Chai Tin 4.99 = 5.98 USDT), partially refunded 2.00 USDT. All statuses are `success`.
 
-| What | Transaction |
-|---|---|
-| Merchant registered (payout wallet) | TODO: `https://explorer.testnet.whitechain.io/tx/0x...` |
-| Customer payment (Chai & Co. order) | TODO: `https://explorer.testnet.whitechain.io/tx/0x...` |
-| Partial refund | TODO: `https://explorer.testnet.whitechain.io/tx/0x...` |
+| Step | What | Transaction |
+|---|---|---|
+| 0 | Customer gets testnet USDT by swapping WBT in the YetiTrade testnet pool | [`0x1c12f7c1…b5ddd6`](https://explorer.testnet.whitechain.io/tx/0x1c12f7c1b1d372147975f03f11d10b1a1be46bc5ed2177ac7055c121b3b5ddd6) |
+| 1 | Merchant registered: backend signer calls `registerMerchant` for Chai & Co.'s payout wallet | [`0x977e275c…6efaa9`](https://explorer.testnet.whitechain.io/tx/0x977e275c71308a9a3c13003f4922d28704beb8c2caefb6cf73ff77b7cf6efaa9) |
+| 2 | Customer approves the PaymentRouter for 5.98 USDT | [`0xe1021fee…69a5d6`](https://explorer.testnet.whitechain.io/tx/0xe1021feec583a277d39b0cd13c03d7e4768ee8d552fae216e3a0e691e969a5d6) |
+| 3 | Customer payment: `pay(merchantId, orderId, 5.98 USDT)` to the merchant's wallet | [`0xebd1c99a…e05125`](https://explorer.testnet.whitechain.io/tx/0xebd1c99ae548a3e497084f92a3d41d1bb0a8a5f4b775a681ebccd715e3e05125) |
+| 4 | Merchant payout wallet approves the PaymentRouter for the 2.00 USDT refund | [`0x96c1ab28…e3f559`](https://explorer.testnet.whitechain.io/tx/0x96c1ab28b6ea31f576f5a833d5e0b785f6fcd250a3962f8252c1ac1f67e3f559) |
+| 5 | Partial refund: `refund(paymentId, 2.00 USDT)` back to the customer | [`0xe2fcbd3d…1bab52`](https://explorer.testnet.whitechain.io/tx/0xe2fcbd3d4a23bbb35964def3f7509bd2883a167164b790733ff069ef5c1bab52) |
+
+The indexer marked the session `paid` and the refund `succeeded`; the store received `payment.succeeded` and
+`refund.succeeded` with verified signatures, and the order ended as `partially_refunded`.
 
 ## Architecture
 
@@ -158,4 +166,4 @@ webhook delivery to the store, and partial and full refunds from the dashboard.
   Set `ALLOW_PRIVATE_WEBHOOK_URLS=true` to allow localhost/private addresses; outside production they are allowed.
 - **Demo store admin** (`/admin`) is public: it's a demo.
 - The demo store keeps orders in a JSON file (`apps/demo-store/data/orders.json`). It's a demo, not a pattern.
-- Blockscout source verification is pending (the explorer's verifier was down). The source is verified on Sourcify.
+- Blockscout source verification is pending (the explorer's verifier was still down on 2026-11-06). The source is verified on Sourcify.

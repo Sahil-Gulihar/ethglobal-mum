@@ -16,6 +16,10 @@
 
 Sanity checks after the deploy: `usdt()` returns `0xcedfB561...55a7` and `owner()` returns `0xA8d1...9c12`.
 
+First live run (2026-11-06): merchant Chai & Co. registered with payout `0xA8d1...9c12`
+(`chainMerchantId` `0xeb1a564a...6b9e0b`), then a 5.98 USDT payment and a 2.00 USDT partial refund. The transactions are
+listed in the README under "Payment and refund explorer links".
+
 These values are set in `packages/core/src/deployment.ts` and in the root `.env` (`PAYMENT_ROUTER_ADDRESS`,
 `NEXT_PUBLIC_PAYMENT_ROUTER_ADDRESS`, `NEXT_PUBLIC_WHITECHAIN_RPC_URL`).
 
@@ -28,7 +32,8 @@ Do not use `https://rpc-testnet.whitechain.io` (with a hyphen). It returns chain
 - **Blockscout: not verified yet.** The verifier service returns `{"message":"Contract verification is temporarily unavailable."}`
   on every endpoint we tried: forge `--verifier blockscout`, `/api/v2/.../verification/via/standard-input`, and the
   standalone `forge verify-contract`. In `/api/v2/smart-contracts/verification/config`, `solidity_compiler_versions` is empty,
-  so the problem is on the server side. To retry once it's back, run:
+  so the problem is on the server side. Retried on 2026-11-06 with the command below: same response, still not
+  verified. To retry once it's back, run:
 
   ```bash
   cd contracts && forge verify-contract 0xa99a6D97607567f4fe734831910D24f4e9BD0508 src/PaymentRouter.sol:PaymentRouter \
