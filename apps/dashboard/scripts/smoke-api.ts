@@ -201,7 +201,7 @@ async function main() {
     r = await call(refundsRoute.POST(req("/refunds", { key: A.key, body: { paymentId: payId, amount: "abc" } })));
     check(r.status === 400, "bad refund amount -> 400", r);
     r = await call(refundsRoute.POST(req("/refunds", { key: A.key, body: { paymentId: payId, amount: "20" } })));
-    check(r.status === 201 && r.body?.status === "pending" && r.body?.amount === "20" && r.body?.id?.startsWith("re_"), "partial refund -> 201 pending", r);
+    check(r.status === 201 && r.body?.status === "pending" && r.body?.amount === "20.00" && r.body?.id?.startsWith("re_"), "partial refund -> 201 pending", r);
     r = await call(refundsRoute.POST(req("/refunds", { key: A.key, body: { paymentId: payId, amount: "30" } })));
     check(r.status === 400, "pending refunds count against balance (20 + 30 > 49.99)", r);
     // concurrent requests must not over-allocate (row lock)
