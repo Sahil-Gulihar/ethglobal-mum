@@ -1,40 +1,73 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { formatUsdt, type Product } from "@/lib/catalog";
 import { useCart } from "./cart";
 import { ProductArt } from "./product-art";
 
 export function ProductCard({ product, index }: { product: Product; index: number }) {
   const { add } = useCart();
+  const [added, setAdded] = useState(false);
+
+  useEffect(() => {
+    if (!added) return;
+    const t = setTimeout(() => setAdded(false), 1800);
+    return () => clearTimeout(t);
+  }, [added]);
+
   return (
-    <article
-      className="animate-rise group flex flex-col overflow-hidden rounded-3xl border border-line bg-paper transition hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-24px_rgba(42,26,18,0.35)]"
-      style={{ animationDelay: `${120 + index * 60}ms` }}
-    >
-      <div className="relative grid aspect-square place-items-center" style={{ background: product.tone }}>
+    <article className="animate-rise group flex min-w-0 flex-col" style={{ animationDelay: `${80 + index * 70}ms` }}>
+      <div
+        className="relative grid aspect-[4/5] place-items-center overflow-hidden rounded-[3px]"
+        style={{ background: product.tone }}
+      >
         {product.badge && (
-          <span className="absolute left-4 top-4 rounded-full bg-paper/90 px-2.5 py-1 text-xs font-semibold text-ink">
+          <span className="absolute left-3 top-3 text-[11.5px] font-medium tracking-[0.01em] text-ink-soft md:left-4 md:top-4">
             {product.badge}
           </span>
         )}
-        <ProductArt art={product.art} className="size-3/4 transition duration-500 group-hover:scale-[1.04]" />
+        <ProductArt
+          art={product.art}
+          className="size-[88%] transition-transform duration-700 ease-[var(--ease-out-soft)] group-hover:scale-[1.035]"
+        />
       </div>
-      <div className="flex flex-1 flex-col gap-1 p-5">
-        <h3 className="font-display text-lg font-semibold leading-snug">{product.name}</h3>
-        <p className="text-sm text-muted">{product.tagline}</p>
-        <p className="mt-2 text-sm leading-relaxed text-ink/70">{product.description}</p>
-        <div className="mt-auto flex items-center justify-between pt-5">
-          <p className="font-semibold tabular-nums">
-            {formatUsdt(product.priceCents)} <span className="text-sm font-normal text-muted">USDT</span>
+
+      <div className="flex flex-1 flex-col pt-4">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
+          <h3 className="font-display text-[19px] leading-snug tracking-[-0.01em] md:text-[21px]">{product.name}</h3>
+          <p className="shrink-0 text-[14px] tabular-nums text-ink">
+            {formatUsdt(product.priceCents)} <span className="text-muted">USDT</span>
           </p>
-          <button
-            onClick={() => add(product.id)}
-            aria-label={`Add ${product.name} to cart`}
-            className="rounded-full border border-ink/15 bg-paper px-4 py-2 text-sm font-medium transition hover:border-ink hover:bg-ink hover:text-cream active:scale-[0.97]"
-          >
-            Add to cart
-          </button>
         </div>
+        <p className="mt-1 text-[13.5px] leading-relaxed text-muted">{product.tagline}</p>
+
+        <button
+          type="button"
+          onClick={() => {
+            add(product.id);
+            setAdded(true);
+          }}
+          aria-label={`Add ${product.name} to cart`}
+          className={`mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-[4px] border text-[14px] transition-colors duration-150 active:translate-y-px ${
+            added
+              ? "border-ink bg-ink text-paper"
+              : "border-line-strong text-ink hover:border-ink hover:bg-ink hover:text-paper"
+          }`}
+        >
+          {added ? (
+            <>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden>
+                <path d="M5 12.5l4.5 4.5L19 7.5" />
+              </svg>
+              Added
+            </>
+          ) : (
+            "Add to cart"
+          )}
+        </button>
+        <span className="sr-only" role="status" aria-live="polite">
+          {added ? `${product.name} added to cart` : ""}
+        </span>
       </div>
     </article>
   );

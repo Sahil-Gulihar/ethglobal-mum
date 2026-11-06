@@ -13,6 +13,8 @@ interface CartState {
   count: number;
   subtotalCents: number;
   open: boolean;
+  /** False until the saved cart has been read from localStorage (avoids a flash of "0"). */
+  hydrated: boolean;
   setOpen: (open: boolean) => void;
   add: (productId: string) => void;
   setQuantity: (productId: string, quantity: number) => void;
@@ -41,8 +43,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [quantities, hydrated]);
 
   const add = useCallback((productId: string) => {
+    // The add button confirms inline and the header count updates; the drawer stays closed.
     setQuantities((q) => ({ ...q, [productId]: Math.min((q[productId] ?? 0) + 1, 20) }));
-    setOpen(true);
   }, []);
 
   const setQuantity = useCallback((productId: string, quantity: number) => {
@@ -66,12 +68,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       count: lines.reduce((n, l) => n + l.quantity, 0),
       subtotalCents: lines.reduce((n, l) => n + l.quantity * l.product.priceCents, 0),
       open,
+      hydrated,
       setOpen,
       add,
       setQuantity,
       clear,
     };
-  }, [quantities, open, add, setQuantity, clear]);
+  }, [quantities, open, hydrated, add, setQuantity, clear]);
 
   return <CartContext value={value}>{children}</CartContext>;
 }

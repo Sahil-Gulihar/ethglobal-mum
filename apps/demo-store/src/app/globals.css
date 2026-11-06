@@ -1,33 +1,85 @@
 @import "tailwindcss";
 
 @theme {
-  --color-cream: #fbf6ee;
-  --color-paper: #fffdf9;
-  --color-ink: #2a1a12;
-  --color-masala: #b5482a;
-  --color-masala-dark: #963a21;
-  --color-saffron: #e5a13a;
-  --color-cardamom: #5f7a4e;
-  --color-muted: #7a6656;
-  --color-line: #eadfd0;
-  /* System stacks only: no network font fetch, works offline at the venue. */
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, ui-serif, serif;
+  /* Chai & Co. palette: bone paper, steeped-tea ink, one spice accent. */
+  --color-cream: #f5efe6;
+  --color-paper: #fbf8f3;
+  --color-bone: #ede4d6;
+  --color-ink: #24180f;
+  --color-ink-soft: #4a3b30;
+  --color-masala: #a8432a;
+  --color-masala-dark: #8a3520;
+  --color-saffron: #d99a3c;
+  --color-cardamom: #4f6b42;
+  --color-muted: #75665a;
+  --color-line: #e2d7c7;
+  --color-line-strong: #cdbfac;
+
+  --font-sans: var(--font-instrument), ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font-newsreader), "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, ui-serif, serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --ease-out-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 html {
   background: var(--color-cream);
   color: var(--color-ink);
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+p {
+  text-wrap: pretty;
 }
 
 ::selection {
   background: color-mix(in oklab, var(--color-saffron) 40%, transparent);
+}
+
+/* One focus ring everywhere, offset so it never sits on top of content. */
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 16px;
+  top: -48px;
+  z-index: 100;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  padding: 8px 12px;
+  font-size: 14px;
+  border-radius: 4px;
+}
+.skip-link:focus {
+  top: 12px;
+}
+
+/* Quiet text link: underline offset, darkens on hover. */
+.link {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--color-line-strong);
+  transition: text-decoration-color 150ms ease, color 150ms ease;
+}
+.link:hover {
+  text-decoration-color: currentColor;
 }
 
 @keyframes steam {
@@ -35,17 +87,33 @@ body {
   30% { opacity: 0.7; }
   100% { transform: translateY(-10px) scaleX(1.2); opacity: 0; }
 }
-.steam path { animation: steam 2.6s ease-in-out infinite; transform-origin: center; }
-.steam path:nth-child(2) { animation-delay: 0.6s; }
-.steam path:nth-child(3) { animation-delay: 1.2s; }
+.steam path { animation: steam 3.2s ease-in-out infinite; transform-origin: center; }
+.steam path:nth-child(2) { animation-delay: 0.8s; }
+.steam path:nth-child(3) { animation-delay: 1.6s; }
 
 @keyframes drawer-in { from { transform: translateX(100%); } to { transform: translateX(0); } }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-.animate-drawer { animation: drawer-in 260ms cubic-bezier(0.2, 0.8, 0.2, 1); }
-.animate-fade { animation: fade-in 200ms ease-out; }
-.animate-rise { animation: rise 320ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.25); } 100% { transform: scale(1); } }
+@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+.animate-drawer { animation: drawer-in 320ms var(--ease-out-soft); }
+.animate-fade { animation: fade-in 220ms ease-out; }
+.animate-rise { animation: rise 520ms var(--ease-out-soft) both; }
+.animate-bump { animation: bump 360ms var(--ease-out-soft); }
+.animate-pulse-dot { animation: pulse-dot 1.8s ease-in-out infinite; }
 
 @media (prefers-reduced-motion: reduce) {
-  .steam path, .animate-drawer, .animate-fade, .animate-rise { animation: none; }
+  .steam path,
+  .animate-drawer,
+  .animate-fade,
+  .animate-rise,
+  .animate-bump,
+  .animate-pulse-dot {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
 }

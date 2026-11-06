@@ -34,7 +34,7 @@ export function CartDrawer() {
       if (e.shiftKey && (document.activeElement === first || !panelRef.current.contains(document.activeElement))) {
         e.preventDefault();
         last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
+      } else if (!e.shiftKey && (document.activeElement === last || !panelRef.current.contains(document.activeElement))) {
         e.preventDefault();
         first.focus();
       }
@@ -71,64 +71,105 @@ export function CartDrawer() {
 
   if (!open) return null;
 
+  const count = lines.reduce((n, l) => n + l.quantity, 0);
+
   return (
-    <div className="fixed inset-0 z-50" role="dialog" aria-modal aria-label="Your cart">
-      <button aria-label="Close cart" tabIndex={-1} className="animate-fade absolute inset-0 bg-ink/40" onClick={() => setOpen(false)} />
-      <aside ref={panelRef} className="animate-drawer absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-paper shadow-2xl">
-        <div className="flex items-center justify-between border-b border-line px-6 py-5">
-          <h2 className="font-display text-2xl font-semibold">Your cart</h2>
+    <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+      <button
+        aria-label="Close cart"
+        tabIndex={-1}
+        className="animate-fade absolute inset-0 cursor-default bg-ink/35 backdrop-blur-[2px]"
+        onClick={() => setOpen(false)}
+      />
+      <aside
+        ref={panelRef}
+        className="animate-drawer absolute inset-y-0 right-0 flex w-full max-w-[440px] flex-col bg-paper shadow-[0_0_60px_rgba(36,24,15,0.18)]"
+      >
+        <div className="flex h-16 items-center justify-between border-b border-line px-5 md:h-[72px] md:px-7">
+          <h2 id="cart-title" className="font-display text-[24px] tracking-[-0.01em]">
+            Your cart
+            {count > 0 && <span className="ml-2 font-sans text-[14px] text-muted tabular-nums">({count})</span>}
+          </h2>
           <button
             ref={closeRef}
+            type="button"
             onClick={() => setOpen(false)}
-            className="grid size-9 place-items-center rounded-full text-muted transition hover:bg-cream hover:text-ink"
-            aria-label="Close"
+            className="-mr-2 grid size-11 place-items-center rounded-[4px] text-ink-soft transition-colors hover:bg-ink/[0.05] hover:text-ink"
+            aria-label="Close cart"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
               <path d="M6 6l12 12M18 6L6 18" />
             </svg>
           </button>
         </div>
 
         {lines.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
-            <ProductArt art="cup" className="size-28 opacity-80" />
-            <p className="font-display text-xl">Your cup is empty</p>
-            <p className="text-sm text-muted">Add a tin of masala chai to get brewing.</p>
+          <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">
+            <p className="font-display text-[22px]">Your cart is empty</p>
+            <p className="mt-2 max-w-[18rem] text-[14px] leading-relaxed text-muted">
+              Start with a tasting sachet, or go straight for the tin.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                document.getElementById("collection")?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="mt-6 inline-flex h-11 items-center rounded-[4px] border border-line-strong px-5 text-[14px] transition-colors hover:border-ink"
+            >
+              Browse the collection
+            </button>
           </div>
         ) : (
-          <ul className="flex-1 divide-y divide-line overflow-y-auto px-6">
+          <ul className="flex-1 divide-y divide-line overflow-y-auto px-5 md:px-7" aria-label="Items in your cart">
             {lines.map(({ product, quantity }) => (
               <li key={product.id} className="flex gap-4 py-5">
-                <div className="grid size-20 shrink-0 place-items-center rounded-2xl" style={{ background: product.tone }}>
-                  <ProductArt art={product.art} className="size-16" />
+                <div
+                  className="grid size-[84px] shrink-0 place-items-center rounded-[3px]"
+                  style={{ background: product.tone }}
+                >
+                  <ProductArt art={product.art} className="size-[68px]" />
                 </div>
-                <div className="flex flex-1 flex-col">
-                  <div className="flex justify-between gap-3">
-                    <p className="font-medium">{product.name}</p>
-                    <p className="font-medium tabular-nums">{formatUsdt(product.priceCents * quantity)}</p>
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className="font-display text-[17px] leading-snug">{product.name}</p>
+                    <p className="shrink-0 text-[14px] tabular-nums">{formatUsdt(product.priceCents * quantity)}</p>
                   </div>
-                  <p className="text-sm text-muted">{formatUsdt(product.priceCents)} USDT each</p>
-                  <div className="mt-auto flex items-center gap-3 pt-2">
-                    <div className="inline-flex items-center rounded-full border border-line">
+                  <p className="mt-0.5 text-[13px] text-muted">
+                    <span className="tabular-nums">{formatUsdt(product.priceCents)}</span> USDT each
+                  </p>
+                  <div className="mt-auto flex items-center justify-between pt-3">
+                    <div className="inline-flex items-center rounded-[4px] border border-line-strong" role="group" aria-label={`Quantity of ${product.name}`}>
                       <button
-                        className="grid size-8 place-items-center rounded-full text-lg text-muted hover:text-ink"
+                        type="button"
+                        className="grid size-9 place-items-center text-ink-soft transition-colors hover:text-ink disabled:opacity-40"
                         onClick={() => setQuantity(product.id, quantity - 1)}
-                        aria-label={`Decrease ${product.name}`}
+                        aria-label={quantity === 1 ? `Remove ${product.name}` : `Decrease ${product.name}`}
                       >
-                        −
+                        <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
+                          <path d="M2 6h8" stroke="currentColor" strokeWidth="1.4" />
+                        </svg>
                       </button>
-                      <span className="w-6 text-center text-sm tabular-nums">{quantity}</span>
+                      <span className="w-7 text-center text-[14px] tabular-nums" aria-live="polite">
+                        {quantity}
+                      </span>
                       <button
-                        className="grid size-8 place-items-center rounded-full text-lg text-muted hover:text-ink"
+                        type="button"
+                        className="grid size-9 place-items-center text-ink-soft transition-colors hover:text-ink disabled:opacity-40"
                         onClick={() => setQuantity(product.id, quantity + 1)}
+                        disabled={quantity >= 20}
                         aria-label={`Increase ${product.name}`}
                       >
-                        +
+                        <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
+                          <path d="M2 6h8M6 2v8" stroke="currentColor" strokeWidth="1.4" />
+                        </svg>
                       </button>
                     </div>
                     <button
-                      className="text-sm text-muted underline-offset-4 hover:text-masala hover:underline"
+                      type="button"
+                      className="link text-[13px] text-muted hover:text-ink"
                       onClick={() => setQuantity(product.id, 0)}
+                      aria-label={`Remove ${product.name} from cart`}
                     >
                       Remove
                     </button>
@@ -139,37 +180,47 @@ export function CartDrawer() {
           </ul>
         )}
 
-        <div className="border-t border-line bg-cream/60 px-6 py-5">
-          <div className="flex items-baseline justify-between">
-            <span className="text-muted">Subtotal</span>
-            <span className="font-display text-2xl font-semibold tabular-nums">
-              {formatUsdt(subtotalCents)} <span className="text-base font-normal text-muted">USDT</span>
-            </span>
-          </div>
-          <p className="mt-1 text-xs text-muted">Free shipping. Final total is calculated by our server.</p>
-          {error && (
-            <p className="mt-3 rounded-xl bg-masala/10 px-3 py-2 text-sm text-masala-dark" role="alert">
-              {error}
-            </p>
-          )}
-          <button
-            disabled={lines.length === 0 || pending}
-            onClick={checkout}
-            className="mt-4 flex h-13 w-full items-center justify-center gap-2 rounded-full bg-masala text-base font-semibold text-cream shadow-[0_8px_24px_-8px_rgba(181,72,42,0.6)] transition hover:bg-masala-dark active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
-          >
-            {pending ? (
-              <>
-                <span className="size-4 animate-spin rounded-full border-2 border-cream/40 border-t-cream" />
-                Creating secure checkout…
-              </>
-            ) : (
-              <>
-                <UsdtIcon /> Checkout with USDT
-              </>
+        {lines.length > 0 && (
+          <div className="border-t border-line px-5 pb-6 pt-5 md:px-7">
+            <dl className="space-y-2 text-[14px]">
+              <div className="flex justify-between text-muted">
+                <dt>Shipping</dt>
+                <dd>Free</dd>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <dt className="text-ink">Subtotal</dt>
+                <dd className="text-[20px] tabular-nums">
+                  {formatUsdt(subtotalCents)} <span className="text-[14px] text-muted">USDT</span>
+                </dd>
+              </div>
+            </dl>
+            {error && (
+              <p className="mt-4 rounded-[4px] border border-masala/25 bg-masala/[0.06] px-3 py-2 text-[13.5px] text-masala-dark" role="alert">
+                {error}
+              </p>
             )}
-          </button>
-          <p className="mt-3 text-center text-xs text-muted">Non-custodial · Whitechain Sepolia · powered by Whitechain Commerce</p>
-        </div>
+            <button
+              type="button"
+              disabled={pending}
+              onClick={checkout}
+              className="mt-5 flex h-[52px] w-full items-center justify-center gap-2.5 rounded-[4px] bg-ink text-[15px] text-paper transition-colors hover:bg-ink-soft disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {pending ? (
+                <>
+                  <span className="size-4 animate-spin rounded-full border-[1.5px] border-paper/30 border-t-paper" aria-hidden />
+                  Preparing checkout
+                </>
+              ) : (
+                <>
+                  <UsdtIcon className="size-[18px]" /> Check out with USDT
+                </>
+              )}
+            </button>
+            <p className="mt-3 text-center text-[12.5px] leading-relaxed text-muted">
+              Totals are confirmed by our server. Payments by Whitechain Commerce.
+            </p>
+          </div>
+        )}
       </aside>
     </div>
   );
