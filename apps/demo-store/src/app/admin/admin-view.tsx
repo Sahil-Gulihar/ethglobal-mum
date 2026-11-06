@@ -33,7 +33,9 @@ export function AdminView() {
         <section>
           <h2 className="mb-3 font-display text-xl font-semibold">Orders</h2>
           <div className="overflow-hidden rounded-3xl border border-line bg-paper">
-            {orders.length === 0 ? (
+            {!data ? (
+              <Skeleton />
+            ) : orders.length === 0 ? (
               <Empty>No orders yet. Place one from the shop.</Empty>
             ) : (
               <table className="w-full text-sm">
@@ -88,7 +90,9 @@ export function AdminView() {
             <code className="text-xs text-muted">POST /api/webhooks/whitechain</code>
           </div>
           <div className="overflow-hidden rounded-3xl border border-line bg-paper">
-            {events.length === 0 ? (
+            {!data ? (
+              <Skeleton />
+            ) : events.length === 0 ? (
               <Empty>No webhook deliveries yet.</Empty>
             ) : (
               <ul className="divide-y divide-line">
@@ -98,6 +102,10 @@ export function AdminView() {
                       {e.verified ? (
                         <span className="inline-flex items-center gap-1 rounded-full bg-cardamom/15 px-2 py-0.5 text-xs font-semibold text-cardamom">
                           ✓ Signature verified
+                        </span>
+                      ) : e.setupError ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-saffron/20 px-2 py-0.5 text-xs font-semibold text-[#8a5a12]">
+                          ⚠ Store setup error · 500
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 rounded-full bg-masala/15 px-2 py-0.5 text-xs font-semibold text-masala-dark">
@@ -134,4 +142,14 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 function Empty({ children }: { children: React.ReactNode }) {
   return <p className="px-5 py-10 text-center text-sm text-muted">{children}</p>;
+}
+
+function Skeleton() {
+  return (
+    <div className="space-y-3 p-5" aria-busy="true" aria-label="Loading">
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="h-10 animate-pulse rounded-xl bg-line/50" />
+      ))}
+    </div>
+  );
 }

@@ -1,6 +1,5 @@
 import { verifyWebhook, type WebhookEvent } from "@whitechain-commerce/react/server";
 import { updateStore } from "@/lib/db";
-import { requireEnv } from "@/lib/env";
 import type { WebhookLogEntry } from "@/lib/types";
 
 const MAX_LOG = 200;
@@ -17,9 +16,28 @@ export async function POST(req: Request) {
   const raw = await req.text(); // raw body: the signature covers these exact bytes
   const header = req.headers.get("wc-signature");
 
+  const secret = process.env.WC_WEBHOOK_SECRET;
+  if (!secret) {
+    // Our own misconfiguration, not a forged request: answer 500 so Whitechain retries once it's fixed.
+    console.error("[webhook] WC_WEBHOOK_SECRET is not set; can't verify webhooks.");
+    await updateStore((data) => {
+      log(data.webhookLog, {
+        receivedAt: new Date().toISOString(),
+        verified: false,
+        eventId: null,
+        type: null,
+        orderId: null,
+        outcome: "WC_WEBHOOK_SECRET is not set in the store's .env. Add it (Webhooks → Reveal) and restart the store.",
+        duplicate: false,
+        setupError: true,
+      });
+    });
+    return Response.json({ error: "Webhook secret not configured" }, { status: 500 });
+  }
+
   let event: WebhookEvent;
   try {
-    event = verifyWebhook<WebhookEvent>(raw, header, requireEnv("WC_WEBHOOK_SECRET"));
+    event = verifyWebhook<WebhookEvent>(raw, header, secret);
   } catch (err) {
     const reason = err instanceof Error ? err.message : String(err);
     console.warn(`[webhook] ✗ signature verification FAILED: ${reason}. Rejecting with 400.`);
@@ -84,9 +102,11 @@ export async function POST(req: Request) {
           recordedAt: new Date().toISOString(),
         });
       }
-      order.amountRefunded = payment.amountRefunded;
+      // Deliveries can arrive out of order (retries): never move the refunded total or status backwards.
+      const prev = order.amountRefunded ? toMicro(order.amountRefunded) : 0n;
+      if (toMicro(payment.amountRefunded) > prev) order.amountRefunded = payment.amountRefunded;
       if (payment.status === "refunded") order.status = "refunded";
-      else if (payment.status === "partially_refunded") order.status = "partially_refunded";
+      else if (payment.status === "partially_refunded" && order.status !== "refunded") order.status = "partially_refunded";
       entry.outcome = `Refund ${refund.amount} USDT recorded for ${orderId}`;
     } else {
       entry.outcome = `Unhandled event type (ignored)`;

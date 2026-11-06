@@ -46,6 +46,8 @@ export interface WebhookLogEntry {
   orderId: string | null;
   outcome: string; // human readable result
   duplicate: boolean;
+  /** The store itself is misconfigured (e.g. WC_WEBHOOK_SECRET missing), not a bad signature. */
+  setupError?: boolean;
 }
 
 export interface StoreData {
