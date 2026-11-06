@@ -60,6 +60,7 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: 22
+          package-manager-cache: false
 
       - name: Strip git metadata
         if: steps.gate.outputs.run == 'true'
