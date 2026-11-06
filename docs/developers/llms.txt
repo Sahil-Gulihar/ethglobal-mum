@@ -25,6 +25,7 @@
 ## Agents
 
 - [Agents and MCP](./agents.md): the hosted MCP server at /api/mcp, setup for Claude Code, Claude and ChatGPT connectors, Cursor and VS Code, `npx @whitechain-commerce/mcp init` for any repository, the 11 tools, and the WhitechainAgentToolkit for the Claude Messages API, OpenAI and the Vercel AI SDK
+- [Integrate with AI](./integrate-with-ai.md): a one-line prompt for coding agents pointing at /integrate.md?stack=nextjs|react-node|node|other&mode=widget|hosted|payment-link, the agent-ready integration guide with env vars, server/client/webhook code, security rules, testnet testing and a final checklist
 
 ## Reference
 
