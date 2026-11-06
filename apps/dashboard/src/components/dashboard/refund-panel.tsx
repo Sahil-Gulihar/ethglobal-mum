@@ -71,9 +71,19 @@ function RefundPanelInner({ paymentId, chainPaymentId, payout, router: routerAdd
   const wrongAccount = !!(wallet.address && payout && wallet.address.toLowerCase() !== payout.toLowerCase());
   const unsigned = pending.filter((p) => !p.txHash);
 
+  const [discarding, setDiscarding] = useState<string | null>(null);
+
+  async function discard(refundId: string) {
+    setDiscarding(refundId);
+    const r = await cancelPendingRefund(refundId);
+    setDiscarding(null);
+    if (!r.ok) setError(r.error);
+    nav.refresh();
+  }
+
   function openNew() {
     setTarget(null);
-    setAmount(fromUnits(remaining, decimals));
+    setAmount(""); // no prefill, so a full refund is never sent by accident
     setError(null);
     setPhase({ k: "idle" });
     setOpen(true);
@@ -138,6 +148,7 @@ function RefundPanelInner({ paymentId, chainPaymentId, payout, router: routerAdd
     }
     const units = BigInt(t.amountUnits);
     let broadcast = false;
+    let reverted = false;
 
     try {
       // 2. Balance + allowance of the payout wallet.
@@ -170,7 +181,10 @@ function RefundPanelInner({ paymentId, chainPaymentId, payout, router: routerAdd
       });
       broadcast = true;
       setPhase({ k: "refunding", hash });
-      if ((await waitForTx(hash)) !== "success") throw new Error("The refund transaction reverted onchain.");
+      if ((await waitForTx(hash)) !== "success") {
+        reverted = true;
+        throw new Error("The refund transaction reverted onchain. No USDT moved.");
+      }
 
       // 4. Validate right away (the worker would do the same on its next pass).
       setPhase({ k: "indexing", hash });
@@ -183,8 +197,9 @@ function RefundPanelInner({ paymentId, chainPaymentId, payout, router: routerAdd
       setPhase({ k: "done", hash, indexed });
       nav.refresh();
     } catch (e) {
-      // Nothing was broadcast: drop the request we created so its amount isn't reserved.
-      if (!broadcast && t.created) {
+      // Nothing was broadcast (or it reverted, so nothing moved): drop the request so its amount isn't reserved.
+      // A timed-out broadcast keeps its row; the merchant can discard it from the payment page.
+      if ((!broadcast || reverted) && t.created) {
         await cancelPendingRefund(t.refundId).catch(() => undefined);
         setTarget(null);
       }
@@ -199,9 +214,20 @@ function RefundPanelInner({ paymentId, chainPaymentId, payout, router: routerAdd
     <>
       <div className="flex flex-wrap items-center gap-2">
         {unsigned.map((p) => (
-          <Button key={p.id} variant="outline" size="sm" onClick={() => openExisting(p)}>
-            <Icon name="undo" /> Sign pending {formatAmount(fromUnits(p.amountUnits, decimals))} USDT refund
-          </Button>
+          <span key={p.id} className="inline-flex items-center gap-1">
+            <Button variant="outline" size="sm" onClick={() => openExisting(p)}>
+              <Icon name="undo" /> Sign pending {formatAmount(fromUnits(p.amountUnits, decimals))} USDT refund
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={discarding === p.id}
+              onClick={() => void discard(p.id)}
+              aria-label={`Discard pending ${formatAmount(fromUnits(p.amountUnits, decimals))} USDT refund`}
+            >
+              {discarding === p.id ? <Spinner /> : null} Discard
+            </Button>
+          </span>
         ))}
         <Button variant="outline" onClick={openNew} disabled={remaining === 0n}>
           <Icon name="undo" /> {remaining === 0n ? "Fully refunded" : "Refund"}
@@ -248,13 +274,26 @@ function RefundPanelInner({ paymentId, chainPaymentId, payout, router: routerAdd
                   name="refund-amount"
                   inputMode="decimal"
                   autoComplete="off"
-                  className="pr-16 tabular"
+                  placeholder="0.00"
+                  className={target ? "pr-16 tabular" : "pr-28 tabular"}
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   disabled={busy || !!target}
                   aria-describedby="refund-amount-hint"
                 />
-                <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-muted-foreground">USDT</span>
+                <span className="absolute inset-y-0 right-3 flex items-center gap-2 text-sm text-muted-foreground">
+                  {!target && (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => setAmount(fromUnits(remaining, decimals))}
+                      className="rounded px-1.5 py-0.5 text-xs font-medium text-primary outline-none hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                    >
+                      Max
+                    </button>
+                  )}
+                  <span className="pointer-events-none">USDT</span>
+                </span>
               </div>
               <p id="refund-amount-hint" className="text-xs text-muted-foreground">
                 {target
