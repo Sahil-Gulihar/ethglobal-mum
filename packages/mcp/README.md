@@ -10,11 +10,32 @@ It has no dependencies. Everything goes through the hosted MCP endpoint (`/api/m
 
 ## Setup
 
-Create a secret key in the dashboard under **Developers**, then:
+Create a secret key in the dashboard under **Developers** (or use [`login`](#connect-without-copying-keys)), then:
 
 ```bash
 export WC_SECRET_KEY=sk_test_...
 export WC_API_BASE=https://your-dashboard.example   # only if you self-host
+```
+
+## Connect without copying keys
+
+Let the agent make its own key and approve it in the browser:
+
+```bash
+npx @whitechain-commerce/mcp login --name="My agent" --save=.env.local
+```
+
+This prints a link to `/connect` on your dashboard and a confirmation code. Open the link while logged in, check that the code matches and approve. The CLI then prints `Connected as {business name}` and writes `WC_SECRET_KEY=...` to the `--save` file. The key is generated locally and only its SHA-256 goes into the link; the full key is printed only with `--print-key`.
+
+From code:
+
+```ts
+import { startConnect } from "@whitechain-commerce/mcp";
+
+const c = await startConnect({ clientName: "My agent" });
+console.log(c.approveUrl, c.code);       // show these to the human
+const account = await c.waitForApproval(); // polls until approved (10 min timeout)
+// c.secretKey now works; store it like any other secret
 ```
 
 ## Add to a repository

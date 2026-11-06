@@ -4,11 +4,13 @@
  * whitechain-mcp            stdio MCP server (bridges to the hosted endpoint). Needs WC_SECRET_KEY.
  * whitechain-mcp init       adds Whitechain Commerce to the current repo's agent configs.
  * whitechain-mcp tools      prints the available tools.
+ * whitechain-mcp login      connects a new key with the merchant's approval in the browser.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { createInterface } from "node:readline";
-import { DEFAULT_BASE_URL, WhitechainAgentToolkit } from "../src/index.js";
+import { DEFAULT_BASE_URL, WhitechainAgentToolkit, startConnect } from "../src/index.js";
 
 const [cmd, ...rest] = process.argv.slice(2);
 
@@ -22,6 +24,7 @@ function flag(name) {
 
 if (cmd === "init") init();
 else if (cmd === "tools") await printTools();
+else if (cmd === "login") await login();
 else if (cmd === "--help" || cmd === "-h" || cmd === "help") help();
 else if (cmd === undefined || cmd === "stdio") await stdio();
 else {
@@ -40,6 +43,12 @@ Usage
       --base-url=URL                         Dashboard URL (default: $WC_API_BASE or ${DEFAULT_BASE_URL})
       --dry-run                              Print what would change
   npx @whitechain-commerce/mcp tools         List the tools for your key
+  npx @whitechain-commerce/mcp login         Get a key by approving this agent in the browser (no copy-paste)
+      --name="My agent"                      Name shown on the approval page and under Developers
+      --base-url=URL                         Dashboard URL (default: $WC_API_BASE or ${DEFAULT_BASE_URL})
+      --save=.env.local                      Write WC_SECRET_KEY=... to this file once approved
+      --print-key                            Print the full key once approved
+      --timeout=600                          Seconds to wait for approval (default: 600)
 
 Environment
   WC_SECRET_KEY   Your secret key, sk_test_... (Dashboard > Developers)
@@ -175,5 +184,49 @@ This project takes USDT payments with Whitechain Commerce (non-custodial, Whitec
   console.log(`
 Next: put your secret key in the environment (Dashboard > Developers > Create key):
   export WC_SECRET_KEY=sk_test_...
-Keep the key out of git; the config files only reference the variable.`);
+Keep the key out of git; the config files only reference the variable.
+
+No key yet? Run npx @whitechain-commerce/mcp login`);
+}
+
+/** Replaces or appends KEY=value in a dotenv file, keeping every other line. */
+function saveEnv(/** @type {string} */ file, /** @type {string} */ name, /** @type {string} */ value) {
+  const p = path.resolve(process.cwd(), file);
+  const cur = existsSync(p) ? readFileSync(p, "utf8") : "";
+  const line = `${name}=${value}`;
+  const re = new RegExp(`^${name}=.*$`, "m");
+  const next = re.test(cur) ? cur.replace(re, () => line) : `${cur}${cur && !cur.endsWith("\n") ? "\n" : ""}${line}\n`;
+  writeFileSync(p, next, { mode: 0o600 });
+  return p;
+}
+
+async function login() {
+  const save = flag("save");
+  const printKey = rest.includes("--print-key");
+  const timeoutS = Number(flag("timeout") || 600);
+  const name = flag("name") || `whitechain-mcp on ${os.hostname()}`.slice(0, 60);
+  const c = await startConnect({ baseUrl: flag("base-url") || undefined, clientName: name });
+
+  console.log(`To connect "${name}" to your Whitechain Commerce account, open this link and approve:
+
+  ${c.approveUrl}
+
+Confirmation code: ${c.code}
+Check that the page shows the same code. Waiting for approval...`);
+  if (!save && !printKey) console.error("(Tip: add --save=.env.local to keep the key. Without --save or --print-key it is discarded.)");
+
+  const ac = new AbortController();
+  process.once("SIGINT", () => ac.abort(new Error("Cancelled.")));
+  /** @type {any} */
+  let account;
+  try {
+    account = await c.waitForApproval({ timeoutMs: (Number.isFinite(timeoutS) && timeoutS > 0 ? timeoutS : 600) * 1000, signal: ac.signal });
+  } catch (e) {
+    console.error(`\n${(/** @type {Error} */ (e)).message}`);
+    process.exit(1);
+  }
+  console.log(`\nConnected as ${account?.businessName ?? "your account"}`);
+  if (save) console.log(`Saved WC_SECRET_KEY (${c.secretKey.slice(0, 12)}...) to ${saveEnv(save, "WC_SECRET_KEY", c.secretKey)}`);
+  if (printKey) console.log(`WC_SECRET_KEY=${c.secretKey}`);
+  console.log("Revoke it anytime in the dashboard under Developers.");
 }

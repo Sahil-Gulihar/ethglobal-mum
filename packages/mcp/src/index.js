@@ -141,3 +141,100 @@ export class WhitechainAgentToolkit {
     return { role: /** @type {const} */ ("tool"), tool_call_id: call.id, content: r.text };
   }
 }
+
+// ---------------------------------------------------------------------------------------------
+// Connect with approval: the agent makes its own key, sends only its hash, and a human approves.
+
+const BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+/** @returns {Crypto} */
+function webcrypto() {
+  const c = globalThis.crypto;
+  if (!c?.getRandomValues || !c.subtle) throw new WhitechainError("Web Crypto is not available in this runtime (needs Node 18+ or an edge runtime).");
+  return c;
+}
+
+/** Crypto-strong base62 string, with rejection sampling so every character is equally likely. */
+function randomBase62(/** @type {number} */ len) {
+  const c = webcrypto();
+  let out = "";
+  while (out.length < len) {
+    const buf = c.getRandomValues(new Uint8Array(len * 2));
+    for (const b of buf) {
+      if (b < 248) out += BASE62[b % 62]; // 248 = 62 * 4
+      if (out.length === len) break;
+    }
+  }
+  return out;
+}
+
+/** sha256 of a UTF-8 string, as lowercase hex. */
+export async function sha256Hex(/** @type {string} */ s) {
+  const digest = await webcrypto().subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Code shown to the human on both sides: first 8 hex of sha256("wc-connect:" + hash), as XXXX-XXXX. */
+export async function connectCode(/** @type {string} */ hash) {
+  const hex = (await sha256Hex(`wc-connect:${hash}`)).slice(0, 8).toUpperCase();
+  return `${hex.slice(0, 4)}-${hex.slice(4)}`;
+}
+
+/** @param {number} ms @param {AbortSignal | undefined} signal */
+function sleep(ms, signal) {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(signal.reason ?? new WhitechainError("Aborted"));
+    const t = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve(undefined);
+    }, ms);
+    const onAbort = () => {
+      clearTimeout(t);
+      reject(signal?.reason ?? new WhitechainError("Aborted"));
+    };
+    signal?.addEventListener("abort", onAbort, { once: true });
+  });
+}
+
+/**
+ * Starts an approval-based connection. Generates a secret key locally, builds the approval URL from
+ * its sha256 (the key itself is never sent), and returns a waiter that resolves once a human approves.
+ * @param {import("./index.d.ts").StartConnectOptions} [opts]
+ * @returns {Promise<import("./index.d.ts").ConnectRequest>}
+ */
+export async function startConnect(opts = {}) {
+  const env = typeof process !== "undefined" ? process.env : {};
+  const baseUrl = (opts.baseUrl ?? env.WC_API_BASE ?? DEFAULT_BASE_URL).replace(/\/$/, "");
+  const clientName = (opts.clientName ?? "AI agent").trim().slice(0, 60) || "AI agent";
+  const secretKey = `sk_test_${randomBase62(32)}`;
+  const hash = await sha256Hex(secretKey);
+  const prefix = secretKey.slice(0, 12);
+  const code = await connectCode(hash);
+  const approveUrl = `${baseUrl}/connect?h=${hash}&p=${prefix}&n=${encodeURIComponent(clientName)}`;
+
+  /** @param {import("./index.d.ts").WaitForApprovalOptions} [w] */
+  async function waitForApproval(w = {}) {
+    const timeoutMs = w.timeoutMs ?? 10 * 60_000;
+    const intervalMs = w.intervalMs ?? 2_000;
+    const toolkit = new WhitechainAgentToolkit({ secretKey, baseUrl, fetch: opts.fetch });
+    const deadline = Date.now() + timeoutMs;
+    for (;;) {
+      if (w.signal?.aborted) throw w.signal.reason ?? new WhitechainError("Aborted");
+      try {
+        const r = await toolkit.callTool("get_account");
+        if (!r.ok) throw new WhitechainError(r.text || "get_account failed");
+        return r.data;
+      } catch (e) {
+        // -32001 is the server's "invalid API key" (HTTP 401): not approved yet. Network errors are retried too.
+        const pendingApproval = e instanceof WhitechainError && e.code === -32001;
+        const network = e instanceof TypeError;
+        if (!pendingApproval && !network) throw e;
+      }
+      const left = deadline - Date.now();
+      if (left <= 0) throw new WhitechainError(`Not approved within ${Math.round(timeoutMs / 1000)}s. Run login again to get a new link.`);
+      await sleep(Math.min(intervalMs, left), w.signal);
+    }
+  }
+
+  return { secretKey, approveUrl, code, waitForApproval };
+}

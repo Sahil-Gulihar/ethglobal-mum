@@ -21,6 +21,49 @@ The dashboard's **Agents** page (`/dashboard/agents`) shows every snippet below 
 
 Create a secret key under **Developers** first. The agent acts as the merchant who owns the key; revoke the key to cut it off.
 
+## Connect an agent with approval
+
+An agent can get its own key without anyone copying a secret around. The agent makes the key, you approve it in the dashboard, and the key starts working.
+
+1. The agent generates a secret key on its own machine (`sk_test_` plus 32 random characters) and computes its SHA-256.
+2. It shows you a link, `{APP_URL}/connect?h={sha256}&p={first 12 characters}&n={agent name}`, and a confirmation code such as `7F3A-91C2`.
+3. You open the link while logged in to the dashboard (you're sent to log in first if needed). The page shows the agent's name, the same confirmation code, the key prefix and what the agent can do. Check that the codes match, then choose **Approve and connect**.
+4. The agent polls the MCP server with its key (`tools/call get_account`). Once you approve, the call stops returning `401` and the agent is connected.
+
+Your account must be verified before you can approve an agent. The key shows up under **Developers** as `Agent: {name}`.
+
+### From the command line
+
+```bash
+npx @whitechain-commerce/mcp login --name="Release bot" --save=.env.local
+```
+
+It prints the link and the confirmation code, waits up to 10 minutes, then prints `Connected as {business name}` and writes `WC_SECRET_KEY=...` to the file given with `--save` (replacing an existing `WC_SECRET_KEY` line). It never prints the full key unless you pass `--print-key`. Use `--base-url=URL` (or `WC_API_BASE`) if you self-host, and `--timeout=SECONDS` to wait longer or shorter.
+
+### From code
+
+```ts
+import { startConnect, WhitechainAgentToolkit } from "@whitechain-commerce/mcp";
+
+const connect = await startConnect({ clientName: "Support agent" }); // baseUrl defaults to WC_API_BASE
+console.log(`Approve at ${connect.approveUrl} (code ${connect.code})`);
+
+const account = await connect.waitForApproval(); // { timeoutMs, intervalMs, signal } are optional
+await saveSecret(connect.secretKey);              // your own secret storage
+
+const whitechain = new WhitechainAgentToolkit({ secretKey: connect.secretKey });
+```
+
+`waitForApproval` resolves with the `get_account` result and rejects after the timeout (10 minutes by default) or when the signal aborts.
+
+### Security model
+
+- The key never leaves the agent's machine before approval. The link carries only its SHA-256 and the 12-character prefix, which is what the dashboard stores for every key anyway.
+- Nothing happens until a logged-in merchant approves. Each link works once: approving the same hash again says it's already connected.
+- The confirmation code ties the page you're looking at to the key your agent made. Only approve a link you started yourself, and only if the codes match. Someone who sends you their own link is asking for access to your account.
+- A connected agent can do what any secret key can do. It can't change your payout wallet, sign refunds, create or revoke keys, or verify your identity.
+- Revoke the key under **Developers** to cut the agent off.
+
 ## Add it to any repository
 
 Run this in the root of the repository you want agents to work in:

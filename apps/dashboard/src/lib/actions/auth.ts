@@ -85,7 +85,8 @@ export async function loginAction(_prev: AuthFormState, formData: FormData): Pro
 
   await startSession(m.id);
   const next = String(formData.get("next") ?? "");
-  redirect(next.startsWith("/dashboard") ? next : "/dashboard");
+  // Same-origin paths only: /dashboard... or the agent approval page.
+  redirect(next.startsWith("/dashboard") || next.startsWith("/connect?") ? next : "/dashboard");
 }
 
 export async function logoutAction() {
