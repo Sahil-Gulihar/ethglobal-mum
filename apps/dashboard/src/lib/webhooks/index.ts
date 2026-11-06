@@ -4,7 +4,7 @@ import { signWebhook } from "@whitechain-commerce/core/webhooks";
 import type { PaymentObject, RefundObject, WebhookEvent, WebhookEventType } from "@whitechain-commerce/core/webhooks";
 import { db, webhookAttempts, webhookDeliveries, webhookEndpoints, webhookEvents } from "@/lib/db";
 import { newId } from "@/lib/ids";
-import { checkWebhookUrl } from "./url-guard";
+import { fetchWebhook, checkWebhookUrl } from "./url-guard";
 
 export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 export type DbOrTx = typeof db | Tx;
@@ -153,7 +153,7 @@ async function attempt(deliveryId: string, prevAttempts: number): Promise<Attemp
     const body = JSON.stringify(row.payload);
     const signature = signWebhook(row.secret, body, Math.floor(Date.now() / 1000));
     try {
-      const res = await fetch(row.url, {
+      const res = await fetchWebhook(row.url, {
         method: "POST",
         headers: { "Content-Type": "application/json", "WC-Signature": signature, "User-Agent": USER_AGENT },
         body,

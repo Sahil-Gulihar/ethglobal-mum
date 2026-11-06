@@ -1,0 +1,27 @@
+name: Payment worker
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build worker image
+        run: docker build -f deploy/payment-worker/Dockerfile -t payment-worker:ci .
+      - name: Smoke test the worker
+        run: |
+          set -o pipefail
+          bash deploy/payment-worker/smoke.sh payment-worker:ci 2>&1 | tee payment-worker-smoke.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: payment-worker-smoke
+          path: payment-worker-smoke.log

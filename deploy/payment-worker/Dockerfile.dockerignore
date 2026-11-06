@@ -1,0 +1,12 @@
+**
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!apps/dashboard/package.json
+!apps/dashboard/src/**
+!apps/dashboard/scripts/worker.ts
+!apps/dashboard/tsconfig.json
+!apps/dashboard/drizzle.config.ts
+!packages/core/package.json
+!packages/core/src/**
+!packages/react/package.json

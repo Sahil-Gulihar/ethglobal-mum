@@ -1,6 +1,7 @@
 import "server-only";
 import { lookup } from "node:dns/promises";
 import { BlockList, isIP } from "node:net";
+import { Agent, fetch, type RequestInit } from "undici";
 
 /**
  * SSRF guard for merchant-supplied webhook URLs. In production, webhook URLs must resolve only to
@@ -77,4 +78,30 @@ export async function checkWebhookUrl(raw: string): Promise<string | null> {
   }
   if (!addrs.length || addrs.some(isPrivateAddress)) return "Webhook URLs must resolve to a public IP address.";
   return null;
+}
+
+// Validate the addresses passed to the socket as well as the preflight check.
+const publicDispatcher = new Agent({
+  connect: {
+    lookup(host, options, callback) {
+      lookup(host, { all: true, verbatim: true }).then(
+        (addresses) => {
+          if (!addresses.length || addresses.some(({ address }) => isPrivateAddress(address))) {
+            callback(new Error("Webhook URLs must resolve to a public IP address."), "", 0);
+          } else if (options.all) {
+            callback(null, addresses);
+          } else {
+            const address = addresses.find(({ family }) => !options.family || family === options.family);
+            if (address) callback(null, address.address, address.family);
+            else callback(new Error("No address matched the requested IP family."), "", 0);
+          }
+        },
+        (error: NodeJS.ErrnoException) => callback(error, "", 0),
+      );
+    },
+  },
+});
+
+export function fetchWebhook(url: string, init: RequestInit) {
+  return fetch(url, { ...init, dispatcher: allowPrivateWebhookUrls() ? undefined : publicDispatcher });
 }

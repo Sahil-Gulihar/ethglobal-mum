@@ -1,0 +1,15 @@
+services:
+  worker:
+    build:
+      context: .
+      dockerfile: deploy/payment-worker/Dockerfile
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Set the dashboard database URL}
+      WHITECHAIN_RPC_URL: ${WHITECHAIN_RPC_URL:?Set the Whitechain RPC URL}
+      PAYMENT_ROUTER_ADDRESS: ${PAYMENT_ROUTER_ADDRESS:-}
+    restart: unless-stopped
+    stop_grace_period: 90s
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
