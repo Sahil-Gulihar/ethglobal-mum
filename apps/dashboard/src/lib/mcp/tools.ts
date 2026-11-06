@@ -25,6 +25,7 @@ import {
   testEndpoint,
   webhookSecret,
 } from "@/lib/webhooks/endpoints";
+import { INTEGRATION_MODES, INTEGRATION_STACKS, integrationGuide } from "@/lib/agent/integration-guide";
 import { dailyPayments, listDeliveries, listLedgerEntries, onboardingState, paymentStats } from "@/app/(app)/dashboard/_lib/queries";
 
 /** A failure the agent should see as a tool error (isError: true), not a protocol error. */
@@ -87,6 +88,20 @@ export const tools: ToolDef[] = [
         dashboardUrl: `${base()}/dashboard`,
       };
     },
+  }),
+
+  tool({
+    name: "get_integration_guide",
+    title: "Get the integration guide",
+    description:
+      "Returns step-by-step instructions (Markdown) for adding Whitechain Commerce checkout to a codebase: what to inspect, env vars, server route, checkout UI, webhook verification, testing and a final checklist. Coding agents: call this before writing integration code and follow it.",
+    input: z.object({
+      stack: z.enum(INTEGRATION_STACKS.map((s) => s.id) as [string, ...string[]]).optional().describe(`The repo's stack: ${INTEGRATION_STACKS.map((s) => `${s.id} (${s.label})`).join(", ")}. Default other.`),
+      mode: z.enum(INTEGRATION_MODES.map((m) => m.id) as [string, ...string[]]).optional().describe(`How customers pay: ${INTEGRATION_MODES.map((m) => `${m.id} (${m.label})`).join(", ")}. Default: widget for React stacks, hosted otherwise.`),
+    }),
+    annotations: { readOnlyHint: true, openWorldHint: false },
+    run: async (_m, a) =>
+      integrationGuide({ baseUrl: base(), stack: a.stack as never, mode: a.mode as never }),
   }),
 
   tool({

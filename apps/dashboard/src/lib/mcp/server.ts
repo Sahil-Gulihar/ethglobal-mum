@@ -7,6 +7,7 @@ import "server-only";
 import { merchantFromSecretKey } from "@/lib/api-auth";
 import type { Merchant } from "@/lib/auth";
 import { describeTool, ToolError, tools, toolsByName } from "./tools";
+import { prompts } from "./prompts";
 
 const SUPPORTED_VERSIONS = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"];
 const SERVER_INFO = { name: "whitechain-commerce", title: "Whitechain Commerce", version: "1.0.0" };
@@ -50,7 +51,7 @@ async function dispatch(msg: RpcMessage, merchant: Merchant): Promise<object | n
       const requested = typeof msg.params?.protocolVersion === "string" ? msg.params.protocolVersion : "";
       return rpcResult(id, {
         protocolVersion: SUPPORTED_VERSIONS.includes(requested) ? requested : SUPPORTED_VERSIONS[0],
-        capabilities: { tools: { listChanged: false } },
+        capabilities: { tools: { listChanged: false }, prompts: { listChanged: false } },
         serverInfo: SERVER_INFO,
         instructions: `${INSTRUCTIONS}\nConnected merchant: ${merchant.name} (${merchant.id}).`,
       });
@@ -70,6 +71,7 @@ async function dispatch(msg: RpcMessage, merchant: Merchant): Promise<object | n
       }
       try {
         const out = await t.run(merchant, parsed.data);
+        if (typeof out === "string") return rpcResult(id, { content: [{ type: "text", text: out }] });
         return rpcResult(id, {
           content: [{ type: "text", text: JSON.stringify(out, null, 2) }],
           structuredContent: out,
@@ -83,7 +85,13 @@ async function dispatch(msg: RpcMessage, merchant: Merchant): Promise<object | n
     case "resources/list":
       return rpcResult(id, { resources: [] });
     case "prompts/list":
-      return rpcResult(id, { prompts: [] });
+      return rpcResult(id, { prompts: prompts.map(({ name, title, description, arguments: args }) => ({ name, title, description, arguments: args })) });
+    case "prompts/get": {
+      const p = prompts.find((x) => x.name === msg.params?.name);
+      if (!p) return rpcError(id, -32602, `Unknown prompt: ${String(msg.params?.name)}`);
+      const args = (msg.params?.arguments ?? {}) as Record<string, string>;
+      return rpcResult(id, { description: p.description, messages: [{ role: "user", content: { type: "text", text: p.render(args, merchant) } }] });
+    }
     default:
       return rpcError(id, -32601, `Method not found: ${msg.method}`);
   }
