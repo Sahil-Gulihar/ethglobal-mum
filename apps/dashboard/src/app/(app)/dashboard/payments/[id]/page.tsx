@@ -46,7 +46,7 @@ export default async function PaymentDetailPage({ params }: { params: Promise<{ 
       at: p.createdAt,
       detail: (
         <span className="flex flex-wrap items-center gap-x-2">
-          Verified PaymentSettled in block {p.blockNumber} <ExplorerLink hash={p.txHash} />
+          Confirmed on Whitechain in block {p.blockNumber} <ExplorerLink hash={p.txHash} />
         </span>
       ),
       tone: "done",
@@ -62,27 +62,30 @@ export default async function PaymentDetailPage({ params }: { params: Promise<{ 
       detail: r.txHash ? <ExplorerLink hash={r.txHash} /> : <span>Waiting for a signature from your payout wallet</span>,
       tone: r.status === "succeeded" ? "done" : "pending",
     })),
-    ...deliveries.map<Event>((d) => ({
-      key: d.id,
-      icon: "webhook",
-      title:
-        d.status === "succeeded"
-          ? `Signed ${d.eventType} webhook delivered`
-          : d.status === "failed"
-            ? `${d.eventType} webhook failed`
-            : `${d.eventType} webhook ${d.attempts ? "retrying" : "queued"}`,
-      at: d.lastAttemptAt ?? d.createdAt,
-      detail: (
-        <span className="flex flex-wrap items-center gap-x-2">
-          {d.lastStatusCode !== null && <span className="font-mono">HTTP {d.lastStatusCode}</span>}
-          <span className="max-w-72 truncate" title={d.endpointUrl}>
-            {d.endpointUrl}
+    ...deliveries.map<Event>((d) => {
+      const webhook = d.eventType === "refund.succeeded" ? "Refund webhook" : "Payment webhook";
+      return {
+        key: d.id,
+        icon: "webhook",
+        title:
+          d.status === "succeeded"
+            ? `${webhook} delivered`
+            : d.status === "failed"
+              ? `${webhook} failed`
+              : `${webhook} ${d.attempts ? "retrying" : "queued"}`,
+        at: d.lastAttemptAt ?? d.createdAt,
+        detail: (
+          <span className="flex flex-wrap items-center gap-x-2">
+            {d.lastStatusCode !== null && <span className="font-mono">HTTP {d.lastStatusCode}</span>}
+            <span className="max-w-72 truncate" title={d.endpointUrl}>
+              {d.endpointUrl}
+            </span>
+            {d.attempts > 1 && <span>{d.attempts} attempts</span>}
           </span>
-          {d.attempts > 1 && <span>{d.attempts} attempts</span>}
-        </span>
-      ),
-      tone: d.status === "succeeded" ? "done" : d.status === "failed" ? "failed" : "pending",
-    })),
+        ),
+        tone: d.status === "succeeded" ? "done" : d.status === "failed" ? "failed" : "pending",
+      };
+    }),
   ]
     .sort((a, b) => a.at.getTime() - b.at.getTime())
     .reverse();
