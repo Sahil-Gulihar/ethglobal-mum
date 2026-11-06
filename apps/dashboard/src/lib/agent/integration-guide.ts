@@ -30,9 +30,8 @@ export function integrationGuide(opts: { baseUrl: string; stack?: IntegrationSta
   const base = opts.baseUrl.replace(/\/+$/, "");
   const stack: IntegrationStack = opts.stack ?? "other";
   if (opts.mode === "payment-link") return paymentLinkGuide(base);
-  const reactStack = stack === "nextjs" || stack === "react-node";
-  // Default: widget where the repo is React, hosted everywhere else.
-  const mode: "widget" | "hosted" = opts.mode ?? (reactStack ? "widget" : "hosted");
+  // Default: hosted everywhere. The widget package is not on npm yet, so it is opt-in (mode=widget).
+  const mode: "widget" | "hosted" = opts.mode ?? "hosted";
   const stackLabel = INTEGRATION_STACKS.find((s) => s.id === stack)!.label;
 
   const parts = [
@@ -64,7 +63,7 @@ Whitechain Commerce is a non-custodial USDT checkout. The customer pays from the
 
 - API base: \`${base}\`
 - Stack for this guide: **${stackLabel}**
-- Checkout mode: **${mode === "widget" ? "embedded widget" : "hosted checkout"}**${defaulted ? " (default for this stack; see the decision table to switch)" : ""}
+- Checkout mode: **${mode === "widget" ? "embedded widget" : "hosted checkout"}**${defaulted ? " (the default: `@whitechain-commerce/react` is not on npm yet, so use `mode=widget` only if the package resolves in this repo, see Step 0)" : ""}
 - Other variants of this guide: \`${base}/integrate.md?stack=nextjs|react-node|node|other&mode=widget|hosted|payment-link\`
 - Full docs: ${base}/docs (plain text index: ${base}/docs/llms.txt)
 
@@ -101,7 +100,7 @@ function inspectSection() {
 Before writing code, find out and note down:
 
 1. **Framework and runtime.** Next.js (App Router or Pages Router, and the version: read \`package.json\`; recent Next.js versions change APIs, so check the repo's \`node_modules/next/dist/docs\` or AGENTS.md if present), Express, Fastify, NestJS, Hono, Remix, SvelteKit, Django, Rails, Laravel... Note whether server code can run on Node.js (webhook verification needs HMAC-SHA256; \`node:crypto\` is used below).
-2. **Where orders and carts live.** The order model/table, how the total is computed (prices must come from the server-side catalog or database, not from the client), the currency and precision (cents? decimals?), and existing order statuses.
+2. **Where orders and carts live.** The order model/table, how the total is computed (prices must come from the server-side catalog or database, not from the client), the currency and precision (cents? decimals?), and existing order statuses. **If the app has no orders or database yet** (for example a static product catalog), add the minimum: an orders table and a processed-webhook-events table, through the repo's ORM if it has one. Otherwise use a small SQL database: SQLite (\`node:sqlite\` on Node 22.13+, or \`better-sqlite3\`) for a single long-running server, or a hosted Postgres on serverless platforms such as Vercel, where the filesystem does not persist. Add a \`POST /api/orders\` route that takes product ids and quantities, prices them from the server-side catalog, and creates a \`pending\` order with a random, hard-to-guess id (for example \`ord_\` + \`crypto.randomUUID()\`): without customer accounts, that id is what keeps one customer's order page private.
 3. **Env handling.** \`.env\`, \`.env.local\`, \`.env.example\`, a typed env module (zod, t3-env, \`process.env\` wrappers), secrets in the deploy platform. Follow the existing pattern; add new variables to \`.env.example\` with empty values.
 4. **Existing payment code.** Stripe or other checkouts, webhook routes, "mark paid" functions, fulfilment jobs, emails. Reuse the existing order state machine and fulfilment function; add Whitechain as another way to pay, do not rewrite the flow.
 5. **Persistence for idempotency.** Where you can store the session id on the order and a processed-webhook-event table (or column) with a unique key.
@@ -231,8 +230,12 @@ export type WcEvent =
   | { id: string; type: "refund.succeeded"; created: number; data: { refund: WcRefund; payment: WcPayment } };
 
 export class WhitechainError extends Error {
-  constructor(message: string, readonly status: number, readonly type: string) {
+  status: number;
+  type: string;
+  constructor(message: string, status: number, type: string) {
     super(message);
+    this.status = status;
+    this.type = type;
   }
 }
 
@@ -297,7 +300,7 @@ export function verifyWebhook(rawBody: string, header: string | null | undefined
 /** "14.98" / "14.980000" -> 14980000n, so USDT amounts compare exactly (never compare floats). */
 export function toMicro(amount: string): bigint {
   const [whole, frac = ""] = amount.split(".");
-  return BigInt(whole || "0") * 1_000_000n + BigInt((frac + "000000").slice(0, 6));
+  return BigInt(whole || "0") * BigInt(1_000_000) + BigInt((frac + "000000").slice(0, 6));
 }
 
 /** Integer cents -> "49.99". */
@@ -349,7 +352,7 @@ export function Pay({ orderId, sessionId }: { orderId: string; sessionId: string
       theme="light" // or "dark"
       // UI only. The order becomes paid when the signed webhook arrives, never here.
       onSuccess={() => router.push(\`/orders/\${orderId}\`)}
-      onCancel={() => router.push("/cart")}
+      onCancel={() => router.push("/")} // your code: the cart or product page the customer came from
       onError={(err) => console.error("Whitechain checkout error", err)}
     />
   );
@@ -426,7 +429,7 @@ export async function POST(req: Request) {
       orderId: order.id,
       amount: centsToAmount(order.totalCents), // from YOUR database, never from the request
       successUrl: \`\${appUrl}/orders/\${order.id}\`,
-      cancelUrl: \`\${appUrl}/cart\`,
+      cancelUrl: \`\${appUrl}/\`, // your code: a real route, such as the cart or the product page
       metadata: { customerId: String(order.customerId) },
     });
     await setOrderSession(order.id, session.id);
@@ -467,6 +470,10 @@ export async function POST(req: Request) {
     if (err instanceof WebhookSignatureError) return Response.json({ error: err.message }, { status: 400 });
     throw err;
   }
+
+  // Only these two types exist today. Acknowledge anything newer (2xx) instead of crashing on it.
+  if ((event.type !== "payment.succeeded" && event.type !== "refund.succeeded") || !event.data?.payment)
+    return Response.json({ received: true, ignored: true });
 
   // Dashboard / send_test_webhook events: verified, but never fulfil them.
   if (event.data.payment.id.startsWith("pay_test_")) return Response.json({ received: true, test: true });
@@ -551,7 +558,9 @@ export function OrderStatus({ orderId, initialStatus }: { orderId: string; initi
   return <p>Order status: {status}</p>;
 }
 `,
-)}`;
+)}
+
+The page itself (\`app/orders/[id]/page.tsx\`) loads the order on the server and renders \`<OrderStatus orderId initialStatus />\`. It must render per request: if \`next.config\` sets \`cacheComponents: true\` (new Next.js 16 apps do), call \`await connection()\` from \`next/server\` before reading the database and wrap the part that reads it in \`<Suspense>\`; otherwise \`next build\` fails on uncached data, or the page is frozen at build time.`;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -584,6 +593,10 @@ export function mountWhitechain(app: express.Express) {
       if (err instanceof WebhookSignatureError) return res.status(400).json({ error: err.message });
       throw err;
     }
+
+    // Only these two types exist today. Acknowledge anything newer (2xx) instead of crashing on it.
+    if ((event.type !== "payment.succeeded" && event.type !== "refund.succeeded") || !event.data?.payment)
+      return res.json({ received: true, ignored: true });
 
     const payment = event.data.payment;
     if (payment.id.startsWith("pay_test_")) return res.json({ received: true, test: true }); // never fulfil test events
@@ -623,7 +636,7 @@ export function mountWhitechain(app: express.Express) {
         orderId: order.id, // idempotency key
         amount: centsToAmount(order.totalCents), // from your database
         successUrl: \`\${process.env.APP_URL}/orders/\${order.id}\`,
-        cancelUrl: \`\${process.env.APP_URL}/cart\`,
+        cancelUrl: \`\${process.env.APP_URL}/\`, // a real route: the cart or product page
       });
       await setOrderSession(order.id, session.id);
       res.json({ sessionId: session.id, url: session.url });
@@ -658,7 +671,7 @@ app.post("/checkout/:orderId", async (req, res) => {
     orderId: order.id,
     amount: centsToAmount(order.totalCents),
     successUrl: \`\${process.env.APP_URL}/orders/\${order.id}\`,
-    cancelUrl: \`\${process.env.APP_URL}/cart\`,
+    cancelUrl: \`\${process.env.APP_URL}/\`,
   });
   res.redirect(303, session.url); // the hosted checkout page
 });
@@ -699,7 +712,7 @@ export function Pay({ orderId }: { orderId: string }) {
       sessionId={sessionId}
       apiBase={import.meta.env.VITE_WC_API_BASE}
       onSuccess={() => window.location.assign(\`/orders/\${orderId}\`)} // UI only; the webhook fulfils
-      onCancel={() => window.location.assign("/cart")}
+      onCancel={() => window.location.assign("/")} // your code: the cart or product page
       onError={(err) => console.error("Whitechain checkout error", err)}
     />
   );
@@ -783,7 +796,7 @@ function testingSection(base: string) {
   return `## Test on testnet
 
 
-1. **Unit-test signature verification** with the test vector: secret \`whsec_exampleexampleexampleexample1234\`, \`t = 1793975348\`, raw body \`{"id":"evt_example","type":"payment.succeeded"}\` must verify as \`v1=2969cd7b4e1840f6a11ae5a59ef36e6bbc7ee626bfc3411ad8dd049e3426983e\` (pass a large tolerance or a fixed "now"), and fail for a changed body or secret.
+1. **Unit-test signature verification** with the test vector: secret \`whsec_exampleexampleexampleexample1234\`, \`t = 1793975348\`, raw body \`{"id":"evt_example","type":"payment.succeeded"}\` must verify as \`v1=2969cd7b4e1840f6a11ae5a59ef36e6bbc7ee626bfc3411ad8dd049e3426983e\` (pass a large tolerance or a fixed "now"), and fail for a changed body or secret. Use the repo's test runner; if it has none, a \`node --test\` file (for example \`test/whitechain.test.mjs\`, run from an \`npm test\` script) is enough.
 2. **Make the webhook reachable.** The platform must be able to POST to the URL. Against a hosted dashboard such as \`${base}\`, local URLs (\`localhost\`, private IPs) are rejected, so expose the dev server through a public HTTPS tunnel (for example \`cloudflared tunnel --url http://localhost:3000\` or \`ngrok http 3000\`) and register \`https://<tunnel>/api/webhooks/whitechain\`.
 3. **Send a test event**: \`send_test_webhook\` (MCP) or **Webhooks → Send test event** in the dashboard. Expect a \`2xx\` and no order change (it is a \`pay_test_\` payment for \`test_order\`). A \`400\` means the secret or raw-body handling is wrong.
 4. **Create a session** from the app's checkout, or directly:
