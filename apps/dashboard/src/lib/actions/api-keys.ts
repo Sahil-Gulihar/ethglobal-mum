@@ -16,7 +16,8 @@ export async function createApiKey(name?: string): Promise<ActionResult<{ id: st
   const prefix = key.slice(0, 12);
   const id = newId("key");
   await db.insert(apiKeys).values({ id, merchantId: m.id, name: label, prefix, keyHash: sha256(key) });
-  revalidatePath("/dashboard", "layout");
+  // No revalidatePath here: refreshing now re-renders the onboarding checklist, which unmounts the
+  // dialog before the one-time key is shown. The dialog calls router.refresh() when it closes.
   return ok({ id, key, prefix });
 }
 

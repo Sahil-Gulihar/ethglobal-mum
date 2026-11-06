@@ -10,5 +10,10 @@ export function toUnits(amount: string, decimals: number): bigint {
   return units;
 }
 
-export const fromUnits = (units: bigint | string, decimals: number): string =>
-  formatUnits(BigInt(units), decimals);
+/** 3500000n -> "3.50", 5000000n -> "5.00", 1234567n -> "1.234567" (at least 2 decimals, money-style). */
+export function fromUnits(units: bigint | string, decimals: number): string {
+  const s = formatUnits(BigInt(units), decimals);
+  if (decimals < 2) return s;
+  const [whole, frac = ""] = s.split(".");
+  return `${whole}.${frac.padEnd(2, "0")}`;
+}

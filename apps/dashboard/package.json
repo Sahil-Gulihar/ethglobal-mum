@@ -10,7 +10,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "db:push": "node --env-file=../../.env ./node_modules/drizzle-kit/bin.cjs push --force",
     "db:studio": "drizzle-kit studio",
-    "worker": "tsx --env-file=../../.env scripts/worker.ts"
+    "worker": "tsx --env-file=../../.env scripts/worker.ts",
+    "smoke:api": "tsx --conditions=react-server --env-file=../../.env scripts/smoke-api.ts"
   },
   "dependencies": {
     "@next/env": "^16.4.5",

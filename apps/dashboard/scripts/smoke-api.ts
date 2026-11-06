@@ -44,6 +44,7 @@ function req(path: string, init: { method?: string; key?: string; body?: unknown
 async function call(p: Promise<Response>) {
   const res = await p;
   const text = await res.text();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- test script inspects arbitrary JSON
   let body: any = null;
   try {
     body = text ? JSON.parse(text) : null;
