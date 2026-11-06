@@ -817,24 +817,12 @@ function ReviewBody(p: ViewProps & { amountLabel: string }) {
       {state.phase === "review" && lowBalance ? (
         <div className="wcc-alert" data-kind="warn">
           <AlertIcon size={16} />
-          <span>
-            Not enough USDT. Top up this wallet from the{" "}
-            <a href={FAUCET_URL} target="_blank" rel="noreferrer">
-              Whitechain test funds page
-            </a>
-            , then come back. We refresh your balance automatically.
-          </span>
+          <span>Not enough USDT.</span>
         </div>
       ) : state.phase === "review" && noGas ? (
         <div className="wcc-alert" data-kind="warn">
           <AlertIcon size={16} />
-          <span>
-            You need a little WBT for network fees. Get some from the{" "}
-            <a href={FAUCET_URL} target="_blank" rel="noreferrer">
-              Whitechain test funds page
-            </a>
-            .
-          </span>
+          <span>Not enough WBT.</span>
         </div>
       ) : null}
       <div className="wcc-rows">
