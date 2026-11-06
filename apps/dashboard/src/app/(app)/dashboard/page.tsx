@@ -83,7 +83,7 @@ export default async function DashboardHome() {
         </CardHeader>
         <CardContent className="grid gap-4 lg:grid-cols-2">
           <CodeBlock filename="server.ts" code={serverSnippet(env.appUrl())} />
-          <CodeBlock filename="Checkout.tsx" code={clientSnippet()} />
+          <CodeBlock filename="Checkout.tsx" code={clientSnippet(env.appUrl())} />
         </CardContent>
       </Card>
     </>
