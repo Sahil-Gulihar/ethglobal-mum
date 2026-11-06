@@ -55,6 +55,7 @@ export default async function Landing() {
                 alt="Dark checkout receipt for the sample 49.99 USDT payment, order 4821"
                 width={856}
                 height={1164}
+                loading="eager"
                 unoptimized
               />
             </div>
