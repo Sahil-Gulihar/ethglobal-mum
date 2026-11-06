@@ -49,7 +49,7 @@ export function PaymentsTable({ rows, emptyAction }: { rows: PaymentRowView[]; e
               >
                 {formatAmount(p.amount)} <span className="text-xs font-medium text-muted-foreground">USDT</span>
               </Link>
-              {p.refunded !== "0" && (
+              {Number(p.refunded) > 0 && (
                 <span className="block text-xs text-muted-foreground tabular">−{formatAmount(p.refunded)} refunded</span>
               )}
             </TableCell>
