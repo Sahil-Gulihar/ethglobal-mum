@@ -9,6 +9,15 @@ linked to the original payment onchain. Built for ETHGlobal Mumbai 2026.
 
 - [Product spec](docs/SPEC.md) · [Frozen interfaces](docs/INTERFACES.md) · [Deployments](docs/DEPLOYMENTS.md)
 
+## Developer docs
+
+Integration guides and the API reference live in [docs/developers](docs/developers/README.md):
+
+- [Quickstart](docs/developers/quickstart.md): your first testnet payment end to end
+- [Checkout widget](docs/developers/checkout-widget.md) and [hosted checkout](docs/developers/hosted-checkout.md)
+- [Webhooks](docs/developers/webhooks.md) and [API reference](docs/developers/api-reference.md)
+- [llms.txt](docs/developers/llms.txt): a plain-text index for LLMs and coding agents
+
 ## Why Whitechain
 
 Card rails can't give a merchant final settlement in seconds to a wallet they control, with no chargebacks, payout delays or cross-border fees. Whitechain USDT settlement does, and every payment and refund is linked to its order onchain so customers can verify it themselves.
