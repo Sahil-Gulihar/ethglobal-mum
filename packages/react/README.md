@@ -1,6 +1,6 @@
 # @whitechain-commerce/react
 
-Non-custodial USDT checkout on Whitechain Sepolia (chain 1874) as one React component. The customer pays from their own wallet straight to your payout wallet; we never hold funds.
+Non-custodial USDT checkout as one React component. The customer pays from their own wallet straight to your payout wallet; we never hold funds.
 
 ## 1. Create a session on your server
 

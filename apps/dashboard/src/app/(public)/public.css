@@ -88,17 +88,6 @@
   padding-block: clamp(28px, 7vw, 96px);
 }
 
-.landing-network {
-  display: inline-block;
-  margin-bottom: 20px;
-  padding: 4px 9px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--link);
-  font-size: 13px;
-  font-weight: 500;
-}
-
 .landing-intro h1 {
   max-width: 13ch;
   font-size: clamp(44px, 5.6vw, 80px);

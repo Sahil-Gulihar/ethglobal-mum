@@ -217,7 +217,7 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
       }
       const chainId = parseInt((await provider.request({ method: "eth_chainId" })) as string, 16);
       if (chainId !== WHITECHAIN_CHAIN_ID)
-        throw new Error("Your wallet is still on another network. Switch to Whitechain Sepolia to continue.");
+        throw new Error("Your wallet is still on another network. Switch networks to continue.");
       dispatch({ type: "CHAIN_CHANGED", chainId });
     } catch (err) {
       fail(err);
@@ -582,9 +582,6 @@ export function View(p: ViewProps) {
             <UsdtIcon /> USDT
           </span>
         </div>
-        <span className="wcc-net">
-          <span className="wcc-dot" /> Whitechain Sepolia
-        </span>
       </div>
       <div className="wcc-divider" />
       <Body {...p} amountLabel={amountLabel} />
@@ -731,9 +728,9 @@ function Body(p: ViewProps & { amountLabel: string }) {
     case "switching":
       return (
         <section className="wcc-body" key="network">
-          <p className="wcc-title">Switch to Whitechain Sepolia</p>
+          <p className="wcc-title">Switch networks</p>
           <p className="wcc-text">
-            Your wallet is on another network. Payments settle on Whitechain Sepolia (chain {WHITECHAIN_CHAIN_ID}).
+            Switch to chain {WHITECHAIN_CHAIN_ID} in your wallet to continue.
           </p>
           <ErrorBanner message={state.error} onDismiss={p.onDismissError} />
           <AccountRow state={state} onDisconnect={p.onDisconnect} />
@@ -867,8 +864,8 @@ function ReviewBody(p: ViewProps & { amountLabel: string }) {
           </>
         ) : null}
         <div className="wcc-row">
-          <span className="wcc-row-k">Network</span>
-          <span className="wcc-row-v">Whitechain Sepolia</span>
+          <span className="wcc-row-k">Chain ID</span>
+          <span className="wcc-row-v">{WHITECHAIN_CHAIN_ID}</span>
         </div>
         <div className="wcc-row">
           <span className="wcc-row-k">Total</span>

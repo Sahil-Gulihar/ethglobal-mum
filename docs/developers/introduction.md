@@ -3,13 +3,13 @@ title: "Introduction"
 description: "The concepts behind Whitechain Commerce: what it does, how money moves, and the objects you work with."
 ---
 
-Whitechain Commerce lets a merchant accept USDT on Whitechain Sepolia without ever handing custody of funds to a third party. Customers pay from their own wallet through a small onchain contract, the `PaymentRouter`, which moves the USDT directly to the merchant's payout wallet in the same transaction. The platform watches the chain, confirms each payment against the order it belongs to, and tells your server with a signed webhook.
+Whitechain Commerce lets a merchant accept USDT without ever handing custody of funds to a third party. Customers pay from their own wallet through a small onchain contract, the `PaymentRouter`, which moves the USDT directly to the merchant's payout wallet in the same transaction. The platform watches the chain, confirms each payment against the order it belongs to, and tells your server with a signed webhook.
 
 ## Core products
 
 | Product | What it is | Read more |
 | --- | --- | --- |
-| Checkout widget | `<WhitechainCheckout />`, a React component that connects the customer's wallet, prompts a switch to Whitechain Sepolia, checks the USDT balance, asks for an `approve` if needed, sends `pay`, and waits for the backend to confirm the payment. | [Checkout widget](./checkout-widget.md) |
+| Checkout widget | `<WhitechainCheckout />`, a React component that connects the customer's wallet, prompts a network switch when needed, checks the USDT balance, asks for an `approve` if needed, sends `pay`, and waits for the backend to confirm the payment. | [Checkout widget](./checkout-widget.md) |
 | Payment links | Reusable links for a fixed USDT amount, created in the dashboard without code. | [Payment links](./payment-links.md) |
 | Hosted checkout | A full-page checkout at `/checkout/{sessionId}` on the dashboard. Create a session and send the customer to its `url`. No frontend code needed. | [Hosted checkout](./hosted-checkout.md) |
 | Checkout sessions | One session prices one order. Your server creates it with a secret key, so the amount can't be changed in the browser. | [Checkout sessions](./checkout-sessions.md) |
@@ -138,7 +138,6 @@ Retries happen 1 minute, 5 minutes and 30 minutes after a failed attempt. See [W
 
 | | |
 | --- | --- |
-| Network | Whitechain Sepolia (testnet) |
 | Chain id | `1874` (`0x752`) |
 | Native gas token | WBT (WhiteBIT Coin), 18 decimals |
 | USDT | [`0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7`](https://explorer.testnet.whitechain.io/token/0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7), 6 decimals |
@@ -151,13 +150,8 @@ Don't use `https://rpc-testnet.whitechain.io` (with a hyphen). It returns chain 
 
 Amounts in the API are decimal strings such as `"49.99"`, with at most 6 decimals. Base-unit amounts, such as `amountUnits`, are integers encoded as strings, for example `"49990000"`.
 
-## Test mode only
-
-Whitechain Commerce runs on testnet only. Every API key is an `sk_test_` key and every payment uses testnet USDT on Whitechain Sepolia. There is no live mode yet.
-
 ## Limitations
 
-- **Testnet only.** There are no live keys and no mainnet deployment.
 - **USDT only.** `currency` must be `"USDT"`.
 - **Refunds need your signature.** `POST /api/v1/refunds` only creates a `pending` request. You sign the refund from your payout wallet in the dashboard, and the payout wallet needs enough USDT and some WBT for gas.
 - **One payment per session.** A session's onchain order id can be paid once.
@@ -165,6 +159,6 @@ Whitechain Commerce runs on testnet only. Every API key is an `sk_test_` key and
 - **Small server SDK.** `createCheckoutSession` and `verifyWebhook` are the only server helpers. Use HTTP for payments and refunds.
 - **Not published to npm.** The SDK packages live in this monorepo as workspace packages. See the [widget installation guide](./checkout-widget.md#installation).
 
-Coming soon, not available today: World ID Proof of Human at onboarding, live mode, payment links and subscriptions.
+Coming soon, not available today: World ID Proof of Human at onboarding and subscriptions.
 
 Next: [Quickstart](./quickstart.md).

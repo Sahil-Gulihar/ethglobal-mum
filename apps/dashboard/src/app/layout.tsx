@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(env.appUrl()),
   title: { default: "Whitechain Commerce", template: "%s · Whitechain Commerce" },
   twitter: { card: "summary" },
-  description: "Accept on-chain USDT payments in your store with Whitechain Commerce. Hosted checkout, payment links and direct wallet settlement on Whitechain Sepolia testnet.",
+  description: "Accept on-chain USDT payments in your store with Whitechain Commerce. Hosted checkout, payment links and direct wallet settlement.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

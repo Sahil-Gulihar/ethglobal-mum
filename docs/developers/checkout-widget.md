@@ -3,7 +3,7 @@ title: "Checkout widget"
 description: "Embed a non-custodial USDT checkout in your React app with one component, <WhitechainCheckout />."
 ---
 
-The widget ships in `@whitechain-commerce/react`. It loads a checkout session, connects the customer's wallet, moves them to Whitechain Sepolia (chain 1874), checks their balance, asks for an exact-amount USDT approval when needed, sends the payment to the PaymentRouter contract, and waits until the Whitechain Commerce backend has verified the payment onchain.
+The widget ships in `@whitechain-commerce/react`. It loads a checkout session, connects the customer's wallet, prompts them to switch networks if needed, checks their balance, asks for an exact-amount USDT approval when needed, sends the payment to the PaymentRouter contract, and waits until the Whitechain Commerce backend has verified the payment onchain.
 
 The customer pays from their own wallet. The funds go straight to your registered payout wallet. Whitechain Commerce never holds them.
 
@@ -189,7 +189,7 @@ The widget shows a skeleton while it fetches the session. If the fetch fails, it
 | `paid` | Success, with the title "This order is already paid" and `alreadyPaid: true` |
 | `expired` | Expired |
 
-The header always shows your merchant name, the order id, the amount in USDT and the network (Whitechain Sepolia).
+The header always shows your merchant name, the order id, and the amount in USDT.
 
 ### Expiry countdown
 
@@ -207,19 +207,19 @@ The widget remembers the last wallet used (in `localStorage` under `wc-commerce:
 
 Clicking a wallet calls `eth_requestAccounts`. While the request is open the screen says "Approve the connection in your wallet…". If the wallet already has a pending connection request (error `-32002`), the widget shows "A connection request is already open. Check your wallet."
 
-### 2. Switch to Whitechain Sepolia
+### 2. Switch networks
 
-If the wallet is on another chain, the widget shows "Switch to Whitechain Sepolia" and a "Switch network" button. It calls `wallet_switchEthereumChain` with chain id `0x752` (1874). If the wallet does not know the chain (error `4902`), it calls `wallet_addEthereumChain` with:
+If the wallet is on another chain, the widget shows "Switch networks" and a "Switch network" button. It calls `wallet_switchEthereumChain` with chain id `0x752` (1874). If the wallet does not know the chain (error `4902`), it calls `wallet_addEthereumChain` with:
 
 | Field | Value |
 | --- | --- |
 | `chainId` | `0x752` |
-| `chainName` | `Whitechain Sepolia` |
+| `chainName` | Configured wallet network name |
 | `nativeCurrency` | `{ name: "WhiteBIT Coin", symbol: "WBT", decimals: 18 }` |
 | `rpcUrls` | `["https://rpc.testnet.whitechain.io"]` (or `NEXT_PUBLIC_WHITECHAIN_RPC_URL` if it is set and inlined at build time) |
 | `blockExplorerUrls` | `["https://explorer.testnet.whitechain.io"]` |
 
-If the wallet is still on another chain afterwards, the widget shows "Your wallet is still on another network. Switch to Whitechain Sepolia to continue."
+If the wallet is still on another chain afterwards, the widget shows "Your wallet is still on another network. Switch networks to continue."
 
 The widget listens for `accountsChanged`, `chainChanged` and `disconnect`. If the customer changes account or network before paying, it re-reads balances or returns to the right step. The "Change" link next to the account disconnects and returns to wallet selection.
 
@@ -252,7 +252,7 @@ After the approval is mined, the widget checks the receipt and re-reads the allo
 
 The widget simulates `PaymentRouter.pay(chainMerchantId, chainOrderId, amount)` before asking for a signature, so revert reasons (for example an order that is already paid) show up before the customer signs. It then asks the wallet to send the transaction. The button shows "Confirm payment in your wallet…".
 
-The router address, token address, `chainMerchantId` and `chainOrderId` all come from the session. On Whitechain Sepolia the deployed PaymentRouter is `0xa99a6D97607567f4fe734831910D24f4e9BD0508` and USDT is `0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7` (6 decimals).
+The router address, token address, `chainMerchantId` and `chainOrderId` all come from the session. The deployed PaymentRouter is `0xa99a6D97607567f4fe734831910D24f4e9BD0508` and USDT is `0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7` (6 decimals).
 
 ### 6. Submit and confirm
 
@@ -424,7 +424,6 @@ The component file starts with `"use client"`. In the Next.js App Router, render
 
 ## Limitations
 
-- Test mode only: Whitechain Sepolia (chain 1874) and `sk_test_` keys. There is no live mode.
 - USDT is the only currency.
 - The package is not published to npm. It is consumed as a workspace package and exports TypeScript source that your bundler must compile.
 - The server helpers cover `createCheckoutSession` and `verifyWebhook` only. For payments and refunds, call the HTTP API directly. See the [API reference](./api-reference.md).

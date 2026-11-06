@@ -3,13 +3,13 @@ title: "Smart contract"
 description: "The PaymentRouter contract moves USDT from the customer straight to your payout wallet, and back again for refunds."
 ---
 
-Every Whitechain Commerce payment and refund is a call to one small, non-upgradeable contract on Whitechain Sepolia. It records which order was paid, emits an event that links the transfer to the order, and never holds a token balance. This page lists its full interface and shows how to check any payment on the chain yourself.
+Every Whitechain Commerce payment and refund is a call to one small, non-upgradeable contract. It records which order was paid, emits an event that links the transfer to the order, and never holds a token balance. This page lists its full interface and shows how to check any payment on the chain yourself.
 
 ## Deployment
 
 | | |
 | --- | --- |
-| Network | Whitechain Sepolia, chain id `1874` (`0x752`) |
+| Chain ID | `1874` (`0x752`) |
 | PaymentRouter | [`0xa99a6D97607567f4fe734831910D24f4e9BD0508`](https://explorer.testnet.whitechain.io/address/0xa99a6D97607567f4fe734831910D24f4e9BD0508) |
 | Deploy transaction | [`0x1d2827bf…c38b37`](https://explorer.testnet.whitechain.io/tx/0x1d2827bfed5817deafb63df7d6c381fcbaed0d79ad4abfdede4fa9ea55c38b37) |
 | Deploy block | `12373441` |
@@ -101,7 +101,7 @@ Reverts with:
 - `MerchantNotRegistered(merchantId)` if the merchant has no payout wallet.
 - `ZeroAmount()` if `amount` is 0.
 - `AlreadyPaid(paymentId)` if this `(merchantId, orderId)` pair has already been paid.
-- The token's own error if the transfer fails. The Whitechain Sepolia USDT reverts with a reason string: `ERC20: transfer amount exceeds balance` when the payer's balance is too low, and `ERC20: transfer amount exceeds allowance` when the approval is too low. If both are too low, you get the balance error.
+- The token's own error if the transfer fails. The USDT contract reverts with a reason string: `ERC20: transfer amount exceeds balance` when the payer's balance is too low, and `ERC20: transfer amount exceeds allowance` when the approval is too low. If both are too low, you get the balance error.
 
 Anyone can call `pay` for any registered merchant. The contract doesn't know about checkout sessions or prices; that check happens off-chain in the [settlement checks](#settlement-checks).
 
@@ -222,7 +222,7 @@ From OpenZeppelin:
 | `ReentrancyGuardReentrantCall()` | `0x3ee5aeb5` | Re-entry into `pay` or `refund`. |
 | `SafeERC20FailedOperation(address token)` | `0x5274afe7` | The token returned `false` from `transferFrom`, or has no code. |
 
-A `transferFrom` that reverts inside the token passes the token's own revert data through unchanged. The Whitechain Sepolia USDT uses reason strings (`Error(string)`), such as `ERC20: transfer amount exceeds balance` and `ERC20: transfer amount exceeds allowance`.
+A `transferFrom` that reverts inside the token passes the token's own revert data through unchanged. The USDT contract uses reason strings (`Error(string)`), such as `ERC20: transfer amount exceeds balance` and `ERC20: transfer amount exceeds allowance`.
 
 ## Non-custodial guarantees
 
@@ -252,9 +252,9 @@ This reads the payment's current state from contract storage, including refunds 
 ```ts
 import { createPublicClient, defineChain, formatUnits, http, parseAbi, parseEventLogs, type Hex } from "viem";
 
-const whitechainSepolia = defineChain({
+const settlementChain = defineChain({
   id: 1874,
-  name: "Whitechain Sepolia",
+  name: "Settlement chain",
   nativeCurrency: { name: "WhiteBIT Coin", symbol: "WBT", decimals: 18 },
   rpcUrls: { default: { http: ["https://rpc.testnet.whitechain.io"] } },
   blockExplorers: { default: { name: "Whitechain Explorer", url: "https://explorer.testnet.whitechain.io" } },
@@ -269,7 +269,7 @@ const routerAbi = parseAbi([
   "event PaymentSettled(bytes32 indexed paymentId, bytes32 indexed merchantId, bytes32 indexed orderId, address payer, address payout, address token, uint256 amount)",
 ]);
 
-const client = createPublicClient({ chain: whitechainSepolia, transport: http() });
+const client = createPublicClient({ chain: settlementChain, transport: http() });
 
 // From a payment.succeeded webhook (or GET /api/v1/payments/:id).
 const chainPaymentId: Hex = "0xf023343c687ea8a44a45aa484624ae2da28c009014941a13a4982ce083da4993";

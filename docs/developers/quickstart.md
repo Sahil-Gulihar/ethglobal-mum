@@ -5,7 +5,7 @@ description: "Add hosted USDT checkout to your store with the Whitechain Commerc
 
 Add **Pay with USDT** to your checkout. Your server creates a session for an order, the shopper pays on a page hosted by Whitechain Commerce, and a signed webhook tells your store when to fulfil the order. Use this flow with any backend that can make HTTPS requests and receive webhooks.
 
-All payments are on **Whitechain Sepolia testnet**. Use test orders and testnet funds. If you only need to share a fixed-price checkout, start with [Payment links](./payment-links.md).
+If you only need to share a fixed-price checkout, start with [Payment links](./payment-links.md).
 
 ## 1. Set up your merchant account
 
@@ -33,7 +33,7 @@ curl --fail-with-body "$WC_API_BASE/checkout_sessions" \
   }'
 ```
 
-Save the returned session `id` with your order and send the shopper to the returned `url`. Never expose the API key to the browser. The shopper connects a wallet, switches to Whitechain Sepolia if needed, approves USDT if prompted, and pays. On return to your store, show the order status from your server. The return URL is for navigation and does not prove payment.
+Save the returned session `id` with your order and send the shopper to the returned `url`. Never expose the API key to the browser. The shopper connects a wallet, switches networks if needed, approves USDT if prompted, and pays. On return to your store, show the order status from your server. The return URL is for navigation and does not prove payment.
 
 See [Checkout sessions](./checkout-sessions.md) for expiry, retries, and already-paid orders. If you maintain the React SDK packages in your own build and want checkout embedded in your site, see [Checkout widget](./checkout-widget.md).
 

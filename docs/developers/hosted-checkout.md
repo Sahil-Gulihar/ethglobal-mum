@@ -9,13 +9,9 @@ Every checkout session has a `url` field. It points to the hosted checkout page,
 
 1. Your server creates a checkout session with your secret key, including a `successUrl` and a `cancelUrl`.
 2. You redirect the customer to the session's `url`.
-3. The customer connects a wallet and pays in USDT on Whitechain Sepolia (chain 1874). The funds go straight from their wallet to your payout wallet.
+3. The customer connects a wallet and pays in USDT. The funds go straight from their wallet to your payout wallet.
 4. Once the backend has verified the payment onchain, the page redirects the customer to your `successUrl`.
 5. Your server receives a signed `payment.succeeded` webhook and fulfils the order. See [Webhooks](./webhooks.md).
-
-![Hosted checkout receipt showing a confirmed 49.99 USDT payment for sample order 4821.](../../apps/dashboard/public/product/checkout-sample.webp)
-
-*Sample testnet checkout after payment confirmation.*
 
 ## The checkout URL
 
@@ -122,7 +118,7 @@ The theme changes the checkout card. The page around it always has a dark backgr
 
 The page has a "Whitechain Commerce" header with a "Secure checkout" badge, the checkout card in the middle, and a footer that says "Funds go straight from your wallet to the merchant on Whitechain. We never hold your money." Search engines are asked not to index it.
 
-The card shows your merchant name, the order id, the amount in USDT and a countdown to the session's expiry (sessions last 30 minutes from creation). The customer then goes through the same steps as in the embedded widget: choose a wallet, switch to Whitechain Sepolia, check the balance, approve the exact amount if needed, pay and wait for verification. See [What the customer sees](./checkout-widget.md#what-the-customer-sees) for each screen, including expired sessions, errors and wallet rejections.
+The card shows your merchant name, the order id, the amount in USDT and a countdown to the session's expiry (sessions last 30 minutes from creation). The customer then goes through the same steps as in the embedded widget: choose a wallet, switch networks if needed, check the balance, approve the exact amount if needed, pay and wait for verification. See [What the customer sees](./checkout-widget.md#what-the-customer-sees) for each screen, including expired sessions, errors and wallet rejections.
 
 If the session id does not exist, the card shows "We couldn't load this checkout" with the API's error message (for example `No checkout session cs_123.`) and a "Try again" button.
 
@@ -143,7 +139,6 @@ Either way, the session, the onchain payment and the webhooks are the same.
 
 ## Limitations
 
-- Test mode only: Whitechain Sepolia (chain 1874) and `sk_test_` keys.
 - USDT is the only currency.
 - The hosted page has no merchant branding beyond your merchant name. There are no logo or color settings.
 - `theme` is the only query parameter.

@@ -15,11 +15,9 @@ https://whitechain-dashboard.vercel.app/api/v1
 
 Use the API origin shown under **Developers** in your dashboard. For hosted checkout, redirect to the URL returned in `CheckoutSession.url`.
 
-Only test mode exists. Keys start with `sk_test_` and every payment settles on Whitechain Sepolia (chain id `1874`).
-
 | Resource | Value |
 | --- | --- |
-| Chain | Whitechain Sepolia, chain id `1874` (`0x752`) |
+| Chain ID | `1874` (`0x752`) |
 | PaymentRouter | `0xa99a6D97607567f4fe734831910D24f4e9BD0508` |
 | USDT | `0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7`, 6 decimals |
 | Explorer | https://explorer.testnet.whitechain.io |
@@ -534,7 +532,7 @@ Returned by `GET /api/v1/checkout_sessions/:id`. Safe to show in a browser.
 | `amountUnits` | string | Amount in token base units as an integer string, for example `"49990000"` for 49.99 USDT. This is the exact value the customer must pay. |
 | `currency` | `"USDT"` | Always USDT. |
 | `decimals` | number | Token decimals used to price the session, read onchain at creation. `6` for USDT. |
-| `chainId` | `1874` | Whitechain Sepolia. |
+| `chainId` | `1874` | Settlement chain ID. |
 | `routerAddress` | string | PaymentRouter address the customer pays through. |
 | `tokenAddress` | string | USDT token address. |
 | `chainMerchantId` | string | `keccak256` of your merchant id (UTF-8), the `merchantId` argument of `pay()`. |
@@ -572,7 +570,7 @@ Returned by the payments endpoints and inside webhook events.
 | `payer` | string | Address that sent the payment. Refunds go back to this address. |
 | `txHash` | string | Transaction that emitted `PaymentSettled`, lowercase. |
 | `explorerUrl` | string | `https://explorer.testnet.whitechain.io/tx/<txHash>`. |
-| `chainId` | `1874` | Whitechain Sepolia. |
+| `chainId` | `1874` | Settlement chain ID. |
 | `chainPaymentId` | string | Onchain payment id, `keccak256(abi.encode(chainMerchantId, chainOrderId))`, lowercase. The first argument of `refund()`. |
 | `createdAt` | string | ISO timestamp of when the payment was recorded by the indexer (not the block time). |
 
@@ -594,4 +592,4 @@ Returned by the refunds endpoints and inside `refund.succeeded` events.
 
 ## Not available
 
-These do not exist in the API today: live mode and `sk_live_` keys, an authenticated session retrieve or list endpoint, session cancel or expire endpoints, refund retrieve by id, refund cancel through the API (discard pending refunds in the dashboard), payment links, subscriptions, and webhook endpoint management through the API (use the dashboard).
+These do not exist in the API today: an authenticated session retrieve or list endpoint, session cancel or expire endpoints, refund retrieve by id, refund cancel through the API (discard pending refunds in the dashboard), payment links, subscriptions, and webhook endpoint management through the API (use the dashboard).

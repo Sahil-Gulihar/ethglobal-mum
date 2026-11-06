@@ -164,7 +164,7 @@ function init() {
       const block = `${cur && !cur.endsWith("\n") ? "\n" : ""}${cur ? "\n" : ""}<!-- whitechain-commerce -->
 ## Payments: Whitechain Commerce
 
-This project takes USDT payments with Whitechain Commerce (non-custodial, Whitechain Sepolia, chain 1874).
+This project takes USDT payments with Whitechain Commerce.
 
 - Agents: use the \`whitechain\` MCP server. It can do everything the dashboard does except identity, payout wallet, refund signing and keys (those come back as \`humanActions\` links for the user). Confirm payments with \`wait_for_payment\`, never by trusting the client.
 - Integrating or changing payment code: first read ${base}/integrate.md (or call the \`get_integration_guide\` tool) and follow it.

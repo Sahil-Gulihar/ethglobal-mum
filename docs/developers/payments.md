@@ -128,6 +128,6 @@ When the amount differs from the session's `amountUnits`, more or less:
 
 ## Limitations
 
-- Payments settle only in USDT on Whitechain Sepolia. There is no live mode.
+- Payments settle in USDT.
 - A payment always pays a checkout session. Each visit to a reusable payment link creates a new session.
 - `createdAt` is the time the payment was indexed, not the block time. Use `txHash` on the explorer for the exact block.

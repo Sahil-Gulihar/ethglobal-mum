@@ -30,9 +30,6 @@ background:var(--wcc-soft);color:var(--wcc-muted);font-variant-numeric:tabular-n
 .wcc-amount-row{display:flex;align-items:baseline;gap:8px;margin-top:4px}
 .wcc-amount-value{font-size:42px;line-height:1.05;font-weight:650;letter-spacing:-.045em;font-variant-numeric:tabular-nums}
 .wcc-amount-cur{display:inline-flex;align-items:center;gap:6px;font-size:16px;font-weight:600;color:var(--wcc-muted)}
-.wcc-net{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:4px 10px 4px 8px;border-radius:0;font-size:12px;
-font-weight:500;border:1px solid var(--wcc-border);color:var(--wcc-muted)}
-.wcc-dot{width:7px;height:7px;border-radius:50%;background:var(--wcc-success);box-shadow:0 0 0 3px var(--wcc-success-soft)}
 .wcc-body{padding:0 28px 28px;animation:wcc-in .28s cubic-bezier(.2,.8,.2,1)}
 .wcc-divider{height:1px;background:var(--wcc-border);margin:0 28px 24px}
 .wcc-title{font-weight:650;font-size:16px;margin:0 0 6px;letter-spacing:-.01em}

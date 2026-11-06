@@ -3,13 +3,13 @@ title: "Test your integration"
 description: "Test checkout, verify signed webhooks, and confirm that your store marks the right order paid."
 ---
 
-Whitechain Commerce runs on Whitechain Sepolia (chain id `1874`) only. There is no live mode: every secret key is `sk_test_`, and every payment uses testnet USDT with no real value.
+Use test funds with no real value to verify your integration.
 
 ## Network details
 
 | | |
 | --- | --- |
-| Network | Whitechain Sepolia, chain id `1874` (`0x752`) |
+| Chain ID | `1874` (`0x752`) |
 | Gas token | WBT (18 decimals) |
 | Public RPC | `https://rpc.testnet.whitechain.io` |
 | Explorer | https://explorer.testnet.whitechain.io |

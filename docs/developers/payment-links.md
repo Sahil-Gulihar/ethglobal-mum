@@ -11,7 +11,7 @@ Use a payment link for a fixed-price item or a payment you reconcile by hand. Sh
 2. Open **Payment links** and select **Create payment link**.
 3. Enter a name and a USDT amount, create the link, and copy it.
 
-The same link can accept multiple payments. Each visit starts a fresh checkout for the fixed amount. Customers need a wallet with testnet USDT and WBT for gas on Whitechain Sepolia. The USDT goes directly to your payout wallet.
+The same link can accept multiple payments. Each visit starts a fresh checkout for the fixed amount. Customers need a wallet with testnet USDT and WBT for gas. The USDT goes directly to your payout wallet.
 
 ## Track payments
 

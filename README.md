@@ -2,7 +2,7 @@
 
 # Whitechain Commerce
 
-Whitechain Commerce lets merchants add on-chain USDT payments to their stores. Customers pay from their wallets and funds settle directly to the merchant's payout wallet. Start with hosted checkout or share a fixed-price payment link. The platform currently runs on Whitechain Sepolia testnet only. Built for ETHGlobal Mumbai 2026.
+Whitechain Commerce lets merchants add on-chain USDT payments to their stores. Customers pay from their wallets and funds settle directly to the merchant's payout wallet. Start with hosted checkout or share a fixed-price payment link. Built for ETHGlobal Mumbai 2026.
 
 ## Merchant docs
 
@@ -20,7 +20,7 @@ Customers pay in USDT on Whitechain and the funds go directly to the merchant's 
 
 | | |
 |---|---|
-| Network | Whitechain Sepolia, chain id `1874` |
+| Chain ID | `1874` |
 | PaymentRouter | [`0xa99a6D97607567f4fe734831910D24f4e9BD0508`](https://explorer.testnet.whitechain.io/address/0xa99a6D97607567f4fe734831910D24f4e9BD0508) (deploy block `12373441`) |
 | Source verification | Verified on the [Whitechain explorer](https://explorer.testnet.whitechain.io/address/0xa99a6D97607567f4fe734831910D24f4e9BD0508) and [Sourcify](https://sourcify.dev/server/v2/contract/1874/0xa99a6D97607567f4fe734831910D24f4e9BD0508) (exact match) |
 | USDT (official, 6 decimals) | [`0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7`](https://explorer.testnet.whitechain.io/token/0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7) |
@@ -29,8 +29,7 @@ Customers pay in USDT on Whitechain and the funds go directly to the merchant's 
 
 ## Payment and refund explorer links
 
-Real testnet transactions from the first live run of the demo flow on Whitechain Sepolia (official USDT, real app:
-dashboard signup, backend-signed registration, store order, indexer, signed webhooks). Order `order_c3956bc0f34ad6f6`
+The first end-to-end demo covered dashboard signup, backend-signed registration, a store order, indexing and signed webhooks. Order `order_c3956bc0f34ad6f6`
 (Tasting Sachet 0.99 + Masala Chai Tin 4.99 = 5.98 USDT), partially refunded 2.00 USDT. All statuses are `success`.
 
 | Step | What | Transaction |
@@ -164,7 +163,6 @@ webhook delivery to the store, and partial and full refunds from the dashboard.
 - **World ID uses the staging environment by default.** New merchants verify with World ID Proof of Human on the
   Setup page (test with the simulator at https://simulator.worldcoin.org). One World ID can back only one merchant
   account. Set `WORLD_ENVIRONMENT=production` for real World App users, or `SKIP_WORLD_ID=true` to activate on signup.
-- **Testnet only** (Whitechain Sepolia). All API keys are `sk_test_`.
 - **Refunds are signed by the merchant.** The API can create a *pending* refund, but because the platform is
   non-custodial it can't move funds. The merchant signs it from the payout wallet in the dashboard.
 - **One payment per session.** A session's onchain `orderId` can be paid once. A payment for the wrong amount (sent by

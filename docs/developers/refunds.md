@@ -66,7 +66,7 @@ Full schema in the [API reference](./api-reference.md#create-a-refund).
 - **Your current payout wallet.** Only the wallet currently registered for your merchant can call `refund()`. Any other wallet reverts with `NotPayout`. If you changed your payout wallet after the payment, sign from the new one; the dashboard shows a notice when the payment settled to a different wallet.
 - **Enough USDT in that wallet.** The dashboard checks the balance before asking you to sign.
 - **An allowance for the router.** The dashboard asks for `approve(router, amount)` for exactly the refund amount when the current allowance is lower.
-- **A little WBT for gas** on Whitechain Sepolia, for the approve and refund transactions.
+- **A little WBT for gas**, for the approve and refund transactions.
 
 The refund always goes to the payment's `payer`. You cannot send it to a different address.
 
@@ -182,7 +182,7 @@ When a refund is recorded, every enabled webhook endpoint receives:
 
 ## Example from a live run
 
-On Whitechain Sepolia, a 5.98 USDT payment was partially refunded by 2.00 USDT from the payout wallet:
+In this example, a 5.98 USDT payment was partially refunded by 2.00 USDT from the payout wallet:
 
 - Approve: [`0x96c1ab28…e3f559`](https://explorer.testnet.whitechain.io/tx/0x96c1ab28b6ea31f576f5a833d5e0b785f6fcd250a3962f8252c1ac1f67e3f559)
 - Refund: [`0xe2fcbd3d…1bab52`](https://explorer.testnet.whitechain.io/tx/0xe2fcbd3d4a23bbb35964def3f7509bd2883a167164b790733ff069ef5c1bab52)

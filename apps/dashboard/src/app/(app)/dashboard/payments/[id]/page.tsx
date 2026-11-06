@@ -230,8 +230,8 @@ export default async function PaymentDetailPage({ params }: { params: Promise<{ 
                           {" "}
                           <span className="font-mono text-xs">{shortHash(p.chainPaymentId)}</span>{" "}
                         </Row>,
-                        <Row key="9" label="Network">
-                          Whitechain Sepolia
+                        <Row key="9" label="Chain ID">
+                          1874
                         </Row>,
                         ...Object.entries(p.metadata ?? {}).map(([name, value]) => (
                           <Row key={`metadata-${name}`} label={name}>

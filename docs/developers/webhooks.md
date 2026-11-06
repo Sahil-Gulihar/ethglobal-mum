@@ -70,7 +70,7 @@ Every request body is one JSON event object.
 | `payer` | string | Wallet address that paid. |
 | `txHash` | string | Hash of the payment transaction. |
 | `explorerUrl` | string | Link to the payment transaction on the Whitechain explorer. |
-| `chainId` | integer | Always `1874` (Whitechain Sepolia). |
+| `chainId` | integer | Settlement chain ID. The value is `1874`. |
 | `chainPaymentId` | string | The onchain `paymentId` (bytes32 hex). See [smart contract](./smart-contract.md#ids). |
 | `createdAt` | string | ISO 8601 time the payment was recorded. |
 
@@ -434,7 +434,6 @@ Register a public HTTPS URL that receives POST requests. The hosted service chec
 - No per-endpoint event filtering, no REST API to manage endpoints or list events (the MCP server has tools for both), and no secret rotation.
 - No test event for `refund.succeeded`.
 - No ordering guarantee between events.
-- Testnet only (Whitechain Sepolia, chain `1874`). There is no live mode.
 
 ## Related
 

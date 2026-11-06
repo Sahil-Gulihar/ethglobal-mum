@@ -60,7 +60,7 @@ function header(base: string, stackLabel: string, mode: "widget" | "hosted", def
 
 You are a coding agent working inside a merchant's repository. Follow these instructions end to end to add Whitechain Commerce checkout. Do the work in the repository, then verify every item in the **Final checklist** before you say you are done.
 
-Whitechain Commerce is a non-custodial USDT checkout on **Whitechain Sepolia (testnet, chain id 1874)**. The customer pays from their own wallet straight to the merchant's payout wallet; the platform never holds funds. The merchant's server creates a **checkout session** with a secret key, the customer pays it (embedded widget or hosted page), and the platform sends a signed **\`payment.succeeded\` webhook** to the merchant's server, which fulfils the order.
+Whitechain Commerce is a non-custodial USDT checkout. The customer pays from their own wallet straight to the merchant's payout wallet; the platform never holds funds. The merchant's server creates a **checkout session** with a secret key, the customer pays it (embedded widget or hosted page), and the platform sends a signed **\`payment.succeeded\` webhook** to the merchant's server, which fulfils the order.
 
 - API base: \`${base}\`
 - Stack for this guide: **${stackLabel}**
@@ -127,7 +127,7 @@ function accountSection(base: string) {
 These need a human (or the MCP tools above). Check them, and if any is missing, tell the human exactly what to do:
 
 1. Account at ${base}/signup, verified, with a **payout wallet registered** at ${base}/dashboard/setup. Without a payout wallet, \`POST /api/v1/checkout_sessions\` returns \`409 conflict\`.
-2. A **secret key** (\`sk_test_...\`) from ${base}/dashboard/developers. There is no live mode; every key is a test key on Whitechain Sepolia.
+2. A **secret key** (\`sk_test_...\`) from ${base}/dashboard/developers.
 3. A **webhook endpoint** for the webhook URL you build below, added at ${base}/dashboard/webhooks (or with \`create_webhook_endpoint\`). Each endpoint has its own signing secret \`whsec_...\` (click **Reveal**). Every endpoint receives every event type.
 
 Never ask the human to paste the secret key or webhook secret into chat or into committed files. Ask them to put the values in the local env file themselves, or write them there yourself if you received them from a tool.`;
@@ -782,7 +782,6 @@ function securitySection() {
 function testingSection(base: string) {
   return `## Test on testnet
 
-Everything runs on Whitechain Sepolia (chain id \`1874\`); there is no live mode and no real money.
 
 1. **Unit-test signature verification** with the test vector: secret \`whsec_exampleexampleexampleexample1234\`, \`t = 1793975348\`, raw body \`{"id":"evt_example","type":"payment.succeeded"}\` must verify as \`v1=2969cd7b4e1840f6a11ae5a59ef36e6bbc7ee626bfc3411ad8dd049e3426983e\` (pass a large tolerance or a fixed "now"), and fail for a changed body or secret.
 2. **Make the webhook reachable.** The platform must be able to POST to the URL. Against a hosted dashboard such as \`${base}\`, local URLs (\`localhost\`, private IPs) are rejected, so expose the dev server through a public HTTPS tunnel (for example \`cloudflared tunnel --url http://localhost:3000\` or \`ngrok http 3000\`) and register \`https://<tunnel>/api/webhooks/whitechain\`.
@@ -797,7 +796,7 @@ curl -X POST ${base}/api/v1/checkout_sessions \\
 `,
 )}
    Calling it twice with the same body must return the same \`id\` (\`200\` the second time, \`201\` the first).
-5. **Pay it** with a browser wallet (MetaMask or any EIP-1193 wallet) on Whitechain Sepolia: RPC \`https://rpc.testnet.whitechain.io\`, explorer https://explorer.testnet.whitechain.io. The customer needs **WBT** for gas (faucet: https://faucet.testnet.whitechain.io) and **testnet USDT** at \`0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7\` (6 decimals; add it as a custom token). The human has to do this step; you cannot sign wallet transactions. If no funded wallet is available, say so and stop at step 4.
+5. **Pay it** with a browser wallet (MetaMask or any EIP-1193 wallet) on chain 1874: RPC \`https://rpc.testnet.whitechain.io\`, explorer https://explorer.testnet.whitechain.io. The customer needs **WBT** for gas (faucet: https://faucet.testnet.whitechain.io) and **testnet USDT** at \`0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7\` (6 decimals; add it as a custom token). The human has to do this step; you cannot sign wallet transactions. If no funded wallet is available, say so and stop at step 4.
 6. **Check the result**: the order page flips from "Confirming…" to paid within a few seconds of the webhook; \`get_checkout_session\` / \`list_payments\` (MCP) or **Payments** in the dashboard show the payment; the delivery shows as delivered under **Webhooks**. Redeliver it from the dashboard and confirm the order is not fulfilled twice.
 7. **Refunds** (optional): refund part of the payment from the dashboard payment page (signed with the payout wallet) and check that \`refund.succeeded\` updates \`amountRefunded\` and the status.
 
@@ -838,7 +837,7 @@ function paymentLinkGuide(base: string) {
 
 You are a coding agent working inside a merchant's repository. The goal is a no-code USDT payment: a fixed-price **payment link** behind a button. No server code, keys or webhooks are needed in the repository.
 
-Whitechain Commerce is a non-custodial USDT checkout on Whitechain Sepolia (testnet, chain id 1874). A payment link is a reusable URL \`${base}/pay/pl_...\`; every visit opens a fresh hosted checkout for the link's fixed amount, and the customer pays from their wallet straight to the merchant's payout wallet.
+Whitechain Commerce is a non-custodial USDT checkout. A payment link is a reusable URL \`${base}/pay/pl_...\`; every visit opens a fresh hosted checkout for the link's fixed amount, and the customer pays from their wallet straight to the merchant's payout wallet.
 
 ## Choose this only if
 

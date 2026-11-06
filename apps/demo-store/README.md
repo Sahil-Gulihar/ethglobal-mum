@@ -1,6 +1,6 @@
 # Chai & Co. (demo merchant)
 
-A small fictional store that sells chai and takes **USDT on Whitechain Sepolia** through Whitechain Commerce.
+A small fictional store that sells chai and takes **USDT** through Whitechain Commerce.
 It uses only the public SDK (`@whitechain-commerce/react` and `@whitechain-commerce/react/server`), the same
 way an outside merchant would.
 

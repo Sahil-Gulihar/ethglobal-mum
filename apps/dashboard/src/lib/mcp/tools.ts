@@ -49,7 +49,7 @@ interface ToolDef<S extends z.ZodObject = z.ZodObject> {
 const tool = <S extends z.ZodObject>(t: ToolDef<S>) => t as unknown as ToolDef;
 
 const base = () => env.appUrl().replace(/\/$/, "");
-const NETWORK = { name: "Whitechain Sepolia (testnet)", chainId: 1874, currency: "USDT", usdt: USDT_ADDRESS };
+const NETWORK = { name: "Chain 1874", chainId: 1874, currency: "USDT", usdt: USDT_ADDRESS };
 
 /**
  * Some steps are reserved for the human on purpose (identity, the payout wallet, signing refunds,

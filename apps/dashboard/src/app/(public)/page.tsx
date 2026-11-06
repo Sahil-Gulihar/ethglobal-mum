@@ -26,7 +26,6 @@ export default async function Landing() {
       <main className="public-frame landing-main">
         <section className="landing-hero" aria-labelledby="landing-title">
           <div className="landing-intro">
-            <p className="landing-network">Whitechain Sepolia · Testnet only</p>
             <h1 id="landing-title">Accept on-chain payments on Whitechain</h1>
             <p className="landing-lede">Let customers pay in USDT on Whitechain. Payments settle directly to your wallet, and signed webhooks tell your store when to fulfil an order.</p>
             <div className="public-actions">
@@ -48,7 +47,7 @@ export default async function Landing() {
                 <div><dt>Store notification</dt><dd>Signed webhook</dd></div>
               </dl>
             </div>
-            <p>Illustrative receipt · Whitechain Sepolia</p>
+            <p>Illustrative receipt</p>
           </figure>
         </section>
 

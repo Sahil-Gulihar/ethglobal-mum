@@ -83,7 +83,7 @@ export default async function SettingsPage() {
                     <Row label="Onchain merchant ID" copy={m.chainMerchantId}>
                       <span className="font-mono text-xs">{shortHash(m.chainMerchantId)}</span>
                     </Row>
-                    <Row label="Network">Whitechain Sepolia (1874)</Row>
+                    <Row label="Chain ID">1874</Row>
                     <Row label="Member since">{formatDate(m.createdAt)}</Row>
                   </dl>
                 </CardContent>

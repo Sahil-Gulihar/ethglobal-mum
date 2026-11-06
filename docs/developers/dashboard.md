@@ -3,7 +3,7 @@ title: "Dashboard"
 description: "The merchant dashboard is where you set up your account, manage keys and webhooks, follow payments and send refunds."
 ---
 
-Use the [merchant dashboard](https://whitechain-dashboard.vercel.app/dashboard) to manage payments on Whitechain Sepolia testnet (chain ID `1874`).
+Use the [merchant dashboard](https://whitechain-dashboard.vercel.app/dashboard) to manage payments.
 
 ## Pages
 
@@ -53,7 +53,7 @@ Until every step is done, the home page shows a "Get set up to accept USDT" chec
 | Step | Done when |
 | --- | --- |
 | 1. Add your business | Always done after signup. Edit the name in Settings. |
-| 2. Verify you're human | The account is `active`. Shows "Skipped on testnet" when verification is skipped. |
+| 2. Verify you're human | The account is `active`. |
 | 3. Connect your payout wallet | A payout address is registered onchain. |
 | 4. Create an API key | You have at least one secret key that isn't revoked. |
 | 5. Add a webhook endpoint | You have at least one webhook endpoint. |
@@ -201,7 +201,7 @@ The **Timeline** lists, newest first:
 - Each refund, either "requested" (pending a signature) or "Refunded", with its transaction link.
 - Each webhook delivery about this payment: delivered, retrying, queued or failed, with the HTTP status, endpoint URL and attempt count.
 
-**Details** shows the amount, refunded and refundable amounts, payment id, order id, customer wallet, the wallet the payment settled to, the transaction, the onchain payment id, the network, and any `metadata` you set on the checkout session.
+**Details** shows the amount, refunded and refundable amounts, payment id, order id, customer wallet, the wallet the payment settled to, the transaction, the onchain payment id, the chain ID, and any `metadata` you set on the checkout session.
 
 The page refreshes every 5 seconds while a refund is pending or a webhook delivery about the payment is queued or retrying.
 
@@ -214,7 +214,7 @@ To refund from a payment page:
 1. Choose **Refund**. The amount field starts empty, so a full refund is never sent by accident.
 2. Enter an amount, or choose **Max** to fill in the full refundable amount. Partial refunds are fine.
 3. Choose **Connect payout wallet**. Check that the connected account matches your payout wallet. If it doesn't, the dialog says so and you need to switch accounts in your wallet.
-4. Choose **Send refund**. If your wallet is on another network, you're asked to switch to Whitechain Sepolia.
+4. Choose **Send refund**. If your wallet is on another network, you're asked to switch networks.
 5. If the router's USDT allowance is too low, approve exactly the refund amount in your wallet first.
 6. Confirm the `refund(paymentId, amount)` transaction in your wallet.
 
@@ -278,7 +278,7 @@ Text cells that start with `=`, `+`, `-`, `@`, a tab or a carriage return get a 
 
 - **Business**: edit the business name (2 to 80 characters). It's shown to customers at checkout.
 - **Payout wallet**: add or change the payout wallet, as described in [Payout wallet](#payout-wallet).
-- **Account**: your email, status (with a "World ID skipped on testnet" badge when verification is skipped), merchant id (`mer_...`), onchain merchant id, network (Whitechain Sepolia, 1874) and signup date. Both ids have a copy button.
+- **Account**: your email, status, merchant id (`mer_...`), onchain merchant id, chain ID (1874) and signup date. Both ids have a copy button.
 
 ## Related
 
