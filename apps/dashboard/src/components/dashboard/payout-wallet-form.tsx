@@ -31,26 +31,46 @@ function PayoutWalletFormInner({ currentPayout, currentTxHash, submitLabel = "Us
   const [manualAddr, setManualAddr] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<{ payoutAddress: string; txHash: string } | null>(null);
+  const [registrationAddress, setRegistrationAddress] = useState("");
   const [pending, startTransition] = useTransition();
 
-  const target = manual ? manualAddr.trim() : wallet.address ?? "";
-  const sameAsCurrent = !!currentPayout && target.toLowerCase() === currentPayout.toLowerCase();
+  const target = manual ? manualAddr.trim() : wallet.isConnected ? wallet.address ?? "" : "";
+  const savedPayout = done?.payoutAddress ?? currentPayout;
+  const sameAsCurrent = !!savedPayout && target.toLowerCase() === savedPayout.toLowerCase();
+  const busy = pending || wallet.isConnecting;
 
-  function submit() {
+  function submit(address: string) {
     setError(null);
-    setDone(null);
-    if (!isAddress(target, { strict: false })) {
+    if (!isAddress(address, { strict: false })) {
       setError("Enter a valid 0x wallet address.");
       return;
     }
+    if (address.toLowerCase() === savedPayout?.toLowerCase()) return;
+    setDone(null);
+    setRegistrationAddress(address);
     startTransition(async () => {
-      const r = await setPayoutAddress(target);
-      if (!r.ok) setError(r.error);
-      else {
-        setDone(r.value);
-        router.refresh();
+      try {
+        const r = await setPayoutAddress(address);
+        if (!r.ok) setError(r.error);
+        else {
+          setDone(r.value);
+          router.refresh();
+        }
+      } catch {
+        setError("Couldn’t register the payout wallet. Try again.");
       }
     });
+  }
+
+  async function connectPayoutWallet() {
+    setError(null);
+    try {
+      const address = await wallet.connect();
+      if (!address) setError("No wallet address was returned. Reconnect your wallet and try again.");
+      else submit(address);
+    } catch (e) {
+      setError(walletErrorMessage(e));
+    }
   }
 
   return (
@@ -80,18 +100,15 @@ function PayoutWalletFormInner({ currentPayout, currentTxHash, submitLabel = "Us
                   <span className="text-xs text-muted-foreground">Connected browser wallet</span>
                 </div>
               </div>
-              <Button variant="ghost" size="sm" onClick={wallet.disconnect}>
+              <Button variant="ghost" size="sm" onClick={wallet.disconnect} disabled={busy}>
                 Disconnect
               </Button>
             </div>
           ) : (
             <Button
               variant="outline"
-              onClick={() => {
-                setError(null);
-                wallet.connect().catch((e) => setError(walletErrorMessage(e)));
-              }}
-              disabled={wallet.isConnecting}
+              onClick={connectPayoutWallet}
+              disabled={busy}
               className="w-full sm:w-fit"
             >
               {wallet.isConnecting ? <Spinner /> : <Icon name="wallet" />}
@@ -113,6 +130,7 @@ function PayoutWalletFormInner({ currentPayout, currentTxHash, submitLabel = "Us
             placeholder="0x…"
             className="font-mono"
             value={manualAddr}
+            disabled={busy}
             onChange={(e) => setManualAddr(e.target.value)}
             aria-invalid={!!error}
           />
@@ -123,7 +141,7 @@ function PayoutWalletFormInner({ currentPayout, currentTxHash, submitLabel = "Us
       {pending && (
         <Alert tone="info">
           <span className="flex items-center gap-2">
-            <Spinner /> Registering {shortAddr(target)} on Whitechain. This takes a few seconds…
+            <Spinner /> Registering {shortAddr(registrationAddress)} on Whitechain. This takes a few seconds…
           </span>
         </Alert>
       )}
@@ -136,12 +154,14 @@ function PayoutWalletFormInner({ currentPayout, currentTxHash, submitLabel = "Us
       )}
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button onClick={submit} disabled={pending || !target || sameAsCurrent}>
-          {pending && <Spinner />}
-          {pending ? "Registering…" : sameAsCurrent ? "Already your payout wallet" : submitLabel}
-        </Button>
+        {(manual || (!busy && target && !sameAsCurrent)) && (
+          <Button onClick={() => submit(target)} disabled={busy || !target || sameAsCurrent}>
+            {pending ? "Registering…" : sameAsCurrent ? "Already your payout wallet" : submitLabel}
+          </Button>
+        )}
         <button
           type="button"
+          disabled={busy}
           onClick={() => {
             setManual((v) => !v);
             setError(null);

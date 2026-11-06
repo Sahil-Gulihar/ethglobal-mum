@@ -115,11 +115,11 @@ export function OnboardingChecklist(p: OnboardingProps) {
               <span
                 aria-hidden
                 className={cn(
-                  "mt-0.5 grid size-6 shrink-0 place-items-center rounded-sm border-[0.5px] text-xs font-semibold",
+                  "mt-0.5 grid size-4 shrink-0 place-items-center rounded-sm border-[0.5px] text-xs font-semibold",
                   s.done ? "border-transparent bg-primary text-primary-foreground" : isCurrent ? "border-primary text-primary" : "text-muted-foreground",
                 )}
               >
-                {s.done ? <Icon name="check" className="size-3.5" /> : i + 1}
+                {s.done ? <Icon name="check" className="size-3.5!" /> : i + 1}
               </span>
               <div className="flex min-w-0 flex-1 flex-col gap-3">
                 <div className="flex flex-col gap-0.5">

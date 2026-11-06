@@ -75,8 +75,7 @@ Payments settle straight to your payout wallet, and refunds are signed from it. 
 
 You can set it from the onboarding checklist or from **Settings > Payout wallet**:
 
-1. Choose **Connect wallet** to use the address of your browser wallet (an injected wallet such as MetaMask or Rabby), or **Paste an address instead**.
-2. Choose **Use as payout wallet** (or **Change payout wallet** if you already have one).
+Choose **Connect wallet** and approve the connection in your browser wallet. Registration starts automatically. If you choose **Paste an address instead**, enter the address and choose **Use as payout wallet** (or **Change payout wallet**).
 
 You don't sign anything. The backend signer, which owns the `PaymentRouter` contract, calls `registerMerchant(chainMerchantId, payout)` onchain and waits for the receipt. This takes a few seconds. When it's done, the dashboard links to the registration transaction on the explorer.
 

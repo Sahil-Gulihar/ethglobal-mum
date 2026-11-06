@@ -22,7 +22,8 @@ export function useWallet() {
     connectError: connect.error,
     connect: async () => {
       if (!injectedConnector) throw new Error("No browser wallet found. Install MetaMask or Rabby.");
-      await connect.mutateAsync({ connector: injectedConnector, chainId: whitechainSepolia.id });
+      const { accounts } = await connect.mutateAsync({ connector: injectedConnector, chainId: whitechainSepolia.id });
+      return accounts[0];
     },
     disconnect: () => disconnect.mutate(),
     switchToWhitechain: () => switchChain.mutateAsync({ chainId: whitechainSepolia.id }),
