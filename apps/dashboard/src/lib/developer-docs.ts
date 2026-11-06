@@ -15,6 +15,7 @@ import { visit } from "unist-util-visit";
 export const docGroups = [
   { label: "Get started", pages: [["", "Overview"], ["introduction", "Introduction"], ["quickstart", "Quickstart"]] },
   { label: "Accept payments", pages: [["checkout-sessions", "Checkout sessions"], ["hosted-checkout", "Hosted checkout"], ["checkout-widget", "Checkout widget"], ["payments", "Payments"], ["refunds", "Refunds"], ["webhooks", "Webhooks"]] },
+  { label: "Agents", pages: [["agents", "Agents and MCP"]] },
   { label: "Reference", pages: [["api-reference", "API reference"], ["errors", "Errors"], ["smart-contract", "Smart contract"]] },
   { label: "Operate", pages: [["dashboard", "Dashboard"], ["testing", "Testing"], ["self-hosting", "Self-hosting"]] },
 ] as const;

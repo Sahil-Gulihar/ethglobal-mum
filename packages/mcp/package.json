@@ -7,13 +7,36 @@
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "exports": {
-    ".": { "types": "./src/index.d.ts", "default": "./src/index.js" }
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    }
   },
-  "bin": { "whitechain-mcp": "./bin/whitechain-mcp.js" },
-  "files": ["src", "bin", "README.md"],
-  "engines": { "node": ">=18" },
-  "keywords": ["mcp", "model-context-protocol", "agents", "usdt", "payments", "whitechain"],
-  "repository": { "type": "git", "url": "https://github.com/Sahil-Gulihar/ethglobal-mum.git", "directory": "packages/mcp" },
+  "bin": {
+    "whitechain-mcp": "./bin/whitechain-mcp.js"
+  },
+  "files": [
+    "src/index.js",
+    "src/index.d.ts",
+    "bin",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "agents",
+    "usdt",
+    "payments",
+    "whitechain"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sahil-Gulihar/ethglobal-mum.git",
+    "directory": "packages/mcp"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "node --test src/*.test.js"

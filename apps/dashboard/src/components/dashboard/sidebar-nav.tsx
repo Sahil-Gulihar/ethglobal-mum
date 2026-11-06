@@ -11,6 +11,7 @@ export const dashboardLinks: { href: string; label: string; icon: IconName }[] =
   { href: "/dashboard/links", label: "Payment links", icon: "link" },
   { href: "/dashboard/developers", label: "Developers", icon: "code" },
   { href: "/dashboard/webhooks", label: "Webhooks", icon: "webhook" },
+  { href: "/dashboard/agents", label: "Agents", icon: "agent" },
   { href: "/dashboard/analytics", label: "Analytics", icon: "analytics" },
   { href: "/dashboard/settings", label: "Settings", icon: "settings" },
 ];

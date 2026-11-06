@@ -4,7 +4,7 @@ import {
   Logout01Icon, ShieldCheckIcon, FlashIcon, UserIcon, Wallet01Icon, Key01Icon,
   Undo02Icon, Link01Icon, InboxIcon, ViewIcon, SentIcon, Refresh01Icon,
   Delete01Icon, Add01Icon, ArrowDown01Icon, GlobeIcon, Layers01Icon, LockIcon,
-  CircleIcon, Download01Icon, AlertCircleIcon, Cancel01Icon,
+  CircleIcon, Download01Icon, AlertCircleIcon, Cancel01Icon, Robot01Icon, Plug01Icon,
 } from "@hugeicons/core-free-icons";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +16,7 @@ const icons = {
   refresh: Refresh01Icon, trash: Delete01Icon, plus: Add01Icon, chevronDown: ArrowDown01Icon,
   globe: GlobeIcon, layers: Layers01Icon, lock: LockIcon, circle: CircleIcon,
   download: Download01Icon, alert: AlertCircleIcon, close: Cancel01Icon,
+  agent: Robot01Icon, plug: Plug01Icon,
 } as const;
 
 type BrandedIcon = "analytics" | "home" | "card" | "code" | "webhook" | "settings" | "panel";

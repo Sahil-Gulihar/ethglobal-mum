@@ -16,6 +16,7 @@ Live docs site: **https://whitechain-docs.vercel.app** (Fumadocs app in `apps/do
 - [Quickstart](docs/developers/quickstart.md): your first testnet payment end to end
 - [Checkout widget](docs/developers/checkout-widget.md) and [hosted checkout](docs/developers/hosted-checkout.md)
 - [Webhooks](docs/developers/webhooks.md) and [API reference](docs/developers/api-reference.md)
+- [Agents and MCP](docs/developers/agents.md): hosted MCP server, `npx @whitechain-commerce/mcp init` for any repo, and an agent toolkit
 - [llms.txt](https://whitechain-docs.vercel.app/llms.txt): a plain-text index for LLMs and coding agents
 
 ## Why Whitechain

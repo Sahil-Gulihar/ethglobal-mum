@@ -13,6 +13,8 @@
     "refunds",
     "---Webhooks---",
     "webhooks",
+    "---Agents---",
+    "agents",
     "---Reference---",
     "api-reference",
     "errors",

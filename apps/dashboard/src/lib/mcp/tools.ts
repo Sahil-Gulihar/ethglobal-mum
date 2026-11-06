@@ -242,6 +242,7 @@ export const toolsByName = new Map(tools.map((t) => [t.name, t]));
 
 /** The tools/list entry for a tool, with its zod schema rendered as JSON Schema. */
 export function describeTool(t: ToolDef) {
-  const { $schema: _ignored, ...inputSchema } = z.toJSONSchema(t.input, { io: "input" }) as Record<string, unknown>;
+  const inputSchema = z.toJSONSchema(t.input, { io: "input" }) as Record<string, unknown>;
+  delete inputSchema.$schema;
   return { name: t.name, title: t.title, description: t.description, inputSchema, annotations: { title: t.title, ...t.annotations } };
 }

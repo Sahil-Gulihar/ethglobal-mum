@@ -17,6 +17,7 @@ The dashboard is part of the `apps/dashboard` Next.js app. Locally it runs at `h
 | `/dashboard/payments/export` | CSV download of payments and refunds |
 | `/dashboard/developers` | Secret keys and integration snippets |
 | `/dashboard/webhooks` | Webhook endpoints, signing secrets and the delivery log |
+| `/dashboard/agents` | MCP server URL, setup snippets for agent clients and the tool list ([Agents and MCP](./agents.md)) |
 | `/dashboard/settings` | Business name, payout wallet and account details |
 
 Every `/dashboard` route requires a logged-in merchant. If you're signed out, you're redirected to `/login`.
