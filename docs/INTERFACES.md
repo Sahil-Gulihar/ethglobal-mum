@@ -2,7 +2,7 @@
 
 Read this before writing code. If you must change something here, change it in the same commit and say so in your report.
 
-World ID is **deferred**. Merchants are `active` on signup while `SKIP_WORLD_ID=true`. Keep the `status` column and `requireActive` checks so World ID can be added later.
+World ID (IDKit 4, Proof of Human) gates onboarding. New merchants are `pending` until they verify on the Setup page; `lib/actions/world-id.ts` signs the RP request, verifies the proof with the Developer Portal, stores the nullifier in the unique `merchants.world_nullifier` column and sets `active`. With `SKIP_WORLD_ID=true`, merchants are `active` on signup instead.
 
 ## Shared code (already written, import it, don't duplicate)
 

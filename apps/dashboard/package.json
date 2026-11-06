@@ -22,6 +22,8 @@
     "@types/hast": "^3.0.5",
     "@whitechain-commerce/core": "workspace:*",
     "@whitechain-commerce/react": "workspace:*",
+    "@worldcoin/idkit": "4.6.0",
+    "@worldcoin/idkit-core": "4.6.0",
     "drizzle-orm": "^0.45.4",
     "geist": "^1.9.2",
     "hast-util-to-string": "^3.0.1",

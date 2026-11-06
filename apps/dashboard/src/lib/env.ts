@@ -8,7 +8,21 @@ export const env = {
     process.env.SKIP_WORLD_ID !== undefined && process.env.SKIP_WORLD_ID !== ""
       ? process.env.SKIP_WORLD_ID !== "false"
       : process.env.NODE_ENV !== "production",
+  /** World ID (IDKit 4). `staging` works with the simulator at https://simulator.worldcoin.org. */
+  worldId: () => ({
+    appId: must("WORLD_APP_ID") as `app_${string}`,
+    rpId: must("WORLD_RP_ID"),
+    signingKey: must("WORLD_RP_SIGNER_PRIVATE_KEY"),
+    action: process.env.WORLD_ACTION || "merchant-onboarding",
+    environment: worldEnvironment(),
+  }),
 };
+
+function worldEnvironment(): "production" | "staging" {
+  const v = process.env.WORLD_ENVIRONMENT;
+  if (v === "production" || v === "staging") return v;
+  return "staging";
+}
 
 function must(k: string): string {
   const v = process.env[k];

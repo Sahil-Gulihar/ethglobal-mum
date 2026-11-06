@@ -168,9 +168,9 @@ webhook delivery to the store, and partial and full refunds from the dashboard.
 
 ## Limitations
 
-- **World ID is deferred.** Merchants become `active` at signup while `SKIP_WORLD_ID=true`. If `SKIP_WORLD_ID` is
-  unset, it is skipped only outside production. The status column and the `requireActive` checks are in place so
-  Proof of Human can be added at onboarding.
+- **World ID uses the staging environment by default.** New merchants verify with World ID Proof of Human on the
+  Setup page (test with the simulator at https://simulator.worldcoin.org). One World ID can back only one merchant
+  account. Set `WORLD_ENVIRONMENT=production` for real World App users, or `SKIP_WORLD_ID=true` to activate on signup.
 - **Testnet only** (Whitechain Sepolia). All API keys are `sk_test_`.
 - **Refunds are signed by the merchant.** The API can create a *pending* refund, but because the platform is
   non-custodial it can't move funds. The merchant signs it from the payout wallet in the dashboard.

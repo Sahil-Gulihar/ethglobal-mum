@@ -7,6 +7,7 @@ import { Icon } from "@/components/icons";
 import { PayoutWalletForm } from "@/components/dashboard/payout-wallet-form";
 import { CreateApiKeyButton } from "@/components/dashboard/create-api-key";
 import { AddWebhookForm } from "@/components/dashboard/add-webhook-form";
+import { WorldIdVerifyButton } from "@/components/dashboard/world-id-verify";
 import { DashboardPager } from "./dashboard-pages";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +15,8 @@ export type OnboardingProps = {
   name: string;
   verified: boolean;
   skipWorldId: boolean;
+  /** True once a World ID nullifier is stored for this merchant. */
+  worldVerified: boolean;
   payout: { address: string | null; txHash: string | null; done: boolean };
   apiKey: boolean;
   webhook: boolean;
@@ -37,14 +40,16 @@ export function OnboardingChecklist(p: OnboardingProps) {
     {
       key: "verify",
       title: "Verify you’re human",
-      description: "One person, one merchant account. World ID Proof of Human verification is coming soon.",
+      description: "One person, one merchant account. Prove you're a unique human with World ID.",
       done: p.verified,
-      skipped: p.verified && p.skipWorldId,
-      body: (
+      skipped: p.verified && !p.worldVerified,
+      body: p.verified ? (
         <div className="flex items-center gap-3 rounded-sm border-[0.5px] border-dashed px-3 py-2.5 text-sm text-muted-foreground">
           <Icon name="shield" className="text-primary" />
-          {p.skipWorldId ? "Verification is skipped. Your account is active." : "World ID verification is coming soon."}
+          {p.worldVerified ? "Verified with World ID. Your account is active." : "Verification is skipped. Your account is active."}
         </div>
+      ) : (
+        <WorldIdVerifyButton />
       ),
     },
     {

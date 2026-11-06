@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { requireMerchant } from "@/lib/auth";
-import { env } from "@/lib/env";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { BusinessNameForm } from "@/components/dashboard/business-name-form";
 import { PayoutWalletForm } from "@/components/dashboard/payout-wallet-form";
@@ -76,7 +75,7 @@ export default async function SettingsPage() {
                       <Badge tone={active ? "success" : "warning"} dot>
                         {active ? "Active" : "Pending verification"}
                       </Badge>
-                      {active && env.skipWorldId() && <Badge>World ID skipped</Badge>}
+                      {m.worldNullifier ? <Badge tone="success">Verified with World ID</Badge> : active && <Badge>World ID skipped</Badge>}
                     </Row>
                     <Row label="Merchant ID" copy={m.id}>
                       <span className="font-mono text-xs">{m.id}</span>

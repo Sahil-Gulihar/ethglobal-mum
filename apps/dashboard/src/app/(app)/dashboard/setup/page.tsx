@@ -20,6 +20,7 @@ export default async function SetupPage() {
         name={merchant.name}
         verified={setup.verified}
         skipWorldId={env.skipWorldId()}
+        worldVerified={!!merchant.worldNullifier}
         payout={{ address: merchant.payoutAddress, txHash: merchant.registeredTxHash, done: setup.payout }}
         apiKey={setup.apiKey}
         webhook={setup.webhook}
