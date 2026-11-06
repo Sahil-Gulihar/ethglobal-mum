@@ -181,11 +181,11 @@ export function agentSetupPrompt(base: string) {
 
 1. Work out the stack of this repo, then read the integration guide for it:
    ${base}/integrate.md?stack=<nextjs | react-node | node | other>
-   Follow it end to end. Use the embedded checkout widget if the frontend is React, otherwise the hosted checkout redirect.
+   Follow it end to end. Use the checkout mode the guide recommends: the embedded widget only if @whitechain-commerce/react can be installed in this repo, otherwise the hosted checkout redirect.
 
 2. Build what the guide describes:
    - a server route that prices the order on the server and creates a checkout session
-   - the checkout: the <WhitechainCheckout /> widget, or a redirect to the session's url
+   - the checkout: a redirect to the session's url, or the <WhitechainCheckout /> widget
    - a webhook route that verifies the WC-Signature header on the raw body and marks the order paid on payment.succeeded (dedupe on event.id)
    - an order page that shows the status from this app's own database
 
