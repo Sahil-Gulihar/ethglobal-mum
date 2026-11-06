@@ -60,7 +60,8 @@ Real testnet transactions from the demo flow (official USDT):
 - **`apps/dashboard`**: merchant signup and login, onboarding checklist, payments and refunds, API keys, webhook
   endpoints with a delivery log and redelivery, settings, the `/api/v1` API, and the hosted checkout page.
   - The **indexer** (`src/lib/indexer`) is the only thing that marks a session paid. It checks each `PaymentSettled`
-    log against the session: merchant, order, paymentId, amount, token, decimals and payout. The browser's tx hash
+    log against the session: router address, chain, merchant, order, paymentId, amount, token, decimals and receipt
+    status, with one confirmation. The browser's tx hash
     is only a hint that speeds this up.
   - **Webhooks** (`src/lib/webhooks`) are HMAC-SHA256 signed (`WC-Signature: t=..,v1=..`), delivered at least once,
     and retried after 1 min, 5 min and 30 min.
@@ -139,15 +140,21 @@ webhook delivery to the store, and partial and full refunds from the dashboard.
 
 ## Limitations
 
-- **World ID is deferred.** Merchants become `active` at signup while `SKIP_WORLD_ID=true`. The status column and the
-  `requireActive` checks are in place so Proof of Human can be added at onboarding.
+- **World ID is deferred.** Merchants become `active` at signup while `SKIP_WORLD_ID=true`. If `SKIP_WORLD_ID` is
+  unset, it is skipped only outside production. The status column and the `requireActive` checks are in place so
+  Proof of Human can be added at onboarding.
 - **Testnet only** (Whitechain Sepolia). All API keys are `sk_test_`.
 - **Refunds are signed by the merchant.** The API can create a *pending* refund, but because the platform is
   non-custodial it can't move funds. The merchant signs it from the payout wallet in the dashboard.
-- **One payment per session.** A session's onchain `orderId` can be paid once. A payment for the wrong amount, sent by
-  calling the contract directly and bypassing the widget, is recorded nowhere and consumes that `orderId`, so the
-  merchant has to create a new session after the old one expires. The widget always pays the exact amount.
-- **Payout changes.** A payment is only accepted if its payout matches the merchant's payout at indexing time. Changing
-  the payout re-registers it onchain, and only the current payout can refund.
+- **One payment per session.** A session's onchain `orderId` can be paid once. A payment for the wrong amount (sent by
+  calling the contract directly, e.g. a dust front-run) is not recorded, but it uses up that `orderId`, so the indexer
+  marks the session `expired` and the next `POST /checkout_sessions` for that order creates a fresh one. The proper fix
+  is a backend-signed quote checked by the contract.
+- **Payout changes.** The payout in a `PaymentSettled` event is whatever was registered onchain at pay time, so payments
+  to an old payout are still accepted. Changing the payout re-registers it onchain (rate-limited: once per 5 minutes per
+  merchant, 60 per hour overall), and only the current payout can refund.
+- **Webhook URLs.** In production, endpoints must resolve to public IPs (checked on create and on every delivery).
+  Set `ALLOW_PRIVATE_WEBHOOK_URLS=true` to allow localhost/private addresses; outside production they are allowed.
+- **Demo store admin** (`/admin`) is public: it's a demo.
 - The demo store keeps orders in a JSON file (`apps/demo-store/data/orders.json`). It's a demo, not a pattern.
 - Blockscout source verification is pending (the explorer's verifier was down). The source is verified on Sourcify.
