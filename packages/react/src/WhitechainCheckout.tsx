@@ -484,12 +484,12 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
         chainId={state.chainId}
         provider={provider}
         session={state.session}
+        balance={state.balance}
         needsFunds={insufficientBalance(state) || insufficientGas(state)}
         busy={fundingBusy}
         onBusy={setFundingBusy}
         onRefresh={refreshBalance}
         onSepolia={() => void switchFundingNetwork()}
-        onWhitechain={() => void switchNetwork()}
       />
     ) : null;
 

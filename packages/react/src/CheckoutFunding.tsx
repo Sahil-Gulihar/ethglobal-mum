@@ -1,13 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import { formatEther, formatUnits, parseEther, TransactionReceiptNotFoundError, type Address, type Hash } from "viem";
+import { formatEther, formatUnits, TransactionReceiptNotFoundError, type Address, type Hash } from "viem";
 import { explorerTx, type PublicCheckoutSession } from "@whitechain-commerce/core";
 import { apiFetch } from "./api.ts";
-import { bridge, fundingStatus, SEPOLIA_ID, swap, type Asset, type Quote } from "./funding-chain.ts";
+import { bridge, fundingBalances, fundingStatus, SEPOLIA_ID, swap, WBT_GAS_RESERVE, type Asset, type Quote } from "./funding-chain.ts";
 import { hasErrorCode, isUserRejection, WHITECHAIN_CHAIN_ID } from "./state.ts";
 import type { Eip1193Provider } from "./wallets.ts";
 
 type Pending = { kind: "bridge" | "swap"; hash: Hash };
-type Mode = Asset | "bridge";
+type Plan =
+  | { kind: "swap"; quote: Quote }
+  | { kind: "bridge"; amount: bigint; output: bigint; deadline: number }
+  | { kind: "switch" }
+  | { kind: "funded" };
 
 interface Props {
   account: Address;
@@ -15,10 +19,10 @@ interface Props {
   chainId: number | null;
   provider: Eip1193Provider;
   session: PublicCheckoutSession;
+  balance: bigint | null;
   needsFunds: boolean;
   busy: boolean;
   onBusy: (busy: boolean) => void;
-  onWhitechain: () => void;
   onRefresh: () => void;
   onSepolia: () => void;
 }
@@ -37,11 +41,9 @@ export function CheckoutFunding(p: Props) {
   const { account, apiBase, chainId, provider, session } = p;
   const storageKey = `whitechain-commerce:funding:1874:${account.toLowerCase()}`;
   const [pending, setPending] = useState<Pending | null>(() => savedTransfer(storageKey));
-  const [mode, setMode] = useState<Mode | null>(null);
-  const [amount, setAmount] = useState("");
-  const [quote, setQuote] = useState<Quote | null>(null);
+  const [plan, setPlan] = useState<Plan | null>(null);
+  const [revision, setRevision] = useState(0);
   const [message, setMessage] = useState("");
-  const [bridged, setBridged] = useState(false);
   const [error, setError] = useState("");
   const inFlight = useRef(false);
   const onRefresh = p.onRefresh;
@@ -59,7 +61,6 @@ export function CheckoutFunding(p: Props) {
         if (status === "reverted") {
           setError("The funding transaction failed. Check the transaction before retrying.");
         } else if (pending.kind === "bridge") {
-          setBridged(true);
           setMessage("ETH arrived on Whitechain. Swap the bridged ETH to USDT to continue.");
         } else {
           setMessage("Swap confirmed. Your USDT balance is refreshing.");
@@ -82,12 +83,62 @@ export function CheckoutFunding(p: Props) {
     };
   }, [onRefresh, pending, storageKey]);
 
-  function select(next: Mode) {
-    setMode(next);
-    setQuote(null);
-    setAmount("");
+  const onWhitechain = chainId === WHITECHAIN_CHAIN_ID;
+  const onSepolia = chainId === SEPOLIA_ID;
+  const shouldQuote = !pending && (onSepolia || (onWhitechain && p.needsFunds && p.balance !== null));
+
+  useEffect(() => {
+    if (!shouldQuote) return;
+    const abort = new AbortController();
+    setPlan(null);
     setError("");
-  }
+    const calculate = async () => {
+      const { usdt, eth, wbt } = await fundingBalances(account);
+      const shortfall = BigInt(session.amountUnits) - usdt;
+      if (shortfall <= 0n) return { kind: "funded" } as const;
+      if (wbt <= WBT_GAS_RESERVE) throw new Error("Get WBT on Whitechain to cover the swap and payment fees.");
+
+      const quote = async (asset: Asset) => {
+        const result = await apiFetch<{ amountIn: string; amountOut: string; fee: number }>(
+          `${apiBase}/api/v1/checkout_sessions/${encodeURIComponent(session.id)}/swap_quote`,
+          { method: "POST", signal: abort.signal, body: JSON.stringify({ asset, amount: shortfall.toString(), side: "EXACT_OUTPUT" }) },
+        );
+        const input = BigInt(result.amountIn);
+        if (input <= 0n || result.amountOut !== shortfall.toString() || ![100, 500, 3000, 10000].includes(result.fee)) {
+          throw new Error("Invalid swap quote.");
+        }
+        const maximum = (input * 10050n + 9999n) / 10000n;
+        return { asset, input, maximum, output: shortfall, fee: result.fee, deadline: Math.floor(Date.now() / 1000) + 120 };
+      };
+
+      if (onSepolia || eth > 0n) {
+        const q = await quote("ETH");
+        if (eth >= q.input) {
+          if (onSepolia) return { kind: "switch" } as const;
+          return { kind: "swap", quote: { ...q, maximum: eth < q.maximum ? eth : q.maximum } } as const;
+        }
+        if (onSepolia) {
+          // Leave room for the price to move while the deposit is in transit.
+          return { kind: "bridge", amount: (q.input * 10200n + 9999n) / 10000n - eth, output: shortfall, deadline: q.deadline } as const;
+        }
+      }
+      const q = await quote("WBT");
+      if (q.maximum + WBT_GAS_RESERVE >= wbt) throw new Error("This wallet needs more WBT to cover the swap and fees.");
+      return { kind: "swap", quote: q } as const;
+    };
+
+    void calculate().then(
+      (next) => { if (!abort.signal.aborted) setPlan(next); },
+      (err: unknown) => { if (!abort.signal.aborted) setError(err instanceof Error ? err.message : "Couldn’t calculate the funding amount."); },
+    );
+    return () => abort.abort();
+  }, [account, apiBase, onSepolia, p.balance, revision, session.amountUnits, session.id, shouldQuote]);
+
+  useEffect(() => {
+    if (!shouldQuote || !plan || p.busy || plan.kind === "funded") return;
+    const refresh = setTimeout(() => setRevision((current) => current + 1), 90_000);
+    return () => clearTimeout(refresh);
+  }, [p.busy, plan, shouldQuote]);
 
   async function run(action: () => Promise<void>) {
     if (p.busy || inFlight.current || pending) return;
@@ -118,23 +169,13 @@ export function CheckoutFunding(p: Props) {
     }
   };
 
-  function enteredAmount() {
-    if (!/^\d{1,12}(\.\d{1,18})?$/.test(amount) || parseEther(amount) === 0n) {
-      throw new Error("Enter a positive amount with up to 18 decimal places.");
-    }
-    return parseEther(amount);
-  }
-
   function save(kind: Pending["kind"], hash: Hash) {
     const tx = { kind, hash };
     try { localStorage.setItem(storageKey, JSON.stringify(tx)); } catch { /* storage unavailable */ }
     setPending(tx);
-    setQuote(null);
-    setMode(null);
+    setPlan(null);
   }
 
-  const onWhitechain = chainId === WHITECHAIN_CHAIN_ID;
-  const onSepolia = chainId === SEPOLIA_ID;
   if (onWhitechain && !p.needsFunds && !pending && !message) return null;
   return (
     <div className="wcc-funding">
@@ -149,63 +190,36 @@ export function CheckoutFunding(p: Props) {
         </p>
       ) : !onWhitechain || p.needsFunds ? (
         <>
-          <div className="wcc-funding-actions">
-            {onWhitechain ? (
-              <>
-                <button type="button" className="wcc-link-btn" disabled={p.busy} onClick={() => select("WBT")}>Swap WBT to USDT</button>
-                <button type="button" className="wcc-link-btn" disabled={p.busy} onClick={() => select("ETH")}>Swap bridged ETH to USDT</button>
-              </>
-            ) : null}
-            {onSepolia ? (
-              <>
-                <button type="button" className="wcc-link-btn" disabled={p.busy} onClick={() => select("bridge")}>Bridge Sepolia ETH</button>
-                {bridged ? <button type="button" className="wcc-link-btn" disabled={p.busy} onClick={p.onWhitechain}>Switch to Whitechain to swap</button> : null}
-              </>
-            ) : (
-              <button type="button" className="wcc-link-btn" disabled={p.busy} onClick={p.onSepolia}>Use Ethereum Sepolia funds</button>
-            )}
-          </div>
-          {mode && (mode === "bridge" ? onSepolia : onWhitechain) ? (
-            <form className="wcc-funding-form" onSubmit={(event) => {
-              event.preventDefault();
-              void run(async () => {
+          {shouldQuote && !plan && !error ? <p className="wcc-text" role="status">Calculating how much you need…</p> : null}
+          {shouldQuote && !plan && error ? (
+            <button type="button" className="wcc-link-btn" onClick={() => setRevision((current) => current + 1)}>Retry</button>
+          ) : null}
+          {plan?.kind === "swap" || plan?.kind === "bridge" ? (
+            <div className="wcc-funding-actions">
+              <p className="wcc-text">
+                {plan.kind === "swap"
+                  ? `Get ${formatUnits(plan.quote.output, session.decimals)} USDT. Maximum ${formatEther(plan.quote.maximum)} ${plan.quote.asset}, plus network fees.`
+                  : `Bridge ${formatEther(plan.amount)} Sepolia ETH to cover about ${formatUnits(plan.output, session.decimals)} USDT. Keep ETH on Sepolia and WBT on Whitechain for fees.`}
+              </p>
+              <button type="button" className="wcc-btn" disabled={p.busy} onClick={() => void run(async () => {
                 const wallet = { account, provider, assertActive };
                 await assertActive();
-                if (mode === "bridge") {
-                  save("bridge", await bridge(wallet, enteredAmount()));
-                } else if (quote) {
-                  setQuote(null);
-                  if (Date.now() >= quote.deadline * 1000) throw new Error("This quote expired. Get a fresh quote.");
-                  save("swap", await swap(wallet, quote));
-                } else {
-                  const input = enteredAmount();
-                  const result = await apiFetch<{ amountOut: string; fee: number }>(
-                    `${apiBase}/api/v1/checkout_sessions/${encodeURIComponent(session.id)}/swap_quote`,
-                    { method: "POST", body: JSON.stringify({ asset: mode, amount: input.toString() }) },
-                  );
-                  const output = BigInt(result.amountOut);
-                  const minimum = output * 9950n / 10000n;
-                  if (minimum <= 0n || ![100, 500, 3000, 10000].includes(result.fee)) throw new Error("Invalid swap quote.");
-                  setQuote({ asset: mode, amount: input, output, minimum, fee: result.fee, deadline: Math.floor(Date.now() / 1000) + 120 });
+                if (Date.now() >= (plan.kind === "swap" ? plan.quote.deadline : plan.deadline) * 1000) {
+                  setRevision((current) => current + 1);
+                  return;
                 }
-              });
-            }}>
-              <label>
-                {mode === "WBT" ? "WBT to swap" : mode === "ETH" ? "Bridged ETH to swap" : "Sepolia ETH to bridge"}
-                <input value={amount} inputMode="decimal" required disabled={p.busy} onChange={(event) => {
-                  setAmount(event.target.value);
-                  setQuote(null);
-                }} />
-              </label>
-              <p className="wcc-text">
-                {mode === "bridge" ? "You may need to confirm wrapping, approval, and the deposit. Leave ETH for Sepolia fees and keep WBT on Whitechain for the swap and payment."
-                  : "Keep at least 0.01 WBT after swap fees for checkout."}
-              </p>
-              {quote ? <p className="wcc-text">Swap {formatEther(quote.amount)} {quote.asset} for about {formatUnits(quote.output, session.decimals)} USDT. Minimum {formatUnits(quote.minimum, session.decimals)} USDT.</p> : null}
-              <button type="submit" className="wcc-btn" disabled={p.busy}>
-                {p.busy ? "Waiting…" : mode === "bridge" ? "Bridge ETH" : quote ? "Confirm swap" : "Get swap quote"}
+                if (plan.kind === "bridge") save("bridge", await bridge(wallet, plan.amount));
+                else save("swap", await swap(wallet, plan.quote));
+              })}>
+                {p.busy ? "Waiting for wallet or network…" : plan.kind === "bridge" ? "Bridge ETH" : `Swap ${plan.quote.asset} to USDT`}
               </button>
-            </form>
+            </div>
+          ) : null}
+          {onSepolia && plan?.kind === "switch" && !message ? (
+            <p className="wcc-text">Your bridged ETH is on Whitechain. Switch networks to swap it.</p>
+          ) : null}
+          {!onSepolia ? (
+            <button type="button" className="wcc-link-btn" disabled={p.busy} onClick={p.onSepolia}>Use Ethereum Sepolia funds</button>
           ) : null}
         </>
       ) : null}
