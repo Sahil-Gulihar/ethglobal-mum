@@ -9,6 +9,15 @@ linked to the original payment onchain. Built for ETHGlobal Mumbai 2026.
 
 - [Product spec](docs/SPEC.md) · [Frozen interfaces](docs/INTERFACES.md) · [Deployments](docs/DEPLOYMENTS.md)
 
+## Developer docs
+
+Integration guides and the API reference live in [docs/developers](docs/developers/README.md):
+
+- [Quickstart](docs/developers/quickstart.md): your first testnet payment end to end
+- [Checkout widget](docs/developers/checkout-widget.md) and [hosted checkout](docs/developers/hosted-checkout.md)
+- [Webhooks](docs/developers/webhooks.md) and [API reference](docs/developers/api-reference.md)
+- [llms.txt](docs/developers/llms.txt): a plain-text index for LLMs and coding agents
+
 ## Why Whitechain
 
 Card rails can't give a merchant final settlement in seconds to a wallet they control, with no chargebacks, payout delays or cross-border fees. Whitechain USDT settlement does, and every payment and refund is linked to its order onchain so customers can verify it themselves.
@@ -19,7 +28,7 @@ Card rails can't give a merchant final settlement in seconds to a wallet they co
 |---|---|
 | Network | Whitechain Sepolia, chain id `1874` |
 | PaymentRouter | [`0xa99a6D97607567f4fe734831910D24f4e9BD0508`](https://explorer.testnet.whitechain.io/address/0xa99a6D97607567f4fe734831910D24f4e9BD0508) (deploy block `12373441`) |
-| Source verification | [Sourcify exact match](https://sourcify.dev/server/v2/contract/1874/0xa99a6D97607567f4fe734831910D24f4e9BD0508). Blockscout verification was down at deploy time; see [docs/DEPLOYMENTS.md](docs/DEPLOYMENTS.md) for the retry command |
+| Source verification | Verified on the [Whitechain explorer](https://explorer.testnet.whitechain.io/address/0xa99a6D97607567f4fe734831910D24f4e9BD0508) and [Sourcify](https://sourcify.dev/server/v2/contract/1874/0xa99a6D97607567f4fe734831910D24f4e9BD0508) (exact match) |
 | USDT (official, 6 decimals) | [`0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7`](https://explorer.testnet.whitechain.io/token/0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7) |
 | Public RPC | `https://rpc.testnet.whitechain.io` |
 | Faucet | https://faucet.testnet.whitechain.io |
@@ -166,4 +175,3 @@ webhook delivery to the store, and partial and full refunds from the dashboard.
   Set `ALLOW_PRIVATE_WEBHOOK_URLS=true` to allow localhost/private addresses; outside production they are allowed.
 - **Demo store admin** (`/admin`) is public: it's a demo.
 - The demo store keeps orders in a JSON file (`apps/demo-store/data/orders.json`). It's a demo, not a pattern.
-- Blockscout source verification is pending (the explorer's verifier was still down on 2026-11-06). The source is verified on Sourcify.

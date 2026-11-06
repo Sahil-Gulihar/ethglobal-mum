@@ -63,7 +63,7 @@ export async function POST(req: Request) {
 | --- | --- | --- |
 | `sessionId` | `string` | `cs_...` from step 1 |
 | `apiBase` | `string?` | Defaults to `NEXT_PUBLIC_WC_API_BASE`, then `""` (same origin) |
-| `onSuccess` | `(r: { sessionId, orderId, paymentId, txHash, explorerUrl, successUrl }) => void` | Called once, after the backend has verified the payment onchain |
+| `onSuccess` | `(r: { sessionId, orderId, paymentId, txHash, explorerUrl, successUrl, alreadyPaid }) => void` | Called once, after the backend has verified the payment onchain. `alreadyPaid` is true when the session was already paid when the widget loaded |
 | `onError` | `(e: Error) => void` | Not called for wallet rejections (those show an inline retry) |
 | `onCancel` | `() => void` | Default: navigate to the session's `cancelUrl` |
 | `theme` | `"light" \| "dark"` | |

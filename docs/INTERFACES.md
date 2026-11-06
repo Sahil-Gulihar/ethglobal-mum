@@ -55,9 +55,9 @@ All errors use `{ "error": { "type", "message" } }`. CORS is open on `/api/v1/*`
 
 | Method & path | Auth | Body / result |
 | --- | --- | --- |
-| `POST /api/v1/checkout_sessions` | `Bearer sk_test_` | `{ orderId, amount: "49.99", currency: "USDT", successUrl?, cancelUrl?, metadata? }` → `CheckoutSession` (201). Merchant must be active **and** have a payout registered. Expires in 30 min. |
+| `POST /api/v1/checkout_sessions` | `Bearer sk_test_` | `{ orderId, amount: "49.99", currency?: "USDT", successUrl?, cancelUrl?, metadata? }` → `CheckoutSession` (201 when created, 200 when an equivalent open or processing session for the same `orderId` and amount is returned). Merchant must be active (an inactive merchant's key gets 401) **and** have a payout registered (else 409). Expires in 30 min. |
 | `GET /api/v1/checkout_sessions/:id` | none (public) | → `PublicCheckoutSession`. Lazily marks expired sessions `expired` (unless `processing`). |
-| `POST /api/v1/checkout_sessions/:id/submit` | none | `{ txHash }` → `{ ok: true }`. Stores the hint, sets the status to `processing`, and triggers a validation attempt for that tx. **Never** marks a session paid without validation. |
+| `POST /api/v1/checkout_sessions/:id/submit` | none | `{ txHash }` → `{ ok: true, status }`. Stores the hint, moves an `open` session to `processing`, and triggers a validation attempt for that tx. **Never** marks a session paid without validation. |
 | `GET /api/v1/payments` | `Bearer` | `?limit=` → `{ data: PaymentObject[] }` |
 | `GET /api/v1/payments/:id` | `Bearer` | → `PaymentObject` |
 | `POST /api/v1/refunds` | `Bearer` | `{ paymentId, amount }` → `RefundObject` with status `pending`. The merchant confirms it from the dashboard by signing with the payout wallet (non-custodial, the API cannot move funds). |
