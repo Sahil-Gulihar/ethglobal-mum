@@ -4,8 +4,6 @@ import { newOrderId, updateStore } from "@/lib/db";
 import { STORE_URL, WC_API_BASE, requireEnv } from "@/lib/env";
 import type { Order, OrderItem } from "@/lib/types";
 
-// POST /api/orders  { items: [{ productId, quantity }] }  ->  { orderId, sessionId }
-// The amount is computed HERE from the server-side catalog. The client only sends ids + quantities.
 export async function POST(req: Request) {
   let body: { items?: { productId?: unknown; quantity?: unknown }[] };
   try {

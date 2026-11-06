@@ -4,21 +4,17 @@ import type { WebhookLogEntry } from "@/lib/types";
 
 const MAX_LOG = 200;
 
-/** "14.98" / "14.980000" -> 14980000n (6 dp), so amounts compare exactly. */
 function toMicro(amount: string): bigint {
   const [whole, frac = ""] = amount.split(".");
   return BigInt(whole || "0") * 1_000_000n + BigInt((frac + "000000").slice(0, 6));
 }
 
-// POST /api/webhooks/whitechain
-// This is the ONLY place an order becomes paid. The browser's onSuccess callback just redirects.
 export async function POST(req: Request) {
   const raw = await req.text(); // raw body: the signature covers these exact bytes
   const header = req.headers.get("wc-signature");
 
   const secret = process.env.WC_WEBHOOK_SECRET;
   if (!secret) {
-    // Our own misconfiguration, not a forged request: answer 500 so Whitechain retries once it's fixed.
     console.error("[webhook] WC_WEBHOOK_SECRET is not set; can't verify webhooks.");
     await updateStore((data) => {
       log(data.webhookLog, {
@@ -102,7 +98,6 @@ export async function POST(req: Request) {
           recordedAt: new Date().toISOString(),
         });
       }
-      // Deliveries can arrive out of order (retries): never move the refunded total or status backwards.
       const prev = order.amountRefunded ? toMicro(order.amountRefunded) : 0n;
       if (toMicro(payment.amountRefunded) > prev) order.amountRefunded = payment.amountRefunded;
       if (payment.status === "refunded") order.status = "refunded";
