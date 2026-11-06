@@ -71,6 +71,7 @@ transition:background .15s,transform .1s,opacity .15s;text-decoration:none!impor
 .wcc-btn:hover:not(:disabled){background:var(--wcc-accent-hover)}
 .wcc-btn:active:not(:disabled){transform:scale(.985)}
 .wcc-btn:disabled{opacity:.55;cursor:default}
+.wcc-btn[data-busy=true]:disabled{opacity:.88;cursor:progress}
 .wcc-btn:focus-visible,.wcc-wallet:focus-visible,.wcc-btn-ghost:focus-visible{outline:2px solid var(--wcc-accent);outline-offset:2px}
 .wcc-btn-ghost{display:block;width:100%;margin-top:8px;padding:10px;border:0;border-radius:12px;background:none;cursor:pointer;
 color:var(--wcc-muted)!important;font-size:13px;font-weight:500;text-align:center}

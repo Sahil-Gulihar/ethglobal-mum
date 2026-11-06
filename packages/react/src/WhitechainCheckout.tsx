@@ -52,6 +52,8 @@ export interface CheckoutSuccess {
   paymentId: string;
   txHash: `0x${string}`;
   explorerUrl: string;
+  /** The session's successUrl, if the merchant set one. */
+  successUrl: string | null;
 }
 
 export interface WhitechainCheckoutProps {
@@ -418,6 +420,7 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
       paymentId: session.payment?.id ?? "",
       txHash,
       explorerUrl: session.payment?.explorerUrl ?? (txHash ? explorerTx(txHash) : ""),
+      successUrl: session.successUrl,
     };
   }, [state.phase, state.session, state.payTx]);
   useEffect(() => {
@@ -476,7 +479,7 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
 // Presentational pieces
 // ---------------------------------------------------------------------------------------------
 
-interface ViewProps {
+export interface ViewProps {
   state: State;
   msLeft: number;
   wallets: DetectedWallet[];
@@ -492,7 +495,8 @@ interface ViewProps {
   onCancel: () => void;
 }
 
-function View(p: ViewProps) {
+/** Internal: pure view, exported for previews/tests only (not part of the public API). */
+export function View(p: ViewProps) {
   const { state } = p;
   const session = state.session;
 
@@ -613,7 +617,7 @@ function Body(p: ViewProps & { amountLabel: string }) {
             </div>
             <p className="wcc-title">{state.alreadyPaid ? "This order is already paid" : "Payment complete"}</p>
             <p className="wcc-text">
-              {amountLabel} USDT sent to {session.merchant.name}. Settled and verified on Whitechain.
+              {amountLabel} USDT sent to {session.merchant.name.replace(/\.+$/, "")}. Settled and verified on Whitechain.
             </p>
           </div>
           {r?.txHash ? (
@@ -707,7 +711,7 @@ function Body(p: ViewProps & { amountLabel: string }) {
           </p>
           <ErrorBanner message={state.error} onDismiss={p.onDismissError} />
           <AccountRow state={state} onDisconnect={p.onDisconnect} />
-          <button className="wcc-btn" disabled={state.phase === "switching"} onClick={p.onSwitch}>
+          <button className="wcc-btn" data-busy={state.phase === "switching"} disabled={state.phase === "switching"} onClick={p.onSwitch}>
             {state.phase === "switching" ? (
               <>
                 <span className="wcc-spin" /> Confirm in your wallet…
@@ -778,7 +782,7 @@ function ReviewBody(p: ViewProps & { amountLabel: string }) {
           ? "Confirm payment in your wallet…"
           : "Confirming payment…";
     button = (
-      <button className="wcc-btn" disabled>
+      <button className="wcc-btn" data-busy="true" disabled>
         <span className="wcc-spin" /> {label}
       </button>
     );
