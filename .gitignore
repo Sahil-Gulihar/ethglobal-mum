@@ -27,3 +27,4 @@ contracts/broadcast/**/dry-run/
 
 # local demo credentials
 *.local.md
+.shots/

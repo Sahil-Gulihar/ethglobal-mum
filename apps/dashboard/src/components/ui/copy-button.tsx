@@ -16,7 +16,7 @@ export function CopyButton({ value, label = "Copy", className, showLabel = false
         setTimeout(() => setCopied(false), 1500);
       }}
       className={cn(
-        "inline-flex h-8 min-w-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring",
+        "inline-flex h-7 min-w-7 items-center justify-center gap-1.5 rounded-md px-1.5 text-[13px] font-medium text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground",
         className,
       )}
     >

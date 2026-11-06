@@ -1,6 +1,7 @@
 import type { HTMLAttributes, TdHTMLAttributes, ThHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
+/* docs/DESIGN.md, Tables: 14px, header 13px/500 secondary on background-200, 1px subtle row rules, hover alpha-100. */
 export function Table({ className, ...props }: HTMLAttributes<HTMLTableElement>) {
   return (
     <div className="relative w-full overflow-x-auto">
@@ -9,17 +10,17 @@ export function Table({ className, ...props }: HTMLAttributes<HTMLTableElement>)
   );
 }
 export function TableHeader({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>) {
-  return <thead className={cn("[&_tr]:border-b", className)} {...props} />;
+  return <thead className={cn("bg-surface-2 [&_tr]:border-b [&_tr]:border-border [&_tr:hover]:bg-transparent", className)} {...props} />;
 }
 export function TableBody({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>) {
   return <tbody className={cn("[&_tr:last-child]:border-0", className)} {...props} />;
 }
 export function TableRow({ className, ...props }: HTMLAttributes<HTMLTableRowElement>) {
-  return <tr className={cn("border-b transition-colors hover:bg-muted/50", className)} {...props} />;
+  return <tr className={cn("border-b border-border transition-colors duration-150 hover:bg-muted", className)} {...props} />;
 }
 export function TableHead({ className, ...props }: ThHTMLAttributes<HTMLTableCellElement>) {
-  return <th className={cn("h-10 px-4 text-left align-middle text-xs font-medium whitespace-nowrap text-muted-foreground", className)} {...props} />;
+  return <th className={cn("h-10 px-4 text-left align-middle text-[13px] font-medium whitespace-nowrap text-muted-foreground", className)} {...props} />;
 }
 export function TableCell({ className, ...props }: TdHTMLAttributes<HTMLTableCellElement>) {
-  return <td className={cn("px-4 py-3 align-middle whitespace-nowrap", className)} {...props} />;
+  return <td className={cn("h-12 px-4 py-2.5 align-middle whitespace-nowrap", className)} {...props} />;
 }
