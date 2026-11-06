@@ -22,7 +22,7 @@ import { createCheckoutSession } from "@whitechain-commerce/react/server";
 export async function POST() {
   const orderId = `order_${crypto.randomUUID()}`;
   const session = await createCheckoutSession({
-    apiBase: process.env.WC_API_ORIGIN, // e.g. "https://whitechain-dashboard.vercel.app"
+    apiBase: process.env.WC_API_ORIGIN, // e.g. "https://100lana.com"
     secretKey: process.env.WC_SECRET_KEY!,
     orderId,
     amount: "49.99",
@@ -37,7 +37,7 @@ export async function POST() {
 Or call the API directly:
 
 ```bash
-curl -X POST https://whitechain-dashboard.vercel.app/api/v1/checkout_sessions \
+curl -X POST https://100lana.com/api/v1/checkout_sessions \
   -H "Authorization: Bearer $WC_SECRET_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "orderId": "order_1042", "amount": "49.99" }'
@@ -184,7 +184,7 @@ If the call never happens (the customer closes the tab, the network drops), the 
 ## Read a session
 
 ```bash
-curl https://whitechain-dashboard.vercel.app/api/v1/checkout_sessions/cs_Q3n8ZpK2vRt6YxLm4WbH
+curl https://100lana.com/api/v1/checkout_sessions/cs_Q3n8ZpK2vRt6YxLm4WbH
 ```
 
 This is the public view the widget polls. It has no authentication and does not include `url`, `metadata` or `createdAt`. There is no authenticated endpoint to retrieve or list sessions, and no endpoint to cancel one. See the [API reference](./api-reference.md#retrieve-a-checkout-session-public).

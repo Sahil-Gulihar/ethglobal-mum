@@ -80,7 +80,7 @@ await whitechain.callTool("create_payment_link", { name: "Consulting call", amou
 
 `handleAnthropicToolUse(block)` and `handleOpenAIToolCall(call)` run a model's tool call and return the message to send back.
 
-Full guide: [Agents and MCP](https://whitechain-dashboard.vercel.app/docs/agents).
+Full guide: [Agents and MCP](https://100lana.com/docs/agents).
 
 ## Safety
 

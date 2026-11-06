@@ -1,9 +1,9 @@
 {
   "name": "whitechain-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Whitechain Commerce for AI agents: an MCP server (stdio) and an agent toolkit for Claude, OpenAI and the Vercel AI SDK.",
   "license": "MIT",
-  "homepage": "https://whitechain-dashboard.vercel.app/docs/agents",
+  "homepage": "https://100lana.com/docs/agents",
   "bugs": {
     "url": "https://github.com/Sahil-Gulihar/ethglobal-mum/issues"
   },

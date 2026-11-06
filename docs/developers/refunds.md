@@ -17,7 +17,7 @@ The dashboard runs step 4 right after the transaction confirms, so you usually s
 ## Create a refund request with the API
 
 ```bash
-curl -X POST https://whitechain-dashboard.vercel.app/api/v1/refunds \
+curl -X POST https://100lana.com/api/v1/refunds \
   -H "Authorization: Bearer $WC_SECRET_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "paymentId": "pay_Vb3kT9wQ2mXr7LpN5sZe", "amount": "10.00" }'
@@ -40,7 +40,7 @@ curl -X POST https://whitechain-dashboard.vercel.app/api/v1/refunds \
 ```ts
 import type { RefundObject } from "@whitechain-commerce/react/server";
 
-const res = await fetch("https://whitechain-dashboard.vercel.app/api/v1/refunds", {
+const res = await fetch("https://100lana.com/api/v1/refunds", {
   method: "POST",
   headers: {
     Authorization: `Bearer ${process.env.WC_SECRET_KEY}`,

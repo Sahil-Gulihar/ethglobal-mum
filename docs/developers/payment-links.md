@@ -7,7 +7,7 @@ Use a payment link for a fixed-price item or a payment you reconcile by hand. Sh
 
 ## Create and share a link
 
-1. [Create a merchant account](https://whitechain-dashboard.vercel.app/signup) and register your payout wallet in the dashboard.
+1. [Create a merchant account](https://100lana.com/signup) and register your payout wallet in the dashboard.
 2. Open **Payment links** and select **Create payment link**.
 3. Enter a name and a USDT amount, create the link, and copy it.
 

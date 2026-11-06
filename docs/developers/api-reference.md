@@ -10,7 +10,7 @@ The API is small on purpose. Your server creates checkout sessions and refund re
 The hosted API base URL is:
 
 ```
-https://whitechain-dashboard.vercel.app/api/v1
+https://100lana.com/api/v1
 ```
 
 Use the API origin shown under **Developers** in your dashboard. For hosted checkout, redirect to the URL returned in `CheckoutSession.url`.
@@ -147,7 +147,7 @@ The merchant account must have a payout wallet registered onchain. Otherwise the
 ### Example
 
 ```bash
-curl -X POST https://whitechain-dashboard.vercel.app/api/v1/checkout_sessions \
+curl -X POST https://100lana.com/api/v1/checkout_sessions \
   -H "Authorization: Bearer $WC_SECRET_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -179,7 +179,7 @@ curl -X POST https://whitechain-dashboard.vercel.app/api/v1/checkout_sessions \
   "successUrl": "https://shop.example.com/orders/order_1042",
   "cancelUrl": "https://shop.example.com/cart",
   "payment": null,
-  "url": "https://whitechain-dashboard.vercel.app/checkout/cs_Q3n8ZpK2vRt6YxLm4WbH",
+  "url": "https://100lana.com/checkout/cs_Q3n8ZpK2vRt6YxLm4WbH",
   "metadata": { "customerId": "cus_88" },
   "createdAt": "2026-11-06T10:15:00.000Z"
 }
@@ -191,7 +191,7 @@ From TypeScript, the server helper in the React SDK wraps this endpoint:
 import { createCheckoutSession } from "@whitechain-commerce/react/server";
 
 const session = await createCheckoutSession({
-  apiBase: "https://whitechain-dashboard.vercel.app",
+  apiBase: "https://100lana.com",
   secretKey: process.env.WC_SECRET_KEY!,
   orderId: "order_1042",
   amount: "49.99",
@@ -227,7 +227,7 @@ There is no authenticated "retrieve session" endpoint. The full [CheckoutSession
 ### Example
 
 ```bash
-curl https://whitechain-dashboard.vercel.app/api/v1/checkout_sessions/cs_Q3n8ZpK2vRt6YxLm4WbH
+curl https://100lana.com/api/v1/checkout_sessions/cs_Q3n8ZpK2vRt6YxLm4WbH
 ```
 
 ```json
@@ -300,7 +300,7 @@ What it does:
 ### Example
 
 ```bash
-curl -X POST https://whitechain-dashboard.vercel.app/api/v1/checkout_sessions/cs_Q3n8ZpK2vRt6YxLm4WbH/submit \
+curl -X POST https://100lana.com/api/v1/checkout_sessions/cs_Q3n8ZpK2vRt6YxLm4WbH/submit \
   -H "Content-Type: application/json" \
   -d '{ "txHash": "0xca1467eb1d7b29899ff948051bd8cd21e1c4581e9e60d6d9cbc0ccf74e97e9b4" }'
 ```
@@ -345,7 +345,7 @@ Returns your payments, newest first.
 ### Example
 
 ```bash
-curl "https://whitechain-dashboard.vercel.app/api/v1/payments?limit=2" \
+curl "https://100lana.com/api/v1/payments?limit=2" \
   -H "Authorization: Bearer $WC_SECRET_KEY"
 ```
 
@@ -393,7 +393,7 @@ Returns one [PaymentObject](#paymentobject). Payments of other merchants return 
 ### Example
 
 ```bash
-curl https://whitechain-dashboard.vercel.app/api/v1/payments/pay_Vb3kT9wQ2mXr7LpN5sZe \
+curl https://100lana.com/api/v1/payments/pay_Vb3kT9wQ2mXr7LpN5sZe \
   -H "Authorization: Bearer $WC_SECRET_KEY"
 ```
 
@@ -435,7 +435,7 @@ The refundable balance is the payment amount minus what has already been refunde
 ### Example
 
 ```bash
-curl -X POST https://whitechain-dashboard.vercel.app/api/v1/refunds \
+curl -X POST https://100lana.com/api/v1/refunds \
   -H "Authorization: Bearer $WC_SECRET_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "paymentId": "pay_Vb3kT9wQ2mXr7LpN5sZe", "amount": "10.00" }'
@@ -490,7 +490,7 @@ Returns your refunds, newest first, at most 100.
 ### Example
 
 ```bash
-curl "https://whitechain-dashboard.vercel.app/api/v1/refunds?paymentId=pay_Vb3kT9wQ2mXr7LpN5sZe" \
+curl "https://100lana.com/api/v1/refunds?paymentId=pay_Vb3kT9wQ2mXr7LpN5sZe" \
   -H "Authorization: Bearer $WC_SECRET_KEY"
 ```
 

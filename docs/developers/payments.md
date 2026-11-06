@@ -82,18 +82,18 @@ Do not fulfil from the widget's `onSuccess` callback or from the customer landin
 
 ```bash
 # Newest first, 1 to 100 (default 20)
-curl "https://whitechain-dashboard.vercel.app/api/v1/payments?limit=50" \
+curl "https://100lana.com/api/v1/payments?limit=50" \
   -H "Authorization: Bearer $WC_SECRET_KEY"
 
 # One payment
-curl https://whitechain-dashboard.vercel.app/api/v1/payments/pay_Vb3kT9wQ2mXr7LpN5sZe \
+curl https://100lana.com/api/v1/payments/pay_Vb3kT9wQ2mXr7LpN5sZe \
   -H "Authorization: Bearer $WC_SECRET_KEY"
 ```
 
 ```ts
 import type { PaymentObject } from "@whitechain-commerce/react/server";
 
-const res = await fetch("https://whitechain-dashboard.vercel.app/api/v1/payments?limit=50", {
+const res = await fetch("https://100lana.com/api/v1/payments?limit=50", {
   headers: { Authorization: `Bearer ${process.env.WC_SECRET_KEY}` },
 });
 if (!res.ok) throw new Error(`HTTP ${res.status}`);

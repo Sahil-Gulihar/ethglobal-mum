@@ -51,7 +51,7 @@ import { createCheckoutSession } from "@whitechain-commerce/react/server";
 export async function POST() {
   const orderId = `order_${Date.now()}`;
   const session = await createCheckoutSession({
-    apiBase: process.env.WC_API_ORIGIN ?? "https://whitechain-dashboard.vercel.app",
+    apiBase: process.env.WC_API_ORIGIN ?? "https://100lana.com",
     secretKey: process.env.WC_SECRET_KEY!, // sk_test_...
     orderId,
     amount: "4.99", // USDT, decided on the server
@@ -76,7 +76,7 @@ export function Pay({ orderId, sessionId }: { orderId: string; sessionId: string
   return (
     <WhitechainCheckout
       sessionId={sessionId}
-      apiBase={process.env.NEXT_PUBLIC_WC_API_BASE ?? "https://whitechain-dashboard.vercel.app"}
+      apiBase={process.env.NEXT_PUBLIC_WC_API_BASE ?? "https://100lana.com"}
       // UI only. Fulfil the order from the payment.succeeded webhook.
       onSuccess={() => router.push(`/orders/${orderId}`)}
       onError={(error) => console.error("Checkout error", error)}
@@ -92,7 +92,7 @@ The demo store uses the same pattern in `apps/demo-store/src/app/api/orders/rout
 | Prop | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
 | `sessionId` | `string` | Yes | | The checkout session id (`cs_...`) returned by `createCheckoutSession` or `POST /api/v1/checkout_sessions`. |
-| `apiBase` | `string` | No | See [API base resolution](#api-base-resolution) | Origin of the Whitechain Commerce API, for example `"https://whitechain-dashboard.vercel.app"`. A trailing slash is removed. |
+| `apiBase` | `string` | No | See [API base resolution](#api-base-resolution) | Origin of the Whitechain Commerce API, for example `"https://100lana.com"`. A trailing slash is removed. |
 | `onSuccess` | `(result: CheckoutSuccess) => void` | No | | Called once, when the session is `paid` according to the backend. UI only. |
 | `onError` | `(error: Error) => void` | No | | Called on failures. Not called when the customer rejects a request in their wallet. |
 | `onCancel` | `() => void` | No | Navigate to the session's `cancelUrl` | Called when the customer clicks "Cancel and return to store". |
@@ -274,7 +274,7 @@ Creates a checkout session by calling `POST {apiBase}/api/v1/checkout_sessions` 
 
 | Param | Type | Required | Description |
 | --- | --- | --- | --- |
-| `apiBase` | `string` | No | API origin, for example `"https://whitechain-dashboard.vercel.app"`. Defaults to `NEXT_PUBLIC_WC_API_BASE`. Required if that is not set. |
+| `apiBase` | `string` | No | API origin, for example `"https://100lana.com"`. Defaults to `NEXT_PUBLIC_WC_API_BASE`. Required if that is not set. |
 | `secretKey` | `string` | Yes | Your secret key (`sk_test_...`). |
 | `orderId` | `string` | Yes | Your own order id. One session pays one order. The API accepts 1 to 200 characters after trimming. |
 | `amount` | `string` | Yes | Positive decimal USDT amount with at most 6 decimals, for example `"49.99"`. |
@@ -311,7 +311,7 @@ import { createCheckoutSession, WhitechainApiError } from "@whitechain-commerce/
 
 try {
   const session = await createCheckoutSession({
-    apiBase: "https://whitechain-dashboard.vercel.app",
+    apiBase: "https://100lana.com",
     secretKey: process.env.WC_SECRET_KEY!,
     orderId: "order_456",
     amount: "49.99",

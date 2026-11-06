@@ -15,7 +15,7 @@ Every checkout session has a `url` field. It points to the hosted checkout page,
 
 ## The checkout URL
 
-Always use the `url` returned by the API. For example, `https://whitechain-dashboard.vercel.app/checkout/cs_...`.
+Always use the `url` returned by the API. For example, `https://100lana.com/checkout/cs_...`.
 
 `url` is part of the secret view of a session (`CheckoutSession`), returned when you create it with your secret key. The public view (`GET /api/v1/checkout_sessions/:id`, used by the widget) does not include it.
 
@@ -24,7 +24,7 @@ Always use the `url` returned by the API. For example, `https://whitechain-dashb
 With curl:
 
 ```bash
-curl -X POST https://whitechain-dashboard.vercel.app/api/v1/checkout_sessions \
+curl -X POST https://100lana.com/api/v1/checkout_sessions \
   -H "Authorization: Bearer sk_test_..." \
   -H "Content-Type: application/json" \
   -d '{
@@ -35,7 +35,7 @@ curl -X POST https://whitechain-dashboard.vercel.app/api/v1/checkout_sessions \
   }'
 ```
 
-The response is the full session, including `"url": "https://whitechain-dashboard.vercel.app/checkout/cs_..."`. A new session returns HTTP `201`. If an unexpired `open` session (or a `processing` one) for the same `orderId` and amount already exists, the API returns it with HTTP `200`.
+The response is the full session, including `"url": "https://100lana.com/checkout/cs_..."`. A new session returns HTTP `201`. If an unexpired `open` session (or a `processing` one) for the same `orderId` and amount already exists, the API returns it with HTTP `200`.
 
 With the server helper:
 
@@ -43,14 +43,14 @@ With the server helper:
 import { createCheckoutSession } from "@whitechain-commerce/react/server";
 
 const session = await createCheckoutSession({
-  apiBase: "https://whitechain-dashboard.vercel.app",
+  apiBase: "https://100lana.com",
   secretKey: process.env.WC_SECRET_KEY!, // sk_test_...
   orderId: "order_123",
   amount: "4.99",
   successUrl: "https://store.example.com/orders/order_123",
   cancelUrl: "https://store.example.com/",
 });
-// session.url === "https://whitechain-dashboard.vercel.app/checkout/cs_..."
+// session.url === "https://100lana.com/checkout/cs_..."
 ```
 
 For every parameter and error, see [`createCheckoutSession`](./checkout-widget.md#createcheckoutsessionparams) and the [API reference](./api-reference.md).
@@ -66,7 +66,7 @@ import { createCheckoutSession } from "@whitechain-commerce/react/server";
 export async function POST() {
   const orderId = `order_${Date.now()}`;
   const session = await createCheckoutSession({
-    apiBase: process.env.WC_API_ORIGIN ?? "https://whitechain-dashboard.vercel.app",
+    apiBase: process.env.WC_API_ORIGIN ?? "https://100lana.com",
     secretKey: process.env.WC_SECRET_KEY!,
     orderId,
     amount: "4.99",
@@ -109,7 +109,7 @@ The hosted page reads one query parameter:
 | `theme` | `dark` | Light | `?theme=dark` renders the checkout card in the dark theme. Any other value, or none, renders it in the light theme. |
 
 ```
-https://whitechain-dashboard.vercel.app/checkout/cs_...?theme=dark
+https://100lana.com/checkout/cs_...?theme=dark
 ```
 
 The theme changes the checkout card. The page around it always has a dark background.

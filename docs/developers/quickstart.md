@@ -9,10 +9,10 @@ If you only need to share a fixed-price checkout, start with [Payment links](./p
 
 ## 1. Set up your merchant account
 
-1. [Create a merchant account](https://whitechain-dashboard.vercel.app/signup) with the business name customers should see at checkout.
+1. [Create a merchant account](https://100lana.com/signup) with the business name customers should see at checkout.
 2. If the dashboard asks you to verify your account, complete the World ID step.
 3. In the dashboard, connect your payout wallet or enter its address. Choose **Use as payout wallet** and wait for the dashboard to show that your wallet is ready.
-4. In **Developers**, choose **Create secret key**. Copy the `sk_test_` key and store it on your server as `WC_SECRET_KEY`. Set `WC_API_BASE` to the origin of your Whitechain Commerce instance, such as `https://whitechain-dashboard.vercel.app`. The SDK adds `/api/v1`.
+4. In **Developers**, choose **Create secret key**. Copy the `sk_test_` key and store it on your server as `WC_SECRET_KEY`. Set `WC_API_BASE` to the origin of your Whitechain Commerce instance, such as `https://100lana.com`. The SDK adds `/api/v1`.
 
 ## 2. Install an SDK
 

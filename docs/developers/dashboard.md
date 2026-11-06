@@ -3,7 +3,7 @@ title: "Dashboard"
 description: "The merchant dashboard is where you set up your account, manage keys and webhooks, follow payments and send refunds."
 ---
 
-Use the [merchant dashboard](https://whitechain-dashboard.vercel.app/dashboard) to manage payments.
+Use the [merchant dashboard](https://100lana.com/dashboard) to manage payments.
 
 ## Pages
 

@@ -13,7 +13,7 @@ The dashboard's **Agents** page (`/dashboard/agents`) shows every snippet below 
 
 | | |
 | --- | --- |
-| URL | `https://whitechain-dashboard.vercel.app/api/mcp` (or `{APP_URL}/api/mcp` if you self-host) |
+| URL | `https://100lana.com/api/mcp` (or `{APP_URL}/api/mcp` if you self-host) |
 | Transport | Streamable HTTP, stateless JSON responses |
 | Auth | `Authorization: Bearer sk_test_...` |
 | Connector URL | `{APP_URL}/api/mcp/sk_test_...`, for clients that only accept a URL |
@@ -86,7 +86,7 @@ export WC_SECRET_KEY=sk_test_...
 ### Claude Code
 
 ```bash
-claude mcp add --transport http whitechain https://whitechain-dashboard.vercel.app/api/mcp \
+claude mcp add --transport http whitechain https://100lana.com/api/mcp \
   --header "Authorization: Bearer $WC_SECRET_KEY"
 ```
 
@@ -97,7 +97,7 @@ Add `--scope project` to save it to the repository's `.mcp.json` for your whole 
 In **Settings > Connectors > Add custom connector**, paste the connector URL with your key in it:
 
 ```
-https://whitechain-dashboard.vercel.app/api/mcp/sk_test_...
+https://100lana.com/api/mcp/sk_test_...
 ```
 
 Anyone with this URL can act as your account, so treat it like the key itself.
@@ -110,7 +110,7 @@ Anyone with this URL can act as your account, so treat it like the key itself.
 {
   "mcpServers": {
     "whitechain": {
-      "url": "https://whitechain-dashboard.vercel.app/api/mcp",
+      "url": "https://100lana.com/api/mcp",
       "headers": { "Authorization": "Bearer ${env:WC_SECRET_KEY}" }
     }
   }
@@ -129,7 +129,7 @@ Anyone with this URL can act as your account, so treat it like the key itself.
   "servers": {
     "whitechain": {
       "type": "http",
-      "url": "https://whitechain-dashboard.vercel.app/api/mcp",
+      "url": "https://100lana.com/api/mcp",
       "headers": { "Authorization": "Bearer ${input:whitechain-secret-key}" }
     }
   }
@@ -302,7 +302,7 @@ for (const call of res.choices[0].message.tool_calls ?? []) {
 The server is plain JSON-RPC over HTTP, so you can call it without any SDK:
 
 ```bash
-curl -X POST https://whitechain-dashboard.vercel.app/api/mcp \
+curl -X POST https://100lana.com/api/mcp \
   -H "Authorization: Bearer $WC_SECRET_KEY" \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_sales_summary","arguments":{}}}'

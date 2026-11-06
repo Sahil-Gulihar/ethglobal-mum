@@ -78,7 +78,7 @@ export function agentClients(base: string): AgentClient[] {
   ];
 }
 
-export const DEFAULT_BASE = "https://whitechain-dashboard.vercel.app";
+export const DEFAULT_BASE = "https://100lana.com";
 
 export const sdkSnippets = (base: string): { id: string; name: string; filename: string; code: string }[] => [
   {

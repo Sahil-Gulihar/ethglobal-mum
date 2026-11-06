@@ -6,6 +6,7 @@ import { promisify } from "node:util";
 import { and, eq, gt } from "drizzle-orm";
 import { db, merchants, authSessions } from "./db";
 import { sha256 } from "./ids";
+import { env } from "./env";
 
 const scrypt = promisify(_scrypt) as (pw: string, salt: Buffer, len: number) => Promise<Buffer>;
 const COOKIE = "wc_session";
@@ -53,7 +54,14 @@ export async function getCurrentMerchant(): Promise<Merchant | null> {
     .innerJoin(merchants, eq(authSessions.merchantId, merchants.id))
     .where(and(eq(authSessions.id, sha256(token)), gt(authSessions.expiresAt, new Date())))
     .limit(1);
-  return rows[0]?.m ?? null;
+  const m = rows[0]?.m ?? null;
+  // With World ID switched off, accounts that signed up while it was required are activated on
+  // their next visit instead of staying stuck as pending.
+  if (m && m.status === "pending" && env.skipWorldId()) {
+    await db.update(merchants).set({ status: "active" }).where(eq(merchants.id, m.id));
+    return { ...m, status: "active" };
+  }
+  return m;
 }
 
 /** For dashboard pages: redirects to /login if signed out. */

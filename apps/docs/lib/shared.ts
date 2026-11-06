@@ -6,7 +6,7 @@ export const docsImageRoute = '/og/docs';
 export const docsContentRoute = '/llms.mdx/docs';
 
 /** The merchant dashboard (sign up, API keys, payments). */
-export const dashboardUrl = 'https://whitechain-dashboard.vercel.app';
+export const dashboardUrl = 'https://100lana.com';
 
 export const gitConfig = {
   user: 'Sahil-Gulihar',

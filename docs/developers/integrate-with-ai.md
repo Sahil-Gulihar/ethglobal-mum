@@ -10,7 +10,7 @@ Whitechain Commerce publishes an integration guide written for coding agents suc
 Open your coding agent in the root of your repository and paste:
 
 ```text
-Read https://whitechain-dashboard.vercel.app/integrate.md?stack=nextjs and integrate Whitechain Commerce checkout into this repo.
+Read https://100lana.com/integrate.md?stack=nextjs and integrate Whitechain Commerce checkout into this repo.
 ```
 
 If you self-host, use your own dashboard URL: `{APP_URL}/integrate.md?stack=nextjs`. The guide fills in that URL as the API base everywhere.

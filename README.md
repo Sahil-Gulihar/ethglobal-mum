@@ -6,7 +6,7 @@ Whitechain Commerce lets merchants add on-chain USDT payments to their stores. C
 
 ## Merchant docs
 
-- [Merchant dashboard](https://whitechain-dashboard.vercel.app) and [merchant docs](https://whitechain-dashboard.vercel.app/docs)
+- [Merchant dashboard](https://100lana.com) and [merchant docs](https://100lana.com/docs)
 - [Store integration quickstart](docs/developers/quickstart.md), [payment links](docs/developers/payment-links.md), and [webhooks](docs/developers/webhooks.md)
 - [Agents and MCP](docs/developers/agents.md)
 

@@ -137,7 +137,7 @@ import { createCheckoutSession, WhitechainApiError } from "@whitechain-commerce/
 
 try {
   const session = await createCheckoutSession({
-    apiBase: "https://whitechain-dashboard.vercel.app",
+    apiBase: "https://100lana.com",
     secretKey: process.env.WC_SECRET_KEY!,
     orderId: "order_1042",
     amount: "49.99",

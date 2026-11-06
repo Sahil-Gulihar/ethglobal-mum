@@ -4,7 +4,7 @@
  * tool list always matches the server and nothing is duplicated here. Zero dependencies.
  */
 
-export const DEFAULT_BASE_URL = "https://whitechain-dashboard.vercel.app";
+export const DEFAULT_BASE_URL = "https://100lana.com";
 
 /** @typedef {import("./index.d.ts").WhitechainTool} WhitechainTool */
 /** @typedef {import("./index.d.ts").ToolkitOptions} ToolkitOptions */
