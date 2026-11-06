@@ -6,6 +6,7 @@ import { db, webhookEndpoints } from "@/lib/db";
 import { requireMerchant } from "@/lib/auth";
 import { newId, randomId } from "@/lib/ids";
 import { redeliver, sendTestEvent } from "@/lib/webhooks";
+import { checkWebhookUrl } from "@/lib/webhooks/url-guard";
 import { err, errorMessage, ok, type ActionResult } from "./result";
 
 const MAX_ENDPOINTS = 10;
@@ -23,6 +24,8 @@ export async function createWebhookEndpoint(url: string): Promise<ActionResult<{
   const m = await requireMerchant();
   const u = parseUrl(url);
   if (!u) return err("Enter a full http(s) URL, e.g. https://shop.example.com/api/webhooks.");
+  const blocked = await checkWebhookUrl(u.toString());
+  if (blocked) return err(blocked);
   const existing = await db.select({ id: webhookEndpoints.id }).from(webhookEndpoints).where(eq(webhookEndpoints.merchantId, m.id));
   if (existing.length >= MAX_ENDPOINTS) return err(`You can add up to ${MAX_ENDPOINTS} endpoints.`);
   const id = newId("we");

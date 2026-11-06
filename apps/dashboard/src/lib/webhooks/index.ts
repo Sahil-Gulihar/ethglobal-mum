@@ -4,6 +4,7 @@ import { signWebhook } from "@whitechain-commerce/core/webhooks";
 import type { PaymentObject, RefundObject, WebhookEvent, WebhookEventType } from "@whitechain-commerce/core/webhooks";
 import { db, webhookAttempts, webhookDeliveries, webhookEndpoints, webhookEvents } from "@/lib/db";
 import { newId } from "@/lib/ids";
+import { checkWebhookUrl } from "./url-guard";
 
 export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 export type DbOrTx = typeof db | Tx;
@@ -122,6 +123,7 @@ async function attempt(deliveryId: string, prevAttempts: number): Promise<Attemp
     .select({
       url: webhookEndpoints.url,
       secret: webhookEndpoints.secret,
+      enabled: webhookEndpoints.enabled,
       payload: webhookEvents.payload,
     })
     .from(webhookDeliveries)
@@ -135,8 +137,16 @@ async function attempt(deliveryId: string, prevAttempts: number): Promise<Attemp
   let error: string | null = null;
   let responseBody: string | null = null;
 
+  let terminal = !row; // true = never retry this delivery
+  const blockedReason = row && row.enabled ? await checkWebhookUrl(row.url) : null;
   if (!row) {
     error = "delivery not found";
+  } else if (!row.enabled) {
+    error = "Endpoint is disabled";
+    terminal = true;
+  } else if (blockedReason) {
+    error = `Blocked: ${blockedReason}`;
+    terminal = true;
   } else {
     // jsonb is canonical, so this string is stable across attempts; we sign exactly what we send.
     const body = JSON.stringify(row.payload);
@@ -163,7 +173,9 @@ async function attempt(deliveryId: string, prevAttempts: number): Promise<Attemp
 
   const durationMs = Date.now() - started;
   const ok = statusCode !== null && statusCode >= 200 && statusCode < 300;
-  const status: AttemptResult["status"] = ok ? "succeeded" : attemptNo >= MAX_ATTEMPTS || !row ? "failed" : "pending";
+  // Test events are one-shot: a failure is shown to the merchant right away, not retried.
+  if (row && isTestEvent(row.payload)) terminal = true;
+  const status: AttemptResult["status"] = ok ? "succeeded" : attemptNo >= MAX_ATTEMPTS || terminal ? "failed" : "pending";
   const nextAttemptAt = status === "pending" ? new Date(Date.now() + RETRY_DELAYS_MS[attemptNo - 1]) : new Date();
 
   await db.transaction(async (tx) => {
@@ -209,9 +221,15 @@ export async function redeliver(deliveryId: string, merchantId?: string): Promis
   return attempt(claimed.id, claimed.attempts);
 }
 
+/** Synthetic events from "Send test" carry a payment id prefixed "pay_test_". */
+export function isTestEvent(payload: unknown): boolean {
+  const id = (payload as { data?: { payment?: { id?: unknown } } } | null)?.data?.payment?.id;
+  return typeof id === "string" && id.startsWith("pay_test_");
+}
+
 /**
  * Sends a synthetic payment.succeeded event (ids prefixed "pay_test_", orderId "test_order")
- * to one endpoint and delivers it immediately. Failed test sends are retried like any delivery.
+ * to one endpoint and delivers it immediately. Failed test sends are not retried.
  */
 export async function sendTestEvent(
   endpointId: string,
@@ -227,7 +245,7 @@ export async function sendTestEvent(
     sessionId: "cs_test",
     orderId: "test_order",
     amount: "1.00",
-    amountRefunded: "0",
+    amountRefunded: "0.00",
     currency: "USDT",
     status: "succeeded",
     payer: "0x000000000000000000000000000000000000dEaD",

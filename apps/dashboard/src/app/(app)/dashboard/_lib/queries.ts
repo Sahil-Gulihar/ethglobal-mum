@@ -3,6 +3,7 @@ import { and, asc, count, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { fromUnits } from "@whitechain-commerce/core";
 import { apiKeys, checkoutSessions, db, payments, refunds, webhookAttempts, webhookDeliveries, webhookEndpoints, webhookEvents } from "@/lib/db";
 import type { Merchant } from "@/lib/auth";
+import { isTestEvent } from "@/lib/webhooks";
 
 export type PaymentListItem = {
   id: string;
@@ -180,6 +181,7 @@ export type DeliveryView = {
   id: string;
   eventId: string;
   eventType: string;
+  isTest: boolean;
   endpointId: string;
   endpointUrl: string;
   status: "pending" | "succeeded" | "failed";
@@ -215,6 +217,7 @@ export async function listDeliveries(merchantId: string, limit = 50): Promise<De
     id: d.id,
     eventId: e.id,
     eventType: e.type,
+    isTest: isTestEvent(e.payload),
     endpointId: d.endpointId,
     endpointUrl: url,
     status: d.status,

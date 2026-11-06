@@ -128,7 +128,7 @@ export function WebhookEndpointCard({ id, url, enabled, createdAt, secretHint }:
         <Alert tone={test.ok ? "success" : "warning"}>
           {test.ok
             ? `Test event delivered: HTTP ${test.statusCode} in ${test.durationMs} ms.`
-            : `Test event failed${test.statusCode ? ` with HTTP ${test.statusCode}` : ""}${test.error ? `: ${test.error}` : ""}. We'll retry it automatically.`}
+            : `Test event failed${test.statusCode ? ` with HTTP ${test.statusCode}` : ""}${test.error && test.error !== `HTTP ${test.statusCode}` ? `: ${test.error}` : ""}. Test events aren't retried; fix the endpoint and send another.`}
         </Alert>
       )}
 

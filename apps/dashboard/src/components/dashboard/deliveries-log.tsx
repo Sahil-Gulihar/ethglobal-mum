@@ -15,6 +15,7 @@ export type DeliveryRow = {
   id: string;
   eventId: string;
   eventType: string;
+  isTest?: boolean;
   endpointUrl: string;
   status: "pending" | "succeeded" | "failed";
   attempts: number;
@@ -76,7 +77,10 @@ export function DeliveriesLog({ rows }: { rows: DeliveryRow[] }) {
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-col">
-                    <span className="font-mono text-xs font-medium">{d.eventType}</span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="font-mono text-xs font-medium">{d.eventType}</span>
+                      {d.isTest && <Badge>Test</Badge>}
+                    </span>
                     <span className="max-w-64 truncate text-xs text-muted-foreground" title={d.endpointUrl}>
                       {d.endpointUrl}
                     </span>
