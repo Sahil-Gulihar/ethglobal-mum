@@ -634,10 +634,14 @@ export function View(p: ViewProps) {
       </div>
       <div className="wcc-divider" />
       {session.buyerCheck?.required && !session.buyerCheck.verified && isPrePay(state.phase) ? (
-        // The human check runs on the hosted checkout (it needs the buyer's 0G session cookie there).
+        // The buyer check (World ID or the 0G picture check) runs on the hosted checkout.
         <section className="wcc-body">
-          <p className="wcc-title">Quick human check first</p>
-          <p className="wcc-text">This store only accepts payments from verified buyers. It takes about 10 seconds.</p>
+          <p className="wcc-title">{session.buyerCheck.method === "zg" ? "Quick human check first" : "Verify you're human first"}</p>
+          <p className="wcc-text">
+            {session.buyerCheck.method === "zg"
+              ? "This store only accepts payments from verified buyers. It takes about 10 seconds."
+              : "This store only accepts payments from verified buyers. Verify with World ID, then pay."}
+          </p>
           <a className="wcc-btn" href={p.hostedUrl} style={{ display: "block", textAlign: "center", color: "var(--wcc-accent-fg)" }}>
             Verify and pay
           </a>

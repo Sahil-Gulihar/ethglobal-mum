@@ -17,8 +17,11 @@ export interface PublicCheckoutSession {
   successUrl: string | null;
   cancelUrl: string | null;
   payment: { id: string; txHash: `0x${string}`; explorerUrl: string } | null;
-  /** Verified buyers (0G human check). `required` is the merchant's setting; `verified` is true once this buyer passed. */
-  buyerCheck?: { required: boolean; verified: boolean };
+  /**
+   * Verified buyers. `required` is the merchant's setting, `method` is how buyers prove they're human
+   * (World ID or the 0G picture check), and `verified` is true once this buyer passed.
+   */
+  buyerCheck?: { required: boolean; verified: boolean; method?: "world_id" | "zg" };
 }
 
 /** Secret view returned to the merchant's server: POST/GET with sk_ key */

@@ -201,6 +201,7 @@ export type PaymentDetail = {
   metadata: Record<string, string> | null;
   refunds: RefundView[];
   buyerVerified: boolean;
+  buyerVerifiedVia: "world_id" | "zg" | "zg_badge" | null;
   humanCheckId: string | null;
 };
 
@@ -241,6 +242,7 @@ export async function getPaymentDetail(merchantId: string, paymentId: string): P
     createdAt: p.createdAt,
     metadata: s.metadata ?? null,
     buyerVerified: !!s.humanVerifiedAt,
+    buyerVerifiedVia: s.humanVerifiedAt ? (s.humanVerifiedVia ?? "zg") : null,
     humanCheckId: s.humanCheckId,
     refunds: rs.map((r) => ({
       id: r.id,
@@ -371,10 +373,15 @@ export async function humanCheckStats(merchantId: string) {
     .where(eq(checkoutSessions.merchantId, merchantId))
     .groupBy(humanChecks.status, humanChecks.payer);
   const sum = (f: (r: (typeof rows)[number]) => boolean) => rows.filter(f).reduce((a, r) => a + r.n, 0);
+  const [w] = await db
+    .select({ n: count() })
+    .from(checkoutSessions)
+    .where(and(eq(checkoutSessions.merchantId, merchantId), eq(checkoutSessions.humanVerifiedVia, "world_id")));
   return {
     total: sum(() => true),
     passed: sum((r) => r.status === "passed"),
     failed: sum((r) => r.status === "failed"),
     buyerPaid: sum((r) => r.payer === "buyer"),
+    worldId: w?.n ?? 0,
   };
 }

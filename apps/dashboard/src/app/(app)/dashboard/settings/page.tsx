@@ -71,16 +71,16 @@ export default async function SettingsPage() {
                 <CardHeader>
                   <CardTitle>Verified buyers</CardTitle>
                   <CardDescription>
-                    Stop bots from spamming your checkout. Buyers name what they see in a fresh picture drawn by 0G Private Computer; 0G checks the
-                    answer in a TEE. Buyers who sign in with their 0G account pay for the check with their own credits and keep a Verified buyer badge
-                    for 30 days across every Whitechain store. Payments show the badge, and webhooks carry <code>buyerVerified</code>.
+                    Stop bots from buying at your checkout. Buyers prove they're human with World ID, or name what they see in a fresh picture drawn by
+                    0G Private Computer. Payments show a Verified buyer badge, and webhooks carry <code>buyerVerified</code>.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4">
-                  <VerifiedBuyersToggle initial={m.requireVerifiedBuyers} />
-                  <dl className="grid grid-cols-3 gap-3 text-sm">
+                  <VerifiedBuyersToggle initial={m.requireVerifiedBuyers} initialMethod={m.verifiedBuyerMethod} />
+                  <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+                    <Stat label="Verified with World ID" value={checks.worldId} />
                     <Stat label="Checks run on 0G" value={checks.total} />
-                    <Stat label="Passed" value={checks.passed} />
+                    <Stat label="0G checks passed" value={checks.passed} />
                     <Stat label="Paid by buyers' 0G credits" value={checks.buyerPaid} />
                   </dl>
                 </CardContent>

@@ -74,10 +74,19 @@ export async function updateBusinessName(_prev: NameFormState, formData: FormDat
   return { saved: true };
 }
 
-/** Settings toggle: require the 0G human check (Verified buyers only) before the hosted checkout shows the pay button. */
+/** Settings toggle: require the verified-buyer check (Verified buyers only) before the hosted checkout shows the pay button. */
 export async function setRequireVerifiedBuyers(on: boolean): Promise<ActionResult<{ on: boolean }>> {
   const m = await requireMerchant();
   await db.update(merchants).set({ requireVerifiedBuyers: !!on }).where(eq(merchants.id, m.id));
   revalidatePath("/dashboard/settings");
   return ok({ on: !!on });
+}
+
+/** Settings: how buyers prove they're human. World ID (default) or the 0G picture check. */
+export async function setVerifiedBuyerMethod(method: "world_id" | "zg"): Promise<ActionResult<{ method: "world_id" | "zg" }>> {
+  const m = await requireMerchant();
+  if (method !== "world_id" && method !== "zg") return err("Pick World ID or 0G.");
+  await db.update(merchants).set({ verifiedBuyerMethod: method }).where(eq(merchants.id, m.id));
+  revalidatePath("/dashboard/settings");
+  return ok({ method });
 }

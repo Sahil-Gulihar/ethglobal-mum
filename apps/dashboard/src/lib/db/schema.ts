@@ -17,6 +17,8 @@ export const merchants = pgTable("merchants", {
   payoutChangedAt: timestamp("payout_changed_at", { withTimezone: true }),
   /** Settings toggle: buyers must pass the 0G human check before the hosted checkout shows the pay button. */
   requireVerifiedBuyers: boolean("require_verified_buyers").notNull().default(false),
+  /** How buyers prove they're human: World ID (default) or the 0G picture check. */
+  verifiedBuyerMethod: text("verified_buyer_method", { enum: ["world_id", "zg"] }).notNull().default("world_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -55,14 +57,18 @@ export const checkoutSessions = pgTable(
     successUrl: text("success_url"),
     cancelUrl: text("cancel_url"),
     metadata: jsonb("metadata").$type<Record<string, string>>(),
-    /** Set when the buyer passed the 0G human check (or is a signed-in verified buyer). */
+    /** Set when the buyer passed the verified-buyer check (World ID or 0G). */
     humanVerifiedAt: timestamp("human_verified_at", { withTimezone: true }),
     humanCheckId: text("human_check_id"),
     buyerId: text("buyer_id"),
+    /** How the buyer was verified: "world_id", "zg" (0G picture check) or "zg_badge" (returning 0G buyer). */
+    humanVerifiedVia: text("human_verified_via", { enum: ["world_id", "zg", "zg_badge"] }),
+    /** World ID nullifier of the verified buyer (decimal). Lets merchants spot one person behind many orders. */
+    buyerWorldNullifier: text("buyer_world_nullifier"),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("cs_merchant_idx").on(t.merchantId)],
+  (t) => [index("cs_merchant_idx").on(t.merchantId), index("cs_buyer_world_nullifier_idx").on(t.buyerWorldNullifier)],
 );
 
 export const payments = pgTable(

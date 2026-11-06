@@ -26,6 +26,8 @@ export const env = {
     rpId: must("WORLD_RP_ID"),
     signingKey: must("WORLD_RP_SIGNER_PRIVATE_KEY"),
     action: process.env.WORLD_ACTION || "merchant-onboarding",
+    /** Action for the verified-buyer check at checkout. Defaults to WORLD_ACTION so no extra Developer Portal setup is needed. */
+    buyerAction: process.env.WORLD_BUYER_ACTION || process.env.WORLD_ACTION || "merchant-onboarding",
     environment: worldEnvironment(),
   }),
 };

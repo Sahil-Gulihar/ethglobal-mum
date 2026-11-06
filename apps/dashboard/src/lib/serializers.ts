@@ -24,6 +24,7 @@ export function toPaymentObject(p: PaymentRow, s: SessionRow): PaymentObject {
     chainId: 1874,
     chainPaymentId: p.chainPaymentId as `0x${string}`,
     buyerVerified: !!s.humanVerifiedAt,
+    buyerVerifiedVia: s.humanVerifiedAt ? (s.humanVerifiedVia ?? "zg") : null,
     createdAt: p.createdAt.toISOString(),
   };
 }
@@ -61,7 +62,7 @@ export function toPublicSession(s: SessionRow, m: MerchantRow, p: PaymentRow | n
     successUrl: s.successUrl,
     cancelUrl: s.cancelUrl,
     payment: p ? { id: p.id, txHash: p.txHash as `0x${string}`, explorerUrl: explorerTx(p.txHash) } : null,
-    buyerCheck: { required: m.requireVerifiedBuyers, verified: !!s.humanVerifiedAt },
+    buyerCheck: { required: m.requireVerifiedBuyers, verified: !!s.humanVerifiedAt, method: m.verifiedBuyerMethod },
   };
 }
 

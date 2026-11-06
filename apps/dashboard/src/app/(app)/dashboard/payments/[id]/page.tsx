@@ -226,7 +226,9 @@ export default async function PaymentDetailPage({ params }: { params: Promise<{ 
                           {p.buyerVerified ? (
                             <span className="flex flex-col items-end gap-1">
                               <VerifiedBuyerBadge />
-                              {check ? (
+                              {p.buyerVerifiedVia === "world_id" ? (
+                                <span className="text-xs text-muted-foreground">Proved human with World ID</span>
+                              ) : check ? (
                                 <span className="text-right font-mono text-[11px] text-muted-foreground">
                                   {check.calls.map((c) => `${c.kind}: ${c.requestId ?? "n/a"}`).join(" · ")}
                                 </span>

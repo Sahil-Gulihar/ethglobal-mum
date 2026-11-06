@@ -1,11 +1,14 @@
 ---
 title: "Verified buyers"
-description: "Stop checkout bots with a human check on 0G Private Computer, and see which payments came from verified people."
+description: "Stop checkout bots: buyers prove they're human with World ID or a 0G picture check, and you see which payments came from verified people."
 ---
 
-Bots abuse open checkouts. They farm sessions, test stolen wallets, and spam limited drops. With **Verified buyers**, a person proves they're human before they pay. The check runs on [0G Private Computer](https://pc.0g.ai), and every payment shows whether its buyer was verified.
+Bots abuse open checkouts. They farm sessions, test stolen wallets, and spam limited drops. With **Verified buyers**, a person proves they're human before they pay, and every payment shows whether its buyer was verified. You pick how buyers verify:
 
-## How the check works
+- **World ID (default).** The buyer taps **Verify with World ID** and approves in World App. It's the same World ID check merchants pass at signup. The proof is bound to that one checkout, verified with World's Developer Portal, and the store never learns who the buyer is.
+- **0G picture check.** The buyer names what's in a fresh picture drawn on [0G Private Computer](https://pc.0g.ai). No app needed. It's described below.
+
+## How the 0G picture check works
 
 1. **A fresh picture.** 0G's `z-image-turbo` image model, running in a TEE, draws a new picture for each check, for example "one purple teapot on a sandy beach." Only our server knows the answer. Pictures are never reused, so there is no pool for a bot to scrape.
 2. **Type it or say it.** The buyer writes what they see, or presses the mic and says it. Voice answers are transcribed by `whisper-large-v3` on 0G.
@@ -26,7 +29,7 @@ Making each attempt cost real 0G credits is the point. A bot farm that wants to 
 
 ## Turn it on
 
-In the dashboard, open **Settings → Verified buyers** and switch on **Verified buyers only**.
+In the dashboard, open **Settings → Verified buyers**, pick **World ID** or **0G picture check**, and switch on **Verified buyers only**.
 
 - **On:** the hosted checkout shows the human check first and only shows the pay button after it passes. The embedded widget sends buyers to the hosted checkout to verify.
 - **Off (default):** the check is optional. Buyers can still earn the badge, and you still see it.
@@ -34,14 +37,16 @@ In the dashboard, open **Settings → Verified buyers** and switch on **Verified
 ## See it on payments
 
 - **Payments** and the payment page show a **Verified buyer** badge. The payment page also lists the 0G request IDs for that buyer's check.
-- The `payment.succeeded` webhook and the Payments API include `buyerVerified: true | false`:
+- The `payment.succeeded` webhook and the Payments API include `buyerVerified: true | false`, and `buyerVerifiedVia` (`"world_id"`, `"zg"` or `"zg_badge"`):
 
 ```json
-{ "type": "payment.succeeded", "data": { "payment": { "id": "pay_…", "amount": "4.99", "buyerVerified": true } } }
+{ "type": "payment.succeeded", "data": { "payment": { "id": "pay_…", "amount": "4.99", "buyerVerified": true, "buyerVerifiedVia": "world_id" } } }
 ```
 
 The PaymentRouter contract stays permissionless, so anyone can still call `pay` directly. If you want to be strict, fulfil only orders where `buyerVerified` is `true`.
 
 ## Self-hosting
 
-Set `ZG_API_KEY` (an `sk-` key from pc.0g.ai) to pay for guest checks. `BUYER_KEY_SECRET` encrypts buyers' keys and defaults to `CRON_SECRET`. Optional settings: `ZG_ROUTER_URL`, `ZG_IMAGE_MODEL`, `ZG_JUDGE_MODEL`, `ZG_ASR_MODEL`, and `ZG_TRUST_MODE` (default `private`, which pins every call to TEE providers). Apply `apps/dashboard/sql/2026-11-07-verified-buyers.sql` to your database.
+World ID buyer checks reuse the merchant World ID setup (`WORLD_APP_ID`, `WORLD_RP_ID`, `WORLD_RP_SIGNER_PRIVATE_KEY`, `WORLD_ENVIRONMENT`). They use `WORLD_ACTION` unless you set `WORLD_BUYER_ACTION` to a separate action. Apply `apps/dashboard/sql/2026-11-07-verified-buyers-world-id.sql` after the file below.
+
+For the 0G picture check, set `ZG_API_KEY` (an `sk-` key from pc.0g.ai) to pay for guest checks. `BUYER_KEY_SECRET` encrypts buyers' keys and defaults to `CRON_SECRET`. Optional settings: `ZG_ROUTER_URL`, `ZG_IMAGE_MODEL`, `ZG_JUDGE_MODEL`, `ZG_ASR_MODEL`, and `ZG_TRUST_MODE` (default `private`, which pins every call to TEE providers). Apply `apps/dashboard/sql/2026-11-07-verified-buyers.sql` to your database.

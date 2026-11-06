@@ -67,7 +67,7 @@ function payingKey(buyer: Buyer | null): { key: string; payer: "buyer" | "platfo
 async function markSessionVerified(sessionId: string, checkId: string | null, buyerId: string | null) {
   await db
     .update(checkoutSessions)
-    .set({ humanVerifiedAt: new Date(), humanCheckId: checkId, buyerId })
+    .set({ humanVerifiedAt: new Date(), humanCheckId: checkId, buyerId, humanVerifiedVia: checkId ? "zg" : "zg_badge" })
     .where(eq(checkoutSessions.id, sessionId));
 }
 
@@ -89,6 +89,7 @@ export async function startHumanCheck(sessionId: string): Promise<StartResult | 
   const r = await loadOpenSession(sessionId);
   if (!r.ok) return r;
   if (r.s.humanVerifiedAt) return { ok: true, verified: true, via: "session" };
+  if (r.m.verifiedBuyerMethod !== "zg") return fail(409, "wrong_method", "This store verifies buyers with World ID.");
 
   const buyer = await getCurrentBuyer();
   // A signed-in buyer who passed a check in the last 30 days carries the badge across every store.
