@@ -1,0 +1,406 @@
+/* The landing hero demo. Every rule is scoped under .wch; the look maps the
+   kit's tokens to docs/DESIGN.md (Geist, monochrome, light and dark). The
+   site's own CSS variables already follow the page theme, so the stage reads
+   them directly; the dark block only adds the surface steps a dark product
+   shot needs for depth (shadows barely show on black). */
+.wch {
+  & .ss-stage {
+    overflow: hidden;
+    background: transparent;
+    --ss-font: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+    --ss-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+    --ss-canvas: var(--bg-200);
+    --ss-surface: var(--bg-100);
+    --ss-chrome: var(--bg-200);
+    --ss-well: var(--bg-200);
+    --ss-raised: var(--bg-100);
+    --ss-line: var(--alpha-300);
+    --ss-line-faint: var(--alpha-200);
+    --ss-text-strong: var(--gray-1000);
+    --ss-text: var(--gray-900);
+    --ss-text-faint: var(--gray-700);
+    --ss-icon: var(--gray-900);
+    --ss-icon-faint: var(--gray-600);
+    --ss-accent: var(--gray-1000);
+    --ss-success: var(--green-900);
+    --ss-success-text: var(--green-900);
+    --ss-success-soft: var(--green-100);
+    --ss-radius-sm: 6px;
+    --ss-radius-md: 6px;
+    --ss-radius-lg: 8px;
+    --ss-radius-window: 12px;
+    --ss-shadow-window: 0 0 0 1px var(--alpha-300), 0 24px 56px -16px oklch(0 0 0 / 0.14), 0 10px 24px -14px oklch(0 0 0 / 0.1);
+    --ss-shadow-hero: var(--ss-shadow-window);
+    --ss-shadow-satellite: 0 0 0 1px var(--alpha-300), 0 18px 40px -10px oklch(0 0 0 / 0.2), 0 4px 10px -4px oklch(0 0 0 / 0.08);
+    font-feature-settings: "rlig" 1, "calt" 0, "ss11" 1;
+  }
+
+  & .ss-stage[data-theme="dark"] {
+    --ss-surface: color-mix(in oklch, var(--gray-100) 18%, var(--bg-100));
+    --ss-canvas: color-mix(in oklch, var(--gray-100) 30%, var(--bg-100));
+    --ss-chrome: var(--ss-canvas);
+    --ss-raised: color-mix(in oklch, var(--gray-100) 52%, var(--bg-100));
+    --ss-shadow-window: 0 0 0 1px var(--alpha-300), 0 30px 60px -12px oklch(0 0 0 / 0.7);
+    --ss-shadow-satellite: 0 0 0 1px var(--alpha-400), 0 18px 40px -10px oklch(0 0 0 / 0.8);
+  }
+
+  /* ---- The merchant's dashboard, behind: pinned top, off the bottom ---- */
+
+  .wch-win {
+    position: absolute;
+    top: 32px;
+    left: 216px;
+    width: 904px;
+    height: 560px;
+    box-shadow: var(--ss-shadow-hero);
+  }
+
+  .wch-side {
+    display: grid;
+    align-content: start;
+    gap: 4px;
+    padding: 8px 12px;
+  }
+
+  .wch-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 32px;
+    padding: 0 8px;
+    border-radius: 6px;
+  }
+
+  .wch-nav[data-on] {
+    background: var(--alpha-100);
+  }
+
+  .wch-main {
+    display: grid;
+    align-content: start;
+    gap: 16px;
+    padding: 8px 24px 24px;
+    height: 100%;
+    background: var(--ss-surface);
+    color: var(--ss-text);
+    font-size: 13px;
+    line-height: 18px;
+  }
+
+  .wch-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .wch-title {
+    color: var(--ss-text-strong);
+    font-size: 18px;
+    line-height: 24px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  .wch-net {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+  }
+
+  .wch-dot {
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gray-700);
+  }
+
+  .wch-dot[data-tone="success"] {
+    background: var(--green-900);
+  }
+
+  .wch-table {
+    display: grid;
+    border-top: 1px solid var(--ss-line);
+  }
+
+  .wch-tr {
+    --cols: minmax(0, 1.1fr) minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 0.8fr);
+    display: grid;
+    grid-template-columns: var(--cols);
+    align-items: center;
+    gap: 16px;
+    height: 46px;
+    padding: 0 12px;
+    border-bottom: 1px solid var(--ss-line-faint);
+  }
+
+  .wch-th {
+    height: 36px;
+    background: var(--ss-canvas);
+    color: var(--ss-text);
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .wch-end {
+    justify-self: end;
+    text-align: right;
+  }
+
+  .wch-amt {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    color: var(--ss-text-strong);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wch-amt .wch-unit {
+    color: var(--ss-text);
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .wch-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--ss-text-strong);
+    font-weight: 500;
+  }
+
+  .wch-order,
+  .wch-when {
+    color: var(--ss-text);
+  }
+
+  .wch-mono {
+    font-family: var(--ss-mono);
+    font-size: 12px;
+  }
+
+  /* ---- The hosted checkout, in front: on the stage gutter, its right edge
+     24px short of the sidebar's line (216 + 216 = 432) ---- */
+
+  .wch-card {
+    position: absolute;
+    z-index: 2;
+    top: 72px;
+    left: 32px;
+    width: 376px;
+    display: grid;
+    padding: 24px;
+    border-radius: 12px;
+    background: var(--ss-raised);
+    box-shadow: var(--ss-shadow-satellite);
+    color: var(--ss-text);
+    font-size: 13px;
+    line-height: 18px;
+  }
+
+  .wch-merchant {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .wch-strong {
+    color: var(--ss-text-strong);
+    font-size: 15px;
+    line-height: 20px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  .wch-faint {
+    color: var(--ss-text);
+    font-size: 12px;
+  }
+
+  .wch-total {
+    display: grid;
+    gap: 4px;
+    margin-top: 24px;
+  }
+
+  .wch-label {
+    color: var(--ss-text);
+  }
+
+  .wch-amount {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    color: var(--ss-text-strong);
+    font-size: 40px;
+    line-height: 48px;
+    font-weight: 450;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wch-unit {
+    color: var(--ss-text);
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  .wch-facts {
+    display: grid;
+    margin-top: 20px;
+    padding-top: 8px;
+    border-top: 1px solid var(--ss-line);
+  }
+
+  .wch-fact {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+  }
+
+  .wch-value {
+    color: var(--ss-text-strong);
+  }
+
+  /* The one action: every state in one cell, crossfading in place */
+  .wch-pay {
+    display: grid;
+    grid-template-areas: "stack";
+    place-items: center;
+    height: 40px;
+    margin-top: 16px;
+    border-radius: 6px;
+    background: var(--gray-1000);
+    color: var(--bg-100);
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.25s ease, color 0.25s ease, opacity 0.15s ease;
+  }
+
+  .wch-pay[data-hover] {
+    opacity: 0.9;
+  }
+
+  .wch-pay[data-pressed] {
+    opacity: 0.82;
+  }
+
+  .wch-pay[data-phase="paid"] {
+    background: var(--green-100);
+    color: var(--green-900);
+    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--green-900) 22%, transparent);
+  }
+
+  .wch-layer {
+    grid-area: stack;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    filter: blur(2px);
+    transition: opacity 0.25s ease, filter 0.25s ease;
+    text-box: trim-both cap alphabetic;
+  }
+
+  .wch-layer[data-on] {
+    opacity: 1;
+    filter: none;
+    transition-delay: 0.08s;
+  }
+
+  .wch-labels {
+    display: grid;
+    justify-items: start;
+  }
+
+  .wch-word {
+    grid-area: 1 / 1;
+    opacity: 0;
+    filter: blur(2px);
+    transition: opacity 0.25s ease, filter 0.25s ease;
+  }
+
+  .wch-word[data-on] {
+    opacity: 1;
+    filter: none;
+    transition-delay: 0.08s;
+  }
+
+  .wch-pay .ss-check__ring {
+    stroke: color-mix(in oklch, currentColor 40%, transparent);
+  }
+
+  .wch-pay .ss-check__arc {
+    stroke: currentColor;
+  }
+
+  .wch-pay .ss-check__fill {
+    fill: currentColor;
+  }
+
+  .wch-pay .ss-check__tick {
+    stroke: var(--green-100);
+  }
+
+  .wch-foot {
+    margin-top: 12px;
+    font-size: 12px;
+  }
+
+  .wch-tx {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  /* ---- Narrow: the dashboard on top without its sidebar, the checkout
+     overlapping its lower half, a 16px gutter ---- */
+
+  & .ss-stage[data-layout="compact"] .wch-win {
+    top: 16px;
+    left: 40px;
+    width: 340px;
+    height: 640px;
+  }
+
+  & .ss-stage[data-layout="compact"] .wch-main {
+    padding: 8px 16px 16px;
+    gap: 12px;
+  }
+
+  & .ss-stage[data-layout="compact"] .wch-tr {
+    --cols: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.7fr);
+    gap: 12px;
+    padding: 0 8px;
+    height: 44px;
+  }
+
+  & .ss-stage[data-layout="compact"] .wch-th {
+    height: 32px;
+  }
+
+  & .ss-stage[data-layout="compact"] .wch-card {
+    top: 220px;
+    left: 16px;
+    width: 300px;
+    padding: 20px;
+  }
+
+  & .ss-stage[data-layout="compact"] .wch-total {
+    margin-top: 20px;
+  }
+
+  & .ss-stage[data-layout="compact"] .wch-amount {
+    font-size: 34px;
+    line-height: 40px;
+  }
+}

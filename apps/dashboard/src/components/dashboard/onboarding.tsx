@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Icon } from "@/components/icons";
@@ -28,7 +27,7 @@ export function OnboardingChecklist(p: OnboardingProps) {
       description: `Customers see “${p.name}” at checkout.`,
       done: true,
       body: (
-        <Link href="/dashboard/settings" className={buttonVariants({ variant: "outline", size: "sm" })}>
+        <Link href="/dashboard/settings" className={buttonVariants({ variant: "secondary", size: "sm" })}>
           Edit business name
         </Link>
       ),
@@ -40,8 +39,8 @@ export function OnboardingChecklist(p: OnboardingProps) {
       done: p.verified,
       skipped: p.verified && p.skipWorldId,
       body: (
-        <div className="flex items-center gap-3 rounded-lg border border-dashed px-3 py-2.5 text-sm text-muted-foreground">
-          <Icon name="shield" className="text-primary" />
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Icon name="shield" />
           {p.skipWorldId ? "Skipped on testnet. Your account is active." : "World ID verification is coming soon."}
         </div>
       ),
@@ -76,50 +75,52 @@ export function OnboardingChecklist(p: OnboardingProps) {
   const current = steps.findIndex((s) => !s.done);
 
   return (
-    <Card className="overflow-hidden">
-      <div className="flex flex-col gap-4 border-b bg-[linear-gradient(120deg,var(--accent),transparent_70%)] p-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-base font-semibold tracking-tight">Get set up to accept USDT</h2>
+    <section aria-labelledby="setup-title" className="flex min-w-0 flex-col gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
+        <div className="flex flex-col gap-0.5">
+          <h2 id="setup-title" className="text-base leading-6 font-medium tracking-[-0.02em]">
+            Get set up to accept USDT
+          </h2>
           <p className="text-sm text-muted-foreground">Finish these steps to take your first payment on Whitechain.</p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-sm font-medium tabular">
-            {completed} of {steps.length}
+          <span className="text-[13px] text-muted-foreground tabular">
+            {completed} of {steps.length} done
           </span>
-          <div className="h-2 w-32 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuemin={0} aria-valuemax={steps.length} aria-valuenow={completed} aria-label="Setup progress">
-            <div className="h-full rounded-full bg-primary transition-[width] duration-500" style={{ width: `${(completed / steps.length) * 100}%` }} />
+          <div className="h-1 w-24 overflow-hidden rounded-full bg-gray-200" role="progressbar" aria-valuemin={0} aria-valuemax={steps.length} aria-valuenow={completed} aria-label="Setup progress">
+            <div className="h-full rounded-full bg-primary" style={{ width: `${(completed / steps.length) * 100}%` }} />
           </div>
         </div>
       </div>
-      <ol className="divide-y">
+      <ol className="divide-y divide-border rounded-lg border border-border">
         {steps.map((s, i) => {
           const isCurrent = i === current;
           return (
-            <li key={s.key} className={cn("flex gap-4 px-5 py-4", isCurrent && "bg-muted/30")}>
+            <li key={s.key} className="flex gap-3.5 px-4 py-4 sm:px-5">
               <span
                 aria-hidden
                 className={cn(
-                  "mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border text-xs font-semibold",
-                  s.done ? "border-transparent bg-primary text-primary-foreground" : isCurrent ? "border-primary text-primary" : "text-muted-foreground",
+                  "mt-px grid size-5 shrink-0 place-items-center rounded-full text-[11px] font-medium tabular",
+                  s.done ? "bg-primary text-primary-foreground" : isCurrent ? "border border-border-strong text-foreground" : "border border-border-default text-faint",
                 )}
               >
-                {s.done ? <Icon name="check" className="size-3.5" /> : i + 1}
+                {s.done ? <Icon name="check" className="size-3" /> : i + 1}
               </span>
               <div className="flex min-w-0 flex-1 flex-col gap-3">
                 <div className="flex flex-col gap-0.5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className={cn("text-sm font-semibold", s.done && !isCurrent && "text-muted-foreground")}>{s.title}</p>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <p className={cn("text-sm font-medium", s.done ? "text-muted-foreground" : "text-foreground")}>{s.title}</p>
                     {s.skipped && <Badge>Skipped on testnet</Badge>}
                     <span className="sr-only">{s.done ? "(done)" : isCurrent ? "(current step)" : "(to do)"}</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{s.description}</p>
+                  {(isCurrent || !s.done) && <p className="text-sm text-muted-foreground">{s.description}</p>}
                 </div>
-                {isCurrent && s.body}
+                {isCurrent && <div className="max-w-xl">{s.body}</div>}
               </div>
             </li>
           );
         })}
       </ol>
-    </Card>
+    </section>
   );
 }

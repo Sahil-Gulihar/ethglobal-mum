@@ -68,7 +68,8 @@ export interface WhitechainCheckoutProps {
   onError?: (error: Error) => void;
   /** Called when the customer clicks Cancel. If omitted and the session has a cancelUrl, we navigate there. */
   onCancel?: () => void;
-  theme?: "light" | "dark";
+  /** "auto" (default) follows the OS colour scheme live; "light" or "dark" forces one. */
+  theme?: "light" | "dark" | "auto";
   className?: string;
 }
 
@@ -83,7 +84,7 @@ function formatAmount(units: bigint, decimals: number): string {
 }
 
 export function WhitechainCheckout(props: WhitechainCheckoutProps) {
-  const { sessionId, theme = "light", className } = props;
+  const { sessionId, theme = "auto", className } = props;
   const apiBase = useMemo(() => resolveApiBase(props.apiBase), [props.apiBase]);
   const [state, dispatch] = useReducer(reducer, initialState);
   const stateRef = useRef<State>(state);
@@ -472,7 +473,9 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
       <footer className="wcc-foot">
         <LockIcon />
         <span>Non-custodial</span>
-        <span className="wcc-foot-sep">·</span>
+        <span className="wcc-foot-sep" aria-hidden>
+          ·
+        </span>
         <span>
           Powered by <b>Whitechain Commerce</b>
         </span>
@@ -501,7 +504,6 @@ export interface ViewProps {
   onCancel: () => void;
 }
 
-/** Internal: pure view, exported for previews/tests only (not part of the public API). */
 /** Short status line for screen readers (announced on phase changes and errors). */
 function announce(s: State): string {
   if (s.error) return s.error;
@@ -527,33 +529,70 @@ function announce(s: State): string {
   }
 }
 
+/** Header metadata on the right: the countdown before paying, a status label after. */
+function HeadMeta({ state, msLeft }: { state: State; msLeft: number }) {
+  const countdown = formatCountdown(msLeft);
+  if (isPrePay(state.phase) && countdown)
+    return (
+      <span className="wcc-meta" data-urgent={msLeft < 120_000} title="Time left to pay">
+        <ClockIcon />
+        <span>
+          <span className="wcc-sr">Expires in </span>
+          {countdown}
+        </span>
+      </span>
+    );
+  switch (state.phase) {
+    case "approving":
+    case "paying":
+    case "confirming":
+      return (
+        <span className="wcc-meta">
+          <span className="wcc-dot" data-kind="warn" /> Processing
+        </span>
+      );
+    case "success":
+      return (
+        <span className="wcc-meta">
+          <span className="wcc-dot" /> Paid
+        </span>
+      );
+    case "expired":
+      return (
+        <span className="wcc-meta">
+          <span className="wcc-dot" data-kind="muted" /> Expired
+        </span>
+      );
+    default:
+      return null;
+  }
+}
+
+/** Internal: pure view, exported for previews/tests only (not part of the public API). */
 export function View(p: ViewProps) {
   const { state } = p;
   const session = state.session;
 
-  if (state.phase === "loading" || !session) {
-    if (state.phase === "load_error")
-      return (
-        <section className="wcc-body" style={{ paddingTop: 28 }}>
-          <div className="wcc-center">
-            <div className="wcc-badge-ic" data-kind="muted">
-              <AlertIcon />
-            </div>
-            <p className="wcc-title">We couldn't load this checkout</p>
-            <p className="wcc-text">{state.error}</p>
-            <button className="wcc-btn" onClick={p.onRetryLoad}>
-              Try again
-            </button>
+  if (state.phase === "load_error" && !session)
+    return (
+      <section className="wcc-body" data-center="true">
+        <div className="wcc-main">
+          <div className="wcc-badge" data-kind="error">
+            <AlertIcon size={20} />
           </div>
-        </section>
-      );
-    return <Skeleton />;
-  }
+          <h2 className="wcc-title">We couldn't load this checkout</h2>
+          <p className="wcc-text">{state.error}</p>
+        </div>
+        <div className="wcc-actions">
+          <button type="button" className="wcc-btn" onClick={p.onRetryLoad}>
+            Try again
+          </button>
+        </div>
+      </section>
+    );
+  if (!session) return <Skeleton />;
 
-  const decimals = session.decimals;
-  const amountLabel = formatAmount(BigInt(session.amountUnits), decimals);
-  const countdown = formatCountdown(p.msLeft);
-  const showTimer = isPrePay(state.phase) && countdown;
+  const amountLabel = formatAmount(BigInt(session.amountUnits), session.decimals);
 
   return (
     <>
@@ -563,27 +602,26 @@ export function View(p: ViewProps) {
         </div>
         <div className="wcc-merchant">
           <div className="wcc-merchant-name">{session.merchant.name}</div>
-          <div className="wcc-merchant-sub">Order {session.orderId}</div>
+          <div className="wcc-merchant-sub">
+            <span>Order</span>
+            <span className="wcc-mono" title={session.orderId}>
+              {session.orderId}
+            </span>
+          </div>
         </div>
-        {showTimer ? (
-          <span className="wcc-pill" data-urgent={p.msLeft < 120_000} title="Time left to pay">
-            <ClockIcon /> {countdown}
-          </span>
-        ) : null}
+        <HeadMeta state={state} msLeft={p.msLeft} />
       </header>
       <div className="wcc-amount">
         <div className="wcc-label">{state.phase === "success" ? "You paid" : "Amount due"}</div>
         <div className="wcc-amount-row">
           <span className="wcc-amount-value">{amountLabel}</span>
-          <span className="wcc-amount-cur">
-            <UsdtIcon /> USDT
-          </span>
+          <span className="wcc-amount-cur">USDT</span>
         </div>
-        <span className="wcc-net">
+        <div className="wcc-net">
           <span className="wcc-dot" /> Whitechain Sepolia
-        </span>
+        </div>
       </div>
-      <div className="wcc-divider" />
+      <div className="wcc-sep" />
       <Body {...p} amountLabel={amountLabel} />
     </>
   );
@@ -595,37 +633,44 @@ function ErrorBanner({ message, onDismiss }: { message: string | null; onDismiss
     <div className="wcc-alert" role="alert">
       <AlertIcon size={16} />
       <span>{message}</span>
-      <button className="wcc-alert-x" aria-label="Dismiss" onClick={onDismiss}>
-        ×
+      <button type="button" className="wcc-alert-x" aria-label="Dismiss" onClick={onDismiss}>
+        <CloseIcon />
       </button>
     </div>
+  );
+}
+
+function CancelButton({ show, onCancel }: { show: boolean; onCancel: () => void }) {
+  if (!show) return null;
+  return (
+    <button type="button" className="wcc-btn-ghost" onClick={onCancel}>
+      Cancel and return to store
+    </button>
   );
 }
 
 function Body(p: ViewProps & { amountLabel: string }) {
   const { state, amountLabel } = p;
   const session = state.session as PublicCheckoutSession;
-  const cancelLink = p.canCancel ? (
-    <button className="wcc-btn-ghost" onClick={p.onCancel}>
-      Cancel and return to store
-    </button>
-  ) : null;
+  const merchant = session.merchant.name.replace(/\.+$/, "");
 
   switch (state.phase) {
     case "expired":
       return (
-        <section className="wcc-body" key="expired">
-          <div className="wcc-center">
-            <div className="wcc-badge-ic" data-kind="muted">
-              <ClockIcon size={28} />
+        <section className="wcc-body" data-center="true" key="expired">
+          <div className="wcc-main">
+            <div className="wcc-badge">
+              <ClockIcon size={20} />
             </div>
-            <p className="wcc-title">This checkout has expired</p>
+            <h2 className="wcc-title">This checkout has expired</h2>
             <p className="wcc-text">No payment was taken. Return to the store to start a new checkout.</p>
           </div>
           {session.cancelUrl ? (
-            <a className="wcc-btn" href={session.cancelUrl}>
-              Return to store
-            </a>
+            <div className="wcc-actions">
+              <a className="wcc-btn" href={session.cancelUrl}>
+                Return to store
+              </a>
+            </div>
           ) : null}
         </section>
       );
@@ -634,38 +679,60 @@ function Body(p: ViewProps & { amountLabel: string }) {
       const r = p.result;
       return (
         <section className="wcc-body" key="success">
-          <div className="wcc-center">
-            <div className="wcc-badge-ic wcc-pop" data-kind="success">
-              <svg className="wcc-check" width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <div className="wcc-main" style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+            <div className="wcc-badge" data-kind="success" style={{ margin: 0 }}>
+              <svg className="wcc-check" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path
                   d="M5 12.5l4.5 4.5L19 7.5"
                   stroke="currentColor"
-                  strokeWidth="2.6"
+                  strokeWidth="2.4"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
               </svg>
             </div>
-            <p className="wcc-title">{state.alreadyPaid ? "This order is already paid" : "Payment complete"}</p>
-            <p className="wcc-text">
-              {amountLabel} USDT sent to {session.merchant.name.replace(/\.+$/, "")}. Settled and verified on Whitechain.
-            </p>
-          </div>
-          {r?.txHash ? (
-            <div className="wcc-rows">
-              <div className="wcc-row">
-                <span className="wcc-row-k">Transaction</span>
-                <a className="wcc-row-v wcc-mono" href={r.explorerUrl} target="_blank" rel="noreferrer">
-                  {short(r.txHash)} ↗
-                </a>
-              </div>
+            <div style={{ minWidth: 0, paddingTop: 0 }}>
+              <h2 className="wcc-title">{state.alreadyPaid ? "This order is already paid" : "Payment complete"}</h2>
+              <p className="wcc-text">
+                {amountLabel} USDT sent to {merchant}, settled on Whitechain.
+              </p>
             </div>
-          ) : null}
-          {session.successUrl ? (
-            <a className="wcc-btn" href={session.successUrl}>
-              Return to store
-            </a>
-          ) : null}
+          </div>
+          <dl className="wcc-rows">
+            <div className="wcc-row">
+              <dt>Status</dt>
+              <dd className="wcc-success-text">
+                <CheckSmallIcon /> Succeeded
+              </dd>
+            </div>
+            {r?.txHash ? (
+              <div className="wcc-row">
+                <dt>Transaction</dt>
+                <dd>
+                  <a className="wcc-mono" href={r.explorerUrl} target="_blank" rel="noreferrer" title={r.txHash}>
+                    {short(r.txHash)}
+                  </a>
+                </dd>
+              </div>
+            ) : null}
+          </dl>
+          <div className="wcc-actions">
+            {session.successUrl ? (
+              <a className="wcc-btn" href={session.successUrl}>
+                Return to store
+              </a>
+            ) : null}
+            {r?.explorerUrl ? (
+              <a
+                className={session.successUrl ? "wcc-btn-ghost" : "wcc-btn-2"}
+                href={r.explorerUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                View on Whitechain explorer <ArrowIcon />
+              </a>
+            ) : null}
+          </div>
         </section>
       );
     }
@@ -673,33 +740,36 @@ function Body(p: ViewProps & { amountLabel: string }) {
     case "connect":
     case "connecting": {
       const none = p.walletsSettled && p.wallets.length === 0;
+      const discovering = !p.walletsSettled && p.wallets.length === 0;
       return (
         <section className="wcc-body" key="connect">
-          <p className="wcc-title">Pay with your wallet</p>
-          <p className="wcc-text">Connect a wallet that holds USDT on Whitechain.</p>
+          <h2 className="wcc-title">Pay with your wallet</h2>
+          <p className="wcc-text">Connect a wallet that holds USDT on Whitechain Sepolia.</p>
           <ErrorBanner message={state.error} onDismiss={p.onDismissError} />
           {none ? (
             <div className="wcc-alert" data-kind="info">
               <WalletIcon size={16} />
               <span>
-                No wallet found.{" "}
+                No wallet found in this browser.{" "}
                 <a href={METAMASK_URL} target="_blank" rel="noreferrer">
                   Install MetaMask
-                </a>{" "}
-                and reload this page.
+                </a>
+                , then reload this page.
               </span>
             </div>
           ) : (
             <div className="wcc-wallets">
-              {!p.walletsSettled && p.wallets.length === 0 ? (
-                <div className="wcc-skel" style={{ height: 58, borderRadius: 14 }} />
+              {discovering ? (
+                <span className="wcc-skel" style={{ height: 48 }} aria-label="Looking for wallets" />
               ) : (
                 p.wallets.map((w) => {
                   const busy = state.phase === "connecting" && state.walletId === w.id;
                   return (
                     <button
+                      type="button"
                       key={w.id}
                       className="wcc-wallet"
+                      data-busy={busy}
                       disabled={state.phase === "connecting"}
                       onClick={() => p.onConnect(w)}
                     >
@@ -707,14 +777,18 @@ function Body(p: ViewProps & { amountLabel: string }) {
                         <img src={w.icon} alt="" />
                       ) : (
                         <span className="wcc-wallet-icon">
-                          <WalletIcon />
+                          <WalletIcon size={14} />
                         </span>
                       )}
                       <span className="wcc-wallet-name">{w.name}</span>
                       {busy ? (
-                        <span className="wcc-spin" style={{ color: "var(--wcc-accent)" }} />
+                        <span className="wcc-wallet-hint">
+                          <span className="wcc-spin" data-size="sm" /> Connecting
+                        </span>
                       ) : (
-                        <span className="wcc-wallet-hint">Connect ›</span>
+                        <span className="wcc-wallet-hint">
+                          Connect <ChevronIcon />
+                        </span>
                       )}
                     </button>
                   );
@@ -722,59 +796,80 @@ function Body(p: ViewProps & { amountLabel: string }) {
               )}
             </div>
           )}
-          {state.phase === "connecting" ? (
-            <p className="wcc-text" style={{ margin: "12px 0 0", textAlign: "center" }}>
-              Approve the connection in your wallet…
-            </p>
-          ) : null}
-          {cancelLink ? <div style={{ marginTop: 8 }}>{cancelLink}</div> : null}
+          <div className="wcc-actions">
+            {state.phase === "connecting" ? (
+              <p className="wcc-note">Approve the connection in your wallet.</p>
+            ) : (
+              <CancelButton show={p.canCancel} onCancel={p.onCancel} />
+            )}
+          </div>
         </section>
       );
     }
 
     case "wrong_network":
-    case "switching":
+    case "switching": {
+      const switching = state.phase === "switching";
       return (
         <section className="wcc-body" key="network">
-          <p className="wcc-title">Switch to Whitechain Sepolia</p>
-          <p className="wcc-text">
-            Your wallet is on another network. Payments settle on Whitechain Sepolia (chain {WHITECHAIN_CHAIN_ID}).
-          </p>
+          <h2 className="wcc-title">Switch to Whitechain Sepolia</h2>
+          <p className="wcc-text">Your wallet is on another network. Payments settle on Whitechain Sepolia.</p>
           <ErrorBanner message={state.error} onDismiss={p.onDismissError} />
-          <AccountRow state={state} onDisconnect={p.onDisconnect} />
-          <button className="wcc-btn" data-busy={state.phase === "switching"} disabled={state.phase === "switching"} onClick={p.onSwitch}>
-            {state.phase === "switching" ? (
-              <>
-                <span className="wcc-spin" /> Confirm in your wallet…
-              </>
-            ) : (
-              "Switch network"
-            )}
-          </button>
-          {cancelLink}
+          <dl className="wcc-rows">
+            <AccountRow state={state} onDisconnect={p.onDisconnect} />
+            <div className="wcc-row">
+              <dt>Wallet network</dt>
+              <dd>
+                <span className="wcc-dot" data-kind="warn" />
+                {state.chainId !== null ? (
+                  <span>
+                    Chain <span className="wcc-mono">{state.chainId}</span>
+                  </span>
+                ) : (
+                  "Unknown"
+                )}
+              </dd>
+            </div>
+          </dl>
+          <div className="wcc-actions">
+            <button type="button" className="wcc-btn" data-busy={switching} disabled={switching} onClick={p.onSwitch}>
+              {switching ? (
+                <>
+                  <span className="wcc-spin" /> Confirm in your wallet…
+                </>
+              ) : (
+                "Switch network"
+              )}
+            </button>
+            <CancelButton show={p.canCancel} onCancel={p.onCancel} />
+          </div>
         </section>
       );
+    }
+
+    case "review":
+      return <ReviewBody {...p} />;
 
     default:
-      return <ReviewBody {...p} />;
+      return <ProgressBody {...p} />;
   }
 }
 
 function AccountRow({ state, onDisconnect }: { state: State; onDisconnect?: () => void }) {
   if (!state.account) return null;
   return (
-    <div className="wcc-rows">
-      <div className="wcc-row">
-        <span className="wcc-row-k">Pay from</span>
-        <span className="wcc-row-v">
-          <span className="wcc-mono">{short(state.account)}</span>
-          {onDisconnect && isPrePay(state.phase) ? (
-            <button className="wcc-link-btn" onClick={onDisconnect}>
-              Change
-            </button>
-          ) : null}
+    <div className="wcc-row">
+      <dt>Pay from</dt>
+      <dd>
+        <span className="wcc-mono" title={state.account}>
+          {short(state.account)}
         </span>
-      </div>
+        {onDisconnect && isPrePay(state.phase) ? (
+          <button type="button" className="wcc-link-btn" onClick={onDisconnect}>
+            Change
+          </button>
+        ) : null}
+      </dd>
     </div>
   );
 }
@@ -782,58 +877,32 @@ function AccountRow({ state, onDisconnect }: { state: State; onDisconnect?: () =
 function ReviewBody(p: ViewProps & { amountLabel: string }) {
   const { state, amountLabel } = p;
   const session = state.session as PublicCheckoutSession;
-  const loaded = state.balance !== null;
+  const loaded = state.balance !== null && state.allowance !== null;
   const lowBalance = insufficientBalance(state);
   const noGas = insufficientGas(state);
-  const stepList = steps(state);
-  const txHash = state.payTx ?? (state.phase === "approving" ? state.approveTx : null);
-
-  let button: ReactNode;
-  if (state.phase === "review") {
-    button = (
-      <button className="wcc-btn" disabled={!canPay(state)} onClick={p.onPay}>
-        {!loaded ? (
-          <>
-            <span className="wcc-spin" /> Checking balance…
-          </>
-        ) : needsApproval(state) ? (
-          `Approve & pay ${amountLabel} USDT`
-        ) : (
-          `Pay ${amountLabel} USDT`
-        )}
-      </button>
-    );
-  } else {
-    const label =
-      state.phase === "approving"
-        ? state.waiting === "wallet"
-          ? "Approve USDT in your wallet…"
-          : "Waiting for approval to confirm…"
-        : state.phase === "paying"
-          ? "Confirm payment in your wallet…"
-          : "Confirming payment…";
-    button = (
-      <button className="wcc-btn" data-busy="true" disabled>
-        <span className="wcc-spin" /> {label}
-      </button>
-    );
-  }
+  const approval = needsApproval(state);
 
   return (
     <section className="wcc-body" key="review">
+      <h2 className="wcc-title">Review and pay</h2>
+      <p className="wcc-text">
+        {approval
+          ? "Your wallet asks twice: once to approve this USDT amount, then to pay."
+          : "Your wallet will ask you to confirm one transaction."}
+      </p>
       <ErrorBanner message={state.error} onDismiss={p.onDismissError} />
-      {state.phase === "review" && lowBalance ? (
+      {lowBalance ? (
         <div className="wcc-alert" data-kind="warn">
           <AlertIcon size={16} />
           <span>
-            Not enough USDT. Top up this wallet from the{" "}
+            Not enough USDT in this wallet. Top up from the{" "}
             <a href={FAUCET_URL} target="_blank" rel="noreferrer">
               Whitechain faucet
             </a>
-            , then come back. We refresh your balance automatically.
+            . Your balance refreshes automatically.
           </span>
         </div>
-      ) : state.phase === "review" && noGas ? (
+      ) : noGas ? (
         <div className="wcc-alert" data-kind="warn">
           <AlertIcon size={16} />
           <span>
@@ -845,81 +914,123 @@ function ReviewBody(p: ViewProps & { amountLabel: string }) {
           </span>
         </div>
       ) : null}
-      <div className="wcc-rows">
-        {state.account ? (
-          <>
-            <div className="wcc-row">
-              <span className="wcc-row-k">Pay from</span>
-              <span className="wcc-row-v">
-                <span className="wcc-mono">{short(state.account)}</span>
-                {state.phase === "review" ? (
-                  <button className="wcc-link-btn" onClick={p.onDisconnect}>
-                    Change
-                  </button>
-                ) : null}
-              </span>
-            </div>
-            <div className="wcc-row">
-              <span className="wcc-row-k">Your balance</span>
-              <span className="wcc-row-v" data-bad={lowBalance}>
-                {state.balance === null ? (
-                  <span className="wcc-skel" style={{ width: 80, height: 14, display: "inline-block" }} />
+      <dl className="wcc-rows">
+        <AccountRow state={state} onDisconnect={p.onDisconnect} />
+        <div className="wcc-row">
+          <dt>Balance</dt>
+          <dd data-bad={lowBalance}>
+            {state.balance === null ? (
+              <span className="wcc-skel" style={{ width: 88, height: 16 }} aria-label="Loading balance" />
+            ) : (
+              `${formatAmount(state.balance, session.decimals)} USDT`
+            )}
+          </dd>
+        </div>
+      </dl>
+      <div className="wcc-actions">
+        <button type="button" className="wcc-btn" data-busy={!loaded} disabled={!canPay(state)} onClick={p.onPay}>
+          {!loaded ? (
+            <>
+              <span className="wcc-spin" /> Checking balance…
+            </>
+          ) : approval ? (
+            `Approve and pay ${amountLabel} USDT`
+          ) : (
+            `Pay ${amountLabel} USDT`
+          )}
+        </button>
+        <CancelButton show={p.canCancel} onCancel={p.onCancel} />
+      </div>
+    </section>
+  );
+}
+
+/** approving, paying and confirming: a progress list with the current step spinning. */
+function ProgressBody(p: ViewProps & { amountLabel: string }) {
+  const { state, amountLabel } = p;
+  const stepList = steps(state);
+
+  let title: string;
+  let text: string;
+  let note: ReactNode;
+  if (state.phase === "approving") {
+    title = state.waiting === "chain" ? "Waiting for the approval" : "Approve USDT";
+    text =
+      state.waiting === "chain"
+        ? "Your approval is confirming on Whitechain. The payment request comes next."
+        : `Allow the payment contract to transfer ${amountLabel} USDT from your wallet.`;
+    note = state.waiting === "chain" ? "Usually takes a few seconds." : "Check your wallet to continue.";
+  } else if (state.phase === "paying") {
+    title = "Confirm the payment";
+    text = `Confirm the ${amountLabel} USDT payment in your wallet.`;
+    note = "Check your wallet to continue.";
+  } else {
+    title = "Confirming payment";
+    text = "Your transaction is on Whitechain. We're verifying it now.";
+    note = "Usually takes a few seconds. You can keep this page open.";
+  }
+
+  const buttonLabel =
+    state.phase === "approving"
+      ? state.waiting === "chain"
+        ? "Confirming approval…"
+        : "Approve in your wallet…"
+      : state.phase === "paying"
+        ? "Confirm in your wallet…"
+        : "Confirming payment…";
+
+  return (
+    <section className="wcc-body" key="progress">
+      <h2 className="wcc-title">{title}</h2>
+      <p className="wcc-text">{text}</p>
+      <ol className="wcc-steps" aria-label="Payment progress">
+        {stepList.map((s, i) => {
+          const txLink =
+            s.status === "active" && s.key === "approve" && state.approveTx
+              ? explorerTx(state.approveTx)
+              : s.status === "active" && s.key === "confirm" && state.payTx
+                ? explorerTx(state.payTx)
+                : null;
+          return (
+            <li key={s.key} className="wcc-step" data-s={s.status} aria-current={s.status === "active" ? "step" : undefined}>
+              <span className="wcc-step-ic">
+                {s.status === "done" ? (
+                  <TickIcon />
+                ) : s.status === "active" ? (
+                  <span className="wcc-spin" data-size="sm" />
                 ) : (
-                  `${formatAmount(state.balance, session.decimals)} USDT`
+                  i + 1
                 )}
               </span>
-            </div>
-          </>
-        ) : null}
-        <div className="wcc-row">
-          <span className="wcc-row-k">Network</span>
-          <span className="wcc-row-v">Whitechain Sepolia</span>
-        </div>
-        <div className="wcc-row">
-          <span className="wcc-row-k">Total</span>
-          <span className="wcc-row-v" style={{ fontWeight: 700 }}>
-            {amountLabel} USDT
-          </span>
-        </div>
-      </div>
-      <ol className="wcc-steps" aria-label="Payment progress">
-        {stepList.map((s, i) => (
-          <li key={s.key} className="wcc-step" data-s={s.status}>
-            <span className="wcc-step-ic">
-              {s.status === "done" ? (
-                <TickIcon />
-              ) : s.status === "active" && state.phase !== "review" ? (
-                <span className="wcc-spin" style={{ width: 12, height: 12, borderWidth: 1.5 }} />
-              ) : (
-                i + 1
-              )}
-            </span>
-            {s.label}
-            {s.key === "approve" && s.status === "active" && state.approveTx ? (
-              <a className="wcc-step-note" href={explorerTx(state.approveTx)} target="_blank" rel="noreferrer">
-                View ↗
-              </a>
-            ) : null}
-            {s.key === "confirm" && s.status === "active" && state.payTx ? (
-              <a className="wcc-step-note" href={explorerTx(state.payTx)} target="_blank" rel="noreferrer">
-                View tx ↗
-              </a>
-            ) : null}
-          </li>
-        ))}
+              <span>
+                {s.label}
+                <span className="wcc-sr">{s.status === "done" ? " (done)" : s.status === "active" ? " (in progress)" : ""}</span>
+              </span>
+              {txLink ? (
+                <a className="wcc-step-note" href={txLink} target="_blank" rel="noreferrer">
+                  View transaction
+                </a>
+              ) : null}
+            </li>
+          );
+        })}
       </ol>
-      {button}
-      {state.phase === "confirming" ? (
-        <p className="wcc-text" style={{ margin: "10px 0 0", textAlign: "center", fontSize: 12 }}>
-          {txHash ? "Transaction sent. " : ""}Waiting for Whitechain Commerce to verify the payment onchain. You can
-          keep this page open.
-        </p>
-      ) : null}
-      {state.phase === "review" && p.canCancel ? (
-        <button className="wcc-btn-ghost" onClick={p.onCancel}>
-          Cancel and return to store
+      <div className="wcc-actions">
+        <button type="button" className="wcc-btn" data-busy="true" disabled>
+          <span className="wcc-spin" /> {buttonLabel}
         </button>
-      ) : null}
+        <p className="wcc-note">
+          {state.phase === "confirming" && state.payTx ? (
+            <>
+              <span className="wcc-mono">{short(state.payTx)}</span>
+              <span aria-hidden>·</span>
+              <span>{note}</span>
+            </>
+          ) : (
+            note
+          )}
+        </p>
+      </div>
     </section>
   );
 }
@@ -928,20 +1039,22 @@ function Skeleton() {
   return (
     <div aria-busy="true" aria-label="Loading checkout">
       <div className="wcc-head">
-        <div className="wcc-skel" style={{ width: 36, height: 36, borderRadius: 11 }} />
+        <span className="wcc-skel" style={{ width: 32, height: 32 }} />
         <div style={{ flex: 1 }}>
-          <div className="wcc-skel" style={{ width: 120, height: 14, marginBottom: 6 }} />
-          <div className="wcc-skel" style={{ width: 80, height: 10 }} />
+          <span className="wcc-skel" style={{ width: 120, height: 14, marginBottom: 6 }} />
+          <span className="wcc-skel" style={{ width: 160, height: 12 }} />
         </div>
       </div>
       <div className="wcc-amount">
-        <div className="wcc-skel" style={{ width: 70, height: 10, marginBottom: 10 }} />
-        <div className="wcc-skel" style={{ width: 180, height: 36 }} />
+        <span className="wcc-skel" style={{ width: 88, height: 14, marginBottom: 10 }} />
+        <span className="wcc-skel" style={{ width: 168, height: 34 }} />
+        <span className="wcc-skel" style={{ width: 128, height: 12, marginTop: 14 }} />
       </div>
-      <div className="wcc-divider" />
-      <div className="wcc-body">
-        <div className="wcc-skel" style={{ height: 58, borderRadius: 14, marginBottom: 8 }} />
-        <div className="wcc-skel" style={{ height: 52, borderRadius: 14 }} />
+      <div className="wcc-sep" />
+      <div className="wcc-body" style={{ animation: "none" }}>
+        <span className="wcc-skel" style={{ width: 150, height: 18 }} />
+        <span className="wcc-skel" style={{ width: 260, height: 14, marginTop: 8 }} />
+        <span className="wcc-skel" style={{ height: 48, marginTop: 16 }} />
       </div>
     </div>
   );
@@ -949,53 +1062,51 @@ function Skeleton() {
 
 // ---------- icons ----------
 const LockIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden style={{ flex: "none" }}>
     <rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" strokeWidth="2" />
     <path d="M8 11V8a4 4 0 118 0v3" stroke="currentColor" strokeWidth="2" />
   </svg>
 );
-const ClockIcon = ({ size = 13 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+const ClockIcon = ({ size = 14 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden style={{ flex: "none" }}>
     <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
     <path d="M12 7v5l3 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
-const AlertIcon = ({ size = 28 }: { size?: number }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    aria-hidden
-    style={{ flex: "none", marginTop: size < 20 ? 1 : 0 }}
-  >
+const AlertIcon = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden style={{ flex: "none", marginTop: size < 20 ? 1 : 0 }}>
     <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
     <path d="M12 7.5v5.5M12 16.2v.3" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
   </svg>
 );
-const WalletIcon = ({ size = 18 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden style={{ flex: "none" }}>
+const WalletIcon = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden style={{ flex: "none", marginTop: 1 }}>
     <rect x="3" y="6" width="18" height="13" rx="3" stroke="currentColor" strokeWidth="2" />
     <path d="M16 12.5h2M3 9h15a3 3 0 013 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
 const TickIcon = () => (
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
-    <path
-      d="M5 12.5l4.5 4.5L19 7.5"
-      stroke="currentColor"
-      strokeWidth="3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-const UsdtIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
-    <circle cx="12" cy="12" r="12" fill="#26A17B" />
-    <path
-      d="M13.3 10.4V8.7h3.9V6.2H6.8v2.5h3.9v1.7c-3.2.15-5.6.8-5.6 1.6s2.4 1.45 5.6 1.6v5.5h2.6v-5.5c3.2-.15 5.6-.8 5.6-1.6s-2.4-1.45-5.6-1.6zm0 2.6v0c-.1 0-.6.04-1.3.04-.6 0-1.1-.02-1.3-.04v0c-2.8-.12-4.9-.6-4.9-1.17s2.1-1.05 4.9-1.17v1.9c.2.02.7.05 1.3.05.7 0 1.2-.03 1.3-.05v-1.9c2.8.12 4.9.6 4.9 1.17S16.1 12.88 13.3 13z"
-      fill="#fff"
-    />
+const CheckSmallIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden style={{ flex: "none" }}>
+    <path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+const ChevronIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden style={{ flex: "none" }}>
+    <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+const ArrowIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden style={{ flex: "none" }}>
+    <path d="M8 16L16 8M9 8h7v7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+const CloseIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <path d="M7 7l10 10M17 7L7 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
   </svg>
 );

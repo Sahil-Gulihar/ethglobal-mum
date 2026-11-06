@@ -1,41 +1,36 @@
 import type { ReactNode } from "react";
 import { Wordmark } from "@/components/brand";
-import { Icon } from "@/components/icons";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { AuthShowcase } from "@/components/auth/auth-showcase";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="grid min-h-dvh lg:grid-cols-[1fr_minmax(0,560px)]">
-      <div className="flex flex-col px-6 py-8 sm:px-10">
-        <Wordmark />
-        <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-12">{children}</main>
-        <p className="text-xs text-muted-foreground">Testnet preview on Whitechain Sepolia. No real funds.</p>
+    <div className="grid min-h-dvh lg:grid-cols-2">
+      <div className="flex min-w-0 flex-col px-6 py-6 sm:px-10 sm:py-8">
+        <header>
+          <Wordmark />
+        </header>
+        <main className="mx-auto flex w-full max-w-[360px] flex-1 flex-col justify-center py-12">{children}</main>
+        <footer className="flex items-center justify-between gap-4">
+          <p className="text-[13px] leading-5 text-muted-foreground">Testnet preview on Whitechain Sepolia. No real funds.</p>
+          <ThemeToggle />
+        </footer>
       </div>
-      <aside className="relative hidden overflow-hidden bg-ink text-white lg:flex lg:flex-col lg:justify-between lg:p-12">
-        <div aria-hidden className="pointer-events-none absolute -top-40 -right-40 size-[520px] rounded-full bg-[radial-gradient(closest-side,rgb(59_91_255/0.55),transparent)]" />
-        <div aria-hidden className="pointer-events-none absolute -bottom-48 -left-24 size-[420px] rounded-full bg-[radial-gradient(closest-side,rgb(59_91_255/0.25),transparent)]" />
-        <span className="relative inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/80">
-          <span aria-hidden className="size-1.5 rounded-full bg-[#5CF2B4]" /> Live on Whitechain Sepolia
-        </span>
-        <div className="relative flex flex-col gap-8">
-          <h2 className="text-3xl leading-tight font-semibold tracking-tight text-balance">
-            Get paid in USDT. Straight to your wallet, in seconds.
-          </h2>
-          <ul className="flex flex-col gap-4 text-sm text-white/75">
-            {[
-              ["shield", "Non-custodial. Funds never touch our contracts."],
-              ["zap", "Settles in one block, linked to your order onchain."],
-              ["undo", "Full or partial refunds, signed from your payout wallet."],
-            ].map(([icon, text]) => (
-              <li key={text} className="flex items-start gap-3">
-                <span className="grid size-7 shrink-0 place-items-center rounded-md bg-white/10">
-                  <Icon name={icon as "shield"} className="size-3.5" />
-                </span>
-                <span className="pt-1">{text}</span>
-              </li>
-            ))}
-          </ul>
+
+      <aside className="relative hidden min-w-0 border-l border-border bg-surface-2 lg:block">
+        <div className="sticky top-0 flex h-dvh flex-col overflow-hidden">
+          <div className="max-w-[460px] px-12 pt-12">
+            <p className="text-xl leading-[26px] font-[450] tracking-[-0.02em] text-foreground">
+              USDT payments, settled to your own wallet
+            </p>
+            <p className="mt-2 text-sm leading-5 text-muted-foreground">
+              Buyers pay on Whitechain Sepolia. Each payment is linked to its order onchain, and refunds are signed from your payout wallet.
+            </p>
+          </div>
+          <div aria-hidden className="relative mt-4 min-h-0 flex-1">
+            <AuthShowcase />
+          </div>
         </div>
-        <p className="relative text-xs text-white/50">© {new Date().getFullYear()} Whitechain Commerce</p>
       </aside>
     </div>
   );

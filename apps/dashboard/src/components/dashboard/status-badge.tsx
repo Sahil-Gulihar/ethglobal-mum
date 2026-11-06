@@ -1,8 +1,9 @@
 import { Badge, type BadgeTone } from "@/components/ui/badge";
 
+/* Status label: dot in the semantic color plus text (docs/DESIGN.md, Status). Refunds are a neutral state, not an error. */
 const payment: Record<string, { tone: BadgeTone; label: string }> = {
   succeeded: { tone: "success", label: "Succeeded" },
-  partially_refunded: { tone: "info", label: "Partially refunded" },
+  partially_refunded: { tone: "neutral", label: "Partially refunded" },
   refunded: { tone: "neutral", label: "Refunded" },
   pending: { tone: "warning", label: "Pending" },
   failed: { tone: "danger", label: "Failed" },

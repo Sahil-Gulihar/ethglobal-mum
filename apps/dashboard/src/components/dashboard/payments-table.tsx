@@ -16,52 +16,53 @@ export type PaymentRowView = {
   createdAt: Date;
 };
 
-export function PaymentsTable({ rows, emptyAction }: { rows: PaymentRowView[]; emptyAction?: React.ReactNode }) {
+/** Payments table. The order id links to the detail page and its hit area covers the whole row. */
+export function PaymentsTable({ rows, emptyAction, compact = false }: { rows: PaymentRowView[]; emptyAction?: React.ReactNode; compact?: boolean }) {
   if (!rows.length) {
     return (
-      <EmptyState
-        icon="card"
-        title="No payments yet"
-        description="Payments appear here as soon as a customer pays through your checkout and the settlement is verified onchain."
-        action={emptyAction}
-      />
+      <div className="rounded-lg border border-border">
+        <EmptyState title="No payments yet" description="Payments appear here once a customer pays through your checkout and the settlement is verified onchain." action={emptyAction} />
+      </div>
     );
   }
   return (
-    <Table>
+    <Table framed>
       <TableHeader>
-        <TableRow className="hover:bg-transparent">
-          <TableHead>Amount</TableHead>
-          <TableHead>Status</TableHead>
+        <TableRow>
           <TableHead>Order</TableHead>
-          <TableHead>Payer</TableHead>
-          <TableHead>Transaction</TableHead>
-          <TableHead className="text-right">Date</TableHead>
+          <TableHead>Status</TableHead>
+          <TableHead className="max-md:hidden">Customer</TableHead>
+          {!compact && <TableHead className="max-lg:hidden">Transaction</TableHead>}
+          <TableHead className="max-sm:hidden">Date</TableHead>
+          <TableHead className="text-right">Amount</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {rows.map((p) => (
           <TableRow key={p.id} className="relative">
-            <TableCell>
+            <TableCell className="max-w-56">
               <Link
                 href={`/dashboard/payments/${p.id}`}
-                className="font-semibold tabular outline-none after:absolute after:inset-0 after:content-[''] focus-visible:underline"
+                className="block truncate font-mono text-[13px] text-foreground after:absolute after:inset-0 after:content-[''] hover:underline hover:underline-offset-[3px]"
+                title={p.orderId}
               >
-                {formatAmount(p.amount)} <span className="text-xs font-medium text-muted-foreground">USDT</span>
+                {p.orderId}
               </Link>
-              {Number(p.refunded) > 0 && (
-                <span className="block text-xs text-muted-foreground tabular">−{formatAmount(p.refunded)} refunded</span>
-              )}
             </TableCell>
             <TableCell>
               <StatusBadge status={p.status} />
             </TableCell>
-            <TableCell className="max-w-48 truncate font-mono text-xs">{p.orderId}</TableCell>
-            <TableCell className="font-mono text-xs text-muted-foreground">{shortAddr(p.payer)}</TableCell>
-            <TableCell className="relative z-[1]">
-              <ExplorerLink hash={p.txHash} />
+            <TableCell className="font-mono text-[13px] text-muted-foreground max-md:hidden">{shortAddr(p.payer)}</TableCell>
+            {!compact && (
+              <TableCell className="relative z-[1] max-lg:hidden">
+                <ExplorerLink hash={p.txHash} />
+              </TableCell>
+            )}
+            <TableCell className="font-mono text-[13px] text-muted-foreground max-sm:hidden">{formatDateTime(p.createdAt)}</TableCell>
+            <TableCell className="text-right">
+              <span className="font-medium">{formatAmount(p.amount)}</span> <span className="text-[13px] text-muted-foreground">USDT</span>
+              {Number(p.refunded) > 0 && <span className="block text-[13px] text-muted-foreground">−{formatAmount(p.refunded)} refunded</span>}
             </TableCell>
-            <TableCell className="text-right text-muted-foreground tabular">{formatDateTime(p.createdAt)}</TableCell>
           </TableRow>
         ))}
       </TableBody>

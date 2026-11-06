@@ -1,0 +1,258 @@
+/* The sign-in still. Kit tokens are mapped onto the app's own variables
+   (globals.css), so the illustration follows the light and dark theme. These
+   rules are unlayered, so they win over the kit's @layer stageshow. */
+
+.wc-show .ss-stage {
+  --ss-font: var(--font-sans);
+  --ss-mono: var(--font-mono);
+
+  --ss-well: transparent;
+  --ss-canvas: var(--bg-200);
+  --ss-surface: var(--bg-100);
+  --ss-chrome: var(--bg-100);
+  --ss-raised: var(--bg-100);
+
+  --ss-ink-1: color-mix(in oklch, var(--gray-1000) 4%, transparent);
+  --ss-ink-2: color-mix(in oklch, var(--gray-1000) 6.5%, transparent);
+  --ss-ink-3: color-mix(in oklch, var(--gray-1000) 9%, transparent);
+  --ss-ink-4: color-mix(in oklch, var(--gray-1000) 12%, transparent);
+  --ss-ink-5: color-mix(in oklch, var(--gray-1000) 18%, transparent);
+  --ss-fill: var(--gray-200);
+  --ss-line: var(--alpha-300);
+  --ss-line-faint: color-mix(in oklch, var(--gray-1000) 6%, transparent);
+
+  --ss-text: var(--gray-900);
+  --ss-text-strong: var(--gray-1000);
+  --ss-text-faint: var(--gray-700);
+  --ss-icon: var(--gray-800);
+  --ss-icon-faint: var(--gray-500);
+
+  --ss-accent: var(--gray-1000);
+  --ss-success: var(--green-700);
+  --ss-success-text: var(--green-900);
+
+  --ss-radius-window: 12px;
+
+  /* Light: a hairline ring and a long, soft fall */
+  --wc-show-hero: 0 0 0 1px var(--alpha-300), 0 32px 64px -24px oklch(0 0 0 / 0.16), 0 12px 24px -16px oklch(0 0 0 / 0.08);
+  --wc-show-sat: 0 0 0 1px var(--alpha-300), 0 18px 40px -12px oklch(0 0 0 / 0.2), 0 4px 10px -4px oklch(0 0 0 / 0.08);
+  --wc-show-selected: color-mix(in oklch, var(--gray-1000) 4%, var(--bg-100));
+
+  overflow: hidden;
+  color: var(--gray-1000);
+  font-feature-settings: "rlig" 1, "calt" 0, "ss11" 1;
+}
+
+/* Dark: depth from a lighter surface and a brighter hairline, not shadow */
+:root.dark .wc-show .ss-stage {
+  --ss-canvas: oklch(0.06 0 0);
+  --ss-surface: oklch(0.1 0 0);
+  --ss-chrome: oklch(0.1 0 0);
+  --ss-raised: oklch(0.15 0 0);
+  --wc-show-hero: 0 0 0 1px var(--alpha-300), 0 32px 64px -24px oklch(0 0 0 / 0.7);
+  --wc-show-sat: 0 0 0 1px oklch(1 0 0 / 0.16), 0 18px 40px -12px oklch(0 0 0 / 0.8), 0 4px 10px -4px oklch(0 0 0 / 0.5);
+  --wc-show-selected: oklch(0.14 0 0);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) .wc-show .ss-stage {
+    --ss-canvas: oklch(0.06 0 0);
+    --ss-surface: oklch(0.1 0 0);
+    --ss-chrome: oklch(0.1 0 0);
+    --ss-raised: oklch(0.15 0 0);
+    --wc-show-hero: 0 0 0 1px var(--alpha-300), 0 32px 64px -24px oklch(0 0 0 / 0.7);
+    --wc-show-sat: 0 0 0 1px oklch(1 0 0 / 0.16), 0 18px 40px -12px oklch(0 0 0 / 0.8), 0 4px 10px -4px oklch(0 0 0 / 0.5);
+    --wc-show-selected: oklch(0.14 0 0);
+  }
+}
+
+/* The hero: a gutter from the top and right, off the bottom. Its left edge
+   (168) leaves room for the receipt to straddle it. */
+.wc-show .wc-show__win {
+  position: absolute;
+  top: 48px;
+  left: 168px;
+  width: 504px;
+  height: 920px;
+  background: var(--ss-surface);
+  box-shadow: var(--wc-show-hero);
+  /* Fade crop: the window dissolves into the panel at its foot, over filler
+     rows only, so a tall screen never shows a ladder of placeholder rows */
+  mask-image: linear-gradient(to bottom, #000 52%, transparent 80%);
+}
+
+.wc-show .wc-show__win .ss-window__heading {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.wc-show .wc-show__nav {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  padding: 8px 10px;
+}
+
+.wc-show .wc-show__nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 6px;
+}
+
+.wc-show .wc-show__nav-item[data-on] {
+  background: var(--ss-ink-2);
+}
+
+.wc-show .wc-show__main {
+  display: grid;
+  align-content: start;
+  gap: 20px;
+  padding: 20px 20px 0;
+}
+
+/* One bordered strip with dividers, as the dashboard draws its stats */
+.wc-show .wc-show__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--ss-line);
+  border-radius: 8px;
+}
+
+.wc-show .wc-show__stat {
+  display: grid;
+  gap: 10px;
+  padding: 14px 14px 16px;
+}
+
+.wc-show .wc-show__stat + .wc-show__stat {
+  border-left: 1px solid var(--ss-line);
+}
+
+.wc-show .wc-show__list {
+  display: grid;
+  margin: 0 -10px;
+}
+
+.wc-show .wc-show__row {
+  height: 56px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--ss-line-faint);
+}
+
+/* The thing acted on: a solid step in surface, never a translucent wash */
+.wc-show .wc-show__row[data-selected] {
+  background: var(--wc-show-selected);
+  border-bottom-color: transparent;
+}
+
+.wc-show .wc-show__amount {
+  color: var(--ss-text-strong);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.wc-show .wc-show__hash {
+  color: var(--ss-text);
+  font-family: var(--ss-mono);
+  font-size: 11.5px;
+  line-height: 16px;
+}
+
+.wc-show .wc-show__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ss-text-strong);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+.wc-show .wc-show__dot {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--ss-success);
+}
+
+.wc-show .wc-show__dot[data-muted] {
+  background: var(--ss-ink-4);
+}
+
+/* The satellite: the buyer's hosted checkout receipt, a level above the
+   window. On the 48px gutter, crossing the window's left edge and stopping
+   24px short of the sidebar's line (168 + 152 = 320). */
+.wc-show .wc-show__receipt {
+  position: absolute;
+  top: 232px;
+  left: 48px;
+  width: 248px;
+  display: grid;
+  padding: 20px;
+  border-radius: 12px;
+  background: var(--ss-raised);
+  box-shadow: var(--wc-show-sat);
+}
+
+.wc-show .wc-show__paid {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ss-success-text);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+.wc-show .wc-show__total {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 14px 0 18px;
+}
+
+.wc-show .wc-show__total-num {
+  color: var(--ss-text-strong);
+  font-size: 30px;
+  font-weight: 450;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.wc-show .wc-show__total-unit {
+  color: var(--ss-text);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.wc-show .wc-show__lines {
+  display: grid;
+  padding: 4px 0;
+  border-top: 1px solid var(--ss-line);
+  border-bottom: 1px solid var(--ss-line);
+}
+
+.wc-show .wc-show__line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+}
+
+.wc-show .wc-show__network {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 14px;
+  color: var(--ss-text);
+  font-size: 12px;
+  line-height: 16px;
+}

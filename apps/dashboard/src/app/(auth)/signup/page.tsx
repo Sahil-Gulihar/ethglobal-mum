@@ -8,10 +8,10 @@ export const metadata: Metadata = { title: "Create your account" };
 export default async function SignupPage() {
   if (await getCurrentMerchant()) redirect("/dashboard");
   return (
-    <div className="flex flex-col gap-8 animate-fade-up">
+    <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Start accepting USDT</h1>
-        <p className="text-sm text-muted-foreground">Create a merchant account. You&apos;ll connect a payout wallet and get API keys next.</p>
+        <h1 className="text-2xl leading-8 font-[450] tracking-[-0.04em] text-foreground">Create a merchant account</h1>
+        <p className="text-sm leading-5 text-muted-foreground">Start accepting USDT. You&apos;ll connect a payout wallet and get API keys next.</p>
       </div>
       <AuthForm mode="signup" />
     </div>
