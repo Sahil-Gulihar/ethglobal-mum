@@ -28,7 +28,7 @@ Card rails can't give a merchant final settlement in seconds to a wallet they co
 |---|---|
 | Network | Whitechain Sepolia, chain id `1874` |
 | PaymentRouter | [`0xa99a6D97607567f4fe734831910D24f4e9BD0508`](https://explorer.testnet.whitechain.io/address/0xa99a6D97607567f4fe734831910D24f4e9BD0508) (deploy block `12373441`) |
-| Source verification | [Sourcify exact match](https://sourcify.dev/server/v2/contract/1874/0xa99a6D97607567f4fe734831910D24f4e9BD0508). Blockscout verification was down at deploy time; see [docs/DEPLOYMENTS.md](docs/DEPLOYMENTS.md) for the retry command |
+| Source verification | Verified on the [Whitechain explorer](https://explorer.testnet.whitechain.io/address/0xa99a6D97607567f4fe734831910D24f4e9BD0508) and [Sourcify](https://sourcify.dev/server/v2/contract/1874/0xa99a6D97607567f4fe734831910D24f4e9BD0508) (exact match) |
 | USDT (official, 6 decimals) | [`0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7`](https://explorer.testnet.whitechain.io/token/0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7) |
 | Public RPC | `https://rpc.testnet.whitechain.io` |
 | Faucet | https://faucet.testnet.whitechain.io |
@@ -175,4 +175,3 @@ webhook delivery to the store, and partial and full refunds from the dashboard.
   Set `ALLOW_PRIVATE_WEBHOOK_URLS=true` to allow localhost/private addresses; outside production they are allowed.
 - **Demo store admin** (`/admin`) is public: it's a demo.
 - The demo store keeps orders in a JSON file (`apps/demo-store/data/orders.json`). It's a demo, not a pattern.
-- Blockscout source verification is pending (the explorer's verifier was still down on 2026-11-06). The source is verified on Sourcify.

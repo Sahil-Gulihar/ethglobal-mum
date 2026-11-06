@@ -186,7 +186,7 @@ cd contracts && forge verify-contract <router address> src/PaymentRouter.sol:Pay
     0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7 <owner address>) --watch
 ```
 
-The explorer's verifier was unavailable when the current router was deployed. That router is verified on [Sourcify](https://sourcify.dev/server/v2/contract/1874/0xa99a6D97607567f4fe734831910D24f4e9BD0508) with an exact match. If Blockscout is down for you too, use Sourcify. The repo doesn't record the exact command used for the current router. The explorer's "Verify & Publish" page also has a Sourcify method that imports an existing Sourcify match. With forge, the Sourcify verifier takes the chain id instead of an API URL:
+The current router is verified both on the explorer and on [Sourcify](https://sourcify.dev/server/v2/contract/1874/0xa99a6D97607567f4fe734831910D24f4e9BD0508) (exact match). The explorer's verifier was briefly unavailable on deploy day; if Blockscout is down for you, use Sourcify. The explorer's "Verify & Publish" page also has a Sourcify method that imports an existing Sourcify match. With forge, the Sourcify verifier takes the chain id instead of an API URL:
 
 ```bash
 cd contracts && forge verify-contract <router address> src/PaymentRouter.sol:PaymentRouter \

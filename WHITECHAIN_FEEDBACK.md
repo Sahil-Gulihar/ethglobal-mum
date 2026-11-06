@@ -10,7 +10,7 @@ We built Whitechain Commerce, a non-custodial USDT checkout on Whitechain Sepoli
 
 ## Where we got stuck
 - **No testnet USDT faucet.** The faucet only gives WBT, but the prize needs a payment in the official USDT. We had to work out that we could swap WBT for USDT in the YetiTrade testnet pool.
-- **Explorer verification was down.** Blockscout returned "Contract verification is temporarily unavailable" on every method we tried.
+- **Explorer verification was down for hours.** Blockscout returned "Contract verification is temporarily unavailable" on every method we tried. It came back later that day and verified fine; Sourcify worked the whole time.
 - **Confusing RPC hostname.** `rpc-testnet.whitechain.io` (hyphen) is chain 2625, not 1874. The right one is `rpc.testnet.whitechain.io` (dot).
 - The Ankr link on the prize page goes to a signup page, and the Ankr RPC timed out once during a deploy.
 

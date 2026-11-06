@@ -26,9 +26,9 @@ Use `https://rpc.testnet.whitechain.io`, with a dot. The similar-looking `https:
 | Verifier | Status |
 | --- | --- |
 | Sourcify | Verified, exact match for creation and runtime bytecode: [sourcify.dev](https://sourcify.dev/server/v2/contract/1874/0xa99a6D97607567f4fe734831910D24f4e9BD0508) |
-| Blockscout | Pending. The Whitechain explorer's verification service was unavailable at deploy time. The retry command is in [DEPLOYMENTS.md](../DEPLOYMENTS.md#verification-status). |
+| Whitechain explorer (Blockscout) | Verified: [explorer](https://explorer.testnet.whitechain.io/address/0xa99a6D97607567f4fe734831910D24f4e9BD0508) |
 
-Until Blockscout verification goes through, the explorer shows the contract as unverified. The Sourcify match proves the deployed bytecode was built from `contracts/src/PaymentRouter.sol`.
+Both matches prove the deployed bytecode was built from `contracts/src/PaymentRouter.sol`.
 
 ## How it fits together
 
@@ -330,7 +330,7 @@ console.log(payments.length, refunds.length);
 
 To list all of your payments, filter on `args: { merchantId }` instead. The public RPC rejects a range wider than 10,000 blocks (`query exceeds max block range 10000`) and a `toBlock` beyond the current head, so read the head first and query in chunks. The platform's indexer uses 2,000 blocks per request.
 
-You can also open the transaction on the [explorer](https://explorer.testnet.whitechain.io) and look at its logs. Until Blockscout verification completes, the explorer may not decode them by name.
+You can also open the transaction on the [explorer](https://explorer.testnet.whitechain.io) and look at its logs. The contract is verified there, so the explorer decodes them by name.
 
 ## Settlement checks
 

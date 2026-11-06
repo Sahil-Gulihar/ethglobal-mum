@@ -29,11 +29,9 @@ Do not use `https://rpc-testnet.whitechain.io` (with a hyphen). It returns chain
 
 - **Sourcify: verified, exact match** (creation and runtime).
   https://sourcify.dev/server/v2/contract/1874/0xa99a6D97607567f4fe734831910D24f4e9BD0508
-- **Blockscout: not verified yet.** The verifier service returns `{"message":"Contract verification is temporarily unavailable."}`
-  on every endpoint we tried: forge `--verifier blockscout`, `/api/v2/.../verification/via/standard-input`, and the
-  standalone `forge verify-contract`. In `/api/v2/smart-contracts/verification/config`, `solidity_compiler_versions` is empty,
-  so the problem is on the server side. Retried on 2026-11-06 with the command below: same response, still not
-  verified. To retry once it's back, run:
+- **Whitechain explorer (Blockscout): verified** on 2026-11-06 (https://explorer.testnet.whitechain.io/address/0xa99a6D97607567f4fe734831910D24f4e9BD0508), compiler v0.8.30+commit.73712a01.
+  The verifier was down at deploy time (`Contract verification is temporarily unavailable.`, empty compiler list) and came
+  back later the same day. The command that worked:
 
   ```bash
   cd contracts && forge verify-contract 0xa99a6D97607567f4fe734831910D24f4e9BD0508 src/PaymentRouter.sol:PaymentRouter \
