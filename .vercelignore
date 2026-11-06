@@ -1,0 +1,12 @@
+# Never upload secrets or local-only files; env vars are set in the Vercel project.
+.env
+.env.*
+!.env.example
+*.local.md
+.shots/
+.agents/
+.claude/
+contracts/
+node_modules/
+**/node_modules/
+**/.next/
