@@ -22,7 +22,8 @@ export function HostedCheckout({ sessionId, theme }: { sessionId: string; theme:
         apiBase=""
         theme={theme}
         onSuccess={(r: CheckoutSuccess) => {
-          if (r.successUrl) setRedirectTo(r.successUrl);
+          // Already paid before we loaded: show that state and let "Return to store" do the redirect.
+          if (r.successUrl && !r.alreadyPaid) setRedirectTo(r.successUrl);
         }}
         onError={(e) => console.error("[whitechain-checkout]", e)}
       />

@@ -54,6 +54,8 @@ export interface CheckoutSuccess {
   explorerUrl: string;
   /** The session's successUrl, if the merchant set one. */
   successUrl: string | null;
+  /** True when the session was already paid when the widget loaded (no payment happened just now). */
+  alreadyPaid: boolean;
 }
 
 export interface WhitechainCheckoutProps {
@@ -421,8 +423,9 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
       txHash,
       explorerUrl: session.payment?.explorerUrl ?? (txHash ? explorerTx(txHash) : ""),
       successUrl: session.successUrl,
+      alreadyPaid: state.alreadyPaid,
     };
-  }, [state.phase, state.session, state.payTx]);
+  }, [state.phase, state.session, state.payTx, state.alreadyPaid]);
   useEffect(() => {
     if (!result || successFired.current) return;
     successFired.current = true;

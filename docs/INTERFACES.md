@@ -92,7 +92,7 @@ import { WhitechainCheckout } from "@whitechain-commerce/react";
 <WhitechainCheckout
   sessionId="cs_..."
   apiBase="http://localhost:3000"   // optional; defaults to NEXT_PUBLIC_WC_API_BASE, then "" (same origin)
-  onSuccess={(r: { sessionId; orderId; paymentId; txHash; explorerUrl }) => {}}
+  onSuccess={(r: { sessionId; orderId; paymentId; txHash; explorerUrl; successUrl; alreadyPaid }) => {}}
   onError={(e: Error) => {}}
 />
 // server helpers:
