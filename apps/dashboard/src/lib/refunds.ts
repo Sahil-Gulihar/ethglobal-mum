@@ -13,7 +13,7 @@
  * RefundResult is `{ ok: true, value } | { ok: false, status, type, message }` (same shape as sessions.ts).
  */
 import "server-only";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { fromUnits, toUnits } from "@whitechain-commerce/core";
 import type { RefundObject } from "@whitechain-commerce/core/webhooks";
 import { db, checkoutSessions, payments, refunds } from "./db";
@@ -96,4 +96,13 @@ export async function listRefunds(
     .orderBy(desc(refunds.createdAt))
     .limit(Math.min(Math.max(opts.limit ?? 100, 1), 100));
   return rows.map(({ r, p, s }) => toRefundObject(r, p, s));
+}
+
+/** Deletes a pending refund that was never signed. Returns its payment id, or null if it can't be discarded. */
+export async function discardPendingRefund(merchantId: string, refundId: string): Promise<string | null> {
+  const rows = await db
+    .delete(refunds)
+    .where(and(eq(refunds.id, refundId), eq(refunds.merchantId, merchantId), eq(refunds.status, "pending"), isNull(refunds.txHash)))
+    .returning({ paymentId: refunds.paymentId });
+  return rows[0]?.paymentId ?? null;
 }

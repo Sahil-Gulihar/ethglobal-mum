@@ -1,13 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { isAddress, isHash, type Hex } from "viem";
 import { erc20Abi, getRouterAddress, toUnits, USDT_ADDRESS } from "@whitechain-commerce/core";
-import { db, payments, refunds } from "@/lib/db";
+import { db, payments } from "@/lib/db";
 import { requireMerchant } from "@/lib/auth";
 import { publicClient } from "@/lib/chain";
-import { createPendingRefund } from "@/lib/refunds";
+import { createPendingRefund, discardPendingRefund } from "@/lib/refunds";
 import { validateTx } from "@/lib/indexer";
 import { err, errorMessage, ok, type ActionResult } from "./result";
 
@@ -37,12 +37,9 @@ export async function startRefund(
 /** Removes a pending refund request that was never signed (e.g. the wallet prompt was rejected). */
 export async function cancelPendingRefund(refundId: string): Promise<ActionResult> {
   const m = await requireMerchant();
-  const rows = await db
-    .delete(refunds)
-    .where(and(eq(refunds.id, refundId), eq(refunds.merchantId, m.id), eq(refunds.status, "pending"), isNull(refunds.txHash)))
-    .returning({ paymentId: refunds.paymentId });
-  if (!rows.length) return err("Refund can't be discarded (not found or already processed).");
-  revalidatePath(`/dashboard/payments/${rows[0].paymentId}`);
+  const paymentId = await discardPendingRefund(m.id, refundId);
+  if (!paymentId) return err("Refund can't be discarded (not found or already processed).");
+  revalidatePath(`/dashboard/payments/${paymentId}`);
   return ok(undefined);
 }
 

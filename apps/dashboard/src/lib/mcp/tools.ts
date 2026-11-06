@@ -8,14 +8,24 @@ import { z } from "zod";
 import { and, desc, eq } from "drizzle-orm";
 import { getRouterAddress, USDT_ADDRESS } from "@whitechain-commerce/core";
 import type { Merchant } from "@/lib/auth";
-import { db, checkoutSessions, paymentLinks, payments } from "@/lib/db";
+import { db, checkoutSessions, merchants, paymentLinks, payments } from "@/lib/db";
 import { env } from "@/lib/env";
 import { randomId } from "@/lib/ids";
 import { toPaymentObject } from "@/lib/serializers";
 import { createCheckoutSessionForMerchant, getCheckoutSessionForMerchant } from "@/lib/sessions";
-import { createPendingRefund, listRefunds } from "@/lib/refunds";
+import { createPendingRefund, discardPendingRefund, listRefunds } from "@/lib/refunds";
 import { createPaymentLinkForMerchant, listPaymentLinks } from "@/lib/payment-links";
-import { paymentStats } from "@/app/(app)/dashboard/_lib/queries";
+import { buildLedgerCsv, parseLedgerRange } from "@/lib/csv-export";
+import {
+  addWebhookEndpoint,
+  listWebhookEndpoints,
+  redeliverForMerchant,
+  removeWebhookEndpoint,
+  setEndpointEnabled,
+  testEndpoint,
+  webhookSecret,
+} from "@/lib/webhooks/endpoints";
+import { dailyPayments, listDeliveries, listLedgerEntries, onboardingState, paymentStats } from "@/app/(app)/dashboard/_lib/queries";
 
 /** A failure the agent should see as a tool error (isError: true), not a protocol error. */
 export class ToolError extends Error {}
@@ -40,6 +50,12 @@ const tool = <S extends z.ZodObject>(t: ToolDef<S>) => t as unknown as ToolDef;
 const base = () => env.appUrl().replace(/\/$/, "");
 const NETWORK = { name: "Whitechain Sepolia (testnet)", chainId: 1874, currency: "USDT", usdt: USDT_ADDRESS };
 
+/**
+ * Some steps are reserved for the human on purpose (identity, the payout wallet, signing refunds,
+ * minting keys). Tools hand those off with a link the agent shows to its user.
+ */
+const humanAction = (reason: string, path: string) => ({ reason, url: `${base()}${path}` });
+
 function unwrap<T>(r: { ok: true; value: T } | { ok: false; message: string }): T {
   if (!r.ok) throw new ToolError(r.message);
   return r.value;
@@ -50,27 +66,67 @@ export const tools: ToolDef[] = [
     name: "get_account",
     title: "Get account",
     description:
-      "Returns the merchant account this API key belongs to: business name, verification status, payout wallet, network and contract addresses, and dashboard links. Call this first to check the account can take payments.",
+      "Returns the merchant account this API key belongs to: business name, verification status, payout wallet, setup checklist, network and contract addresses. Call this first. If canAcceptPayments is false, show the user the humanActions links: those steps need the human.",
     input: z.object({}),
     annotations: { readOnlyHint: true, openWorldHint: false },
-    run: async (m) => ({
-      merchantId: m.id,
-      businessName: m.name,
-      status: m.status,
-      payoutWallet: m.payoutAddress,
-      canAcceptPayments: m.status === "active" && Boolean(m.payoutAddress && m.registeredTxHash),
-      network: { ...NETWORK, paymentRouter: getRouterAddress() },
-      dashboardUrl: `${base()}/dashboard`,
-    }),
+    run: async (m) => {
+      const setup = await onboardingState(m);
+      const humanActions = [
+        ...(setup.verified ? [] : [humanAction("Verify you're a unique human with World ID before taking payments.", "/dashboard/setup")]),
+        ...(setup.payout ? [] : [humanAction("Connect the wallet that receives payments. Only the account owner can set or change it.", "/dashboard/settings")]),
+      ];
+      return {
+        merchantId: m.id,
+        businessName: m.name,
+        status: m.status,
+        payoutWallet: m.payoutAddress,
+        canAcceptPayments: setup.verified && setup.payout,
+        setup: { ...setup, webhookHint: setup.webhook ? undefined : "No webhook endpoint yet. Use create_webhook_endpoint." },
+        humanActions,
+        network: { ...NETWORK, paymentRouter: getRouterAddress() },
+        dashboardUrl: `${base()}/dashboard`,
+      };
+    },
   }),
 
   tool({
     name: "get_sales_summary",
     title: "Get sales summary",
-    description: "Returns lifetime totals for the merchant: number of payments, gross USDT volume, refunded USDT and net USDT.",
+    description:
+      "Returns lifetime totals (number of payments, gross, refunded and net USDT) and the number of payments per day for the last 14 days (UTC).",
     input: z.object({}),
     annotations: { readOnlyHint: true, openWorldHint: false },
-    run: async (m) => ({ currency: "USDT", ...(await paymentStats(m.id)) }),
+    run: async (m) => ({ currency: "USDT", ...(await paymentStats(m.id)), last14Days: await dailyPayments(m.id) }),
+  }),
+
+  tool({
+    name: "update_business_name",
+    title: "Rename the business",
+    description: "Changes the business name customers see on checkout pages.",
+    input: z.object({ name: z.string().trim().min(2).max(80).describe("The new business name, 2 to 80 characters.") }),
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    run: async (m, a) => {
+      await db.update(merchants).set({ name: a.name }).where(eq(merchants.id, m.id));
+      return { businessName: a.name };
+    },
+  }),
+
+  tool({
+    name: "export_ledger_csv",
+    title: "Export ledger CSV",
+    description:
+      "Returns the accounting ledger as CSV text: every payment and every completed refund, oldest first. Optional from/to are ISO dates (YYYY-MM-DD, to is inclusive).",
+    input: z.object({
+      from: z.string().trim().max(40).optional().describe("Start date, e.g. 2026-11-01."),
+      to: z.string().trim().max(40).optional().describe("End date, inclusive, e.g. 2026-11-30."),
+    }),
+    annotations: { readOnlyHint: true, openWorldHint: false },
+    run: async (m, a) => {
+      const r = parseLedgerRange(a.from ?? null, a.to ?? null);
+      if ("error" in r) throw new ToolError(r.error);
+      const entries = await listLedgerEntries(m.id, r.range);
+      return { rows: entries.length, csv: buildLedgerCsv(entries), downloadUrl: `${base()}/dashboard/payments/export` };
+    },
   }),
 
   tool({
@@ -165,10 +221,24 @@ export const tools: ToolDef[] = [
       amount: decimal("10.00").describe("Amount to refund in USDT. Cannot exceed what is left to refund."),
     }),
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
-    run: async (m, a) => ({
-      ...unwrap(await createPendingRefund(m.id, a)),
-      approveUrl: `${base()}/dashboard/payments/${a.paymentId}`,
-    }),
+    run: async (m, a) => {
+      const refund = unwrap(await createPendingRefund(m.id, a));
+      const action = humanAction("Sign the refund with the payout wallet to send the USDT back.", `/dashboard/payments/${a.paymentId}`);
+      return { ...refund, approveUrl: action.url, humanActions: [action] };
+    },
+  }),
+
+  tool({
+    name: "cancel_refund",
+    title: "Cancel a pending refund",
+    description: "Discards a pending refund that hasn't been signed yet. Refunds already sent onchain can't be cancelled.",
+    input: z.object({ refundId: z.string().trim().min(1).max(100).describe("The refund id, re_...") }),
+    annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
+    run: async (m, a) => {
+      const paymentId = await discardPendingRefund(m.id, a.refundId);
+      if (!paymentId) throw new ToolError("This refund can't be cancelled: it doesn't exist or was already signed.");
+      return { id: a.refundId, paymentId, cancelled: true };
+    },
   }),
 
   tool({
@@ -235,6 +305,96 @@ export const tools: ToolDef[] = [
       if (!rows.length) throw new ToolError(`No payment link ${a.linkId}.`);
       return rows[0];
     },
+  }),
+
+  tool({
+    name: "list_webhook_endpoints",
+    title: "List webhook endpoints",
+    description: "Lists the URLs that receive payment.succeeded and refund.succeeded events, and whether each is on.",
+    input: z.object({}),
+    annotations: { readOnlyHint: true, openWorldHint: false },
+    run: async (m) => ({ data: (await listWebhookEndpoints(m.id)).map((e) => ({ ...e, createdAt: e.createdAt.toISOString() })) }),
+  }),
+
+  tool({
+    name: "create_webhook_endpoint",
+    title: "Add a webhook endpoint",
+    description:
+      "Registers a public URL to receive signed payment.succeeded and refund.succeeded events and returns its signing secret (whsec_...). Store the secret as WC_WEBHOOK_SECRET in the merchant's server environment, never in code. Then call send_test_webhook to check the endpoint.",
+    input: z.object({ url: httpUrl.describe("Public http(s) URL, e.g. https://shop.example.com/api/webhooks/whitechain.") }),
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+    run: async (m, a) => unwrap(await addWebhookEndpoint(m.id, a.url)),
+  }),
+
+  tool({
+    name: "get_webhook_secret",
+    title: "Get a webhook signing secret",
+    description: "Returns the signing secret (whsec_...) of a webhook endpoint, for configuring WC_WEBHOOK_SECRET.",
+    input: z.object({ endpointId: z.string().trim().min(1).max(100).describe("The endpoint id, we_...") }),
+    annotations: { readOnlyHint: true, openWorldHint: false },
+    run: async (m, a) => ({ endpointId: a.endpointId, secret: unwrap(await webhookSecret(m.id, a.endpointId)) }),
+  }),
+
+  tool({
+    name: "set_webhook_endpoint_enabled",
+    title: "Turn a webhook endpoint on or off",
+    description: "Pauses or resumes deliveries to a webhook endpoint.",
+    input: z.object({
+      endpointId: z.string().trim().min(1).max(100).describe("The endpoint id, we_..."),
+      enabled: z.boolean().describe("true to deliver events, false to pause."),
+    }),
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    run: async (m, a) => unwrap(await setEndpointEnabled(m.id, a.endpointId, a.enabled)),
+  }),
+
+  tool({
+    name: "delete_webhook_endpoint",
+    title: "Delete a webhook endpoint",
+    description: "Removes a webhook endpoint and stops all deliveries to it. Confirm with the user first.",
+    input: z.object({ endpointId: z.string().trim().min(1).max(100).describe("The endpoint id, we_...") }),
+    annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
+    run: async (m, a) => ({ ...unwrap(await removeWebhookEndpoint(m.id, a.endpointId)), deleted: true }),
+  }),
+
+  tool({
+    name: "send_test_webhook",
+    title: "Send a test webhook",
+    description:
+      "Sends a signed test payment.succeeded event (payment id pay_test_..., orderId test_order) to one endpoint right now and reports the HTTP status. A 2xx means the endpoint verified and accepted it.",
+    input: z.object({ endpointId: z.string().trim().min(1).max(100).describe("The endpoint id, we_...") }),
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+    run: async (m, a) => unwrap(await testEndpoint(m.id, a.endpointId)),
+  }),
+
+  tool({
+    name: "list_webhook_deliveries",
+    title: "List webhook deliveries",
+    description: "Shows recent webhook deliveries with status (pending, succeeded, failed), attempts, last HTTP status and error. Use it to debug an endpoint.",
+    input: z.object({ limit: z.number().int().min(1).max(50).optional().describe("How many deliveries, 1 to 50. Default 20.") }),
+    annotations: { readOnlyHint: true, openWorldHint: false },
+    run: async (m, a) => ({
+      data: (await listDeliveries(m.id, a.limit ?? 20)).map((d) => ({
+        id: d.id,
+        eventId: d.eventId,
+        eventType: d.eventType,
+        isTest: d.isTest,
+        endpointUrl: d.endpointUrl,
+        status: d.status,
+        attempts: d.attempts,
+        lastStatusCode: d.lastStatusCode,
+        lastError: d.lastError,
+        createdAt: d.createdAt.toISOString(),
+      })),
+    }),
+  }),
+
+  tool({
+    name: "redeliver_webhook",
+    title: "Redeliver a webhook",
+    description: "Sends a past webhook delivery again right now, for example after fixing the endpoint.",
+    input: z.object({ deliveryId: z.string().trim().min(1).max(100).describe("The delivery id, whd_...") }),
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+    run: async (m, a) => unwrap(await redeliverForMerchant(m.id, a.deliveryId)),
   }),
 ];
 
