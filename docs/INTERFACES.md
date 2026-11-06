@@ -106,3 +106,12 @@ The SDK talks to the browser wallet directly over EIP-1193/EIP-6963 using viem. 
 - Dashboard on `:3000`, demo store on `:3001`.
 - Root `.env` is loaded by both apps (`next.config.ts` `loadEnvConfig("../..")`). See `.env.example`.
 - Postgres: `docker compose up -d db`, then `pnpm db:push`. URL: `postgres://wc:wc@localhost:5433/whitechain_commerce`.
+
+### Indexer/webhooks as built (note from the indexer agent)
+
+- `enqueueEvent(txOrDb, merchantId, type, data)`: the first argument is the Drizzle transaction (or `db`) so the event commits atomically with the state change; `data` is the event's `data` object (`{ payment }` or `{ refund, payment }`).
+- `validateTx(txHash)` returns `{ ok: true, results }` or `{ ok: false, reason: "pending" | "reverted" | "no_router_events" | "invalid" }`.
+- Dashboard helpers in `src/lib/webhooks`: `sendTestEvent(endpointId, merchantId?)` (synthetic `payment.succeeded` with `pay_test_...` ids, sent now) and `redeliver(deliveryId, merchantId?)` (sends now and resets the retry schedule). Both return `{ ok, statusCode, error, durationMs, attempt, status }` and throw "not found" when the id doesn't belong to `merchantId`.
+- Each indexer pass also re-checks `processing` sessions that have a `submittedTxHash`: if the hinted tx is mined but didn't pay that session, the session goes back to `open` (or `expired`).
+- The indexer skips work while the router address is the zero address, so the cursor can't move past the real deploy block.
+- Node scripts that import `server-only` modules: `import "<...>/src/lib/indexer/node-shim"` first, then dynamic-import the modules.
