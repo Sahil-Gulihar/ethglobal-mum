@@ -18,7 +18,16 @@ export async function usdtDecimals(): Promise<number> {
 }
 
 /** Backend signer (router owner) registers or updates a merchant's payout address onchain. */
-export async function registerMerchantOnchain(chainMerchantId: `0x${string}`, payout: `0x${string}`) {
+export function registerMerchantOnchain(chainMerchantId: `0x${string}`, payout: `0x${string}`) {
+  // Serialize the backend signer within this process so concurrent calls don't collide on the nonce.
+  const run = signerQueue.then(() => sendRegisterMerchant(chainMerchantId, payout));
+  signerQueue = run.catch(() => undefined);
+  return run;
+}
+
+let signerQueue: Promise<unknown> = Promise.resolve();
+
+async function sendRegisterMerchant(chainMerchantId: `0x${string}`, payout: `0x${string}`) {
   const wallet = backendWallet();
   const hash = await wallet.writeContract({
     address: getRouterAddress(),

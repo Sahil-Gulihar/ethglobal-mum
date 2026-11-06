@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { eq } from "drizzle-orm";
+import { and, count, eq, gt, isNull, lt, or } from "drizzle-orm";
 import { getAddress, isAddress, zeroAddress, type Hex } from "viem";
 import { z } from "zod";
 import { getRouterAddress } from "@whitechain-commerce/core";
@@ -9,6 +9,9 @@ import { db, merchants } from "@/lib/db";
 import { requireMerchant } from "@/lib/auth";
 import { registerMerchantOnchain } from "@/lib/chain";
 import { err, errorMessage, ok, type ActionResult } from "./result";
+
+const PAYOUT_COOLDOWN_MS = 5 * 60_000;
+const GLOBAL_CHANGES_PER_HOUR = 60;
 
 /**
  * Validates the payout address and has the backend signer (router owner) call
@@ -27,11 +30,32 @@ export async function setPayoutAddress(address: string): Promise<ActionResult<{ 
     return ok({ payoutAddress: payout, txHash: m.registeredTxHash });
   }
 
+  // Every change costs the backend signer gas, so rate limit it per merchant and globally.
+  if (m.payoutChangedAt && Date.now() - m.payoutChangedAt.getTime() < PAYOUT_COOLDOWN_MS) {
+    const mins = Math.ceil((PAYOUT_COOLDOWN_MS - (Date.now() - m.payoutChangedAt.getTime())) / 60_000);
+    return err(`You changed your payout wallet recently. Try again in ${mins} minute${mins === 1 ? "" : "s"}.`);
+  }
+  const [{ n }] = await db
+    .select({ n: count() })
+    .from(merchants)
+    .where(gt(merchants.payoutChangedAt, new Date(Date.now() - 60 * 60_000)));
+  if (n >= GLOBAL_CHANGES_PER_HOUR) return err("Too many payout registrations right now. Please try again in a few minutes.");
+
+  // Claim the cooldown slot atomically so parallel requests can't both go through.
+  const cutoff = new Date(Date.now() - PAYOUT_COOLDOWN_MS);
+  const claimed = await db
+    .update(merchants)
+    .set({ payoutChangedAt: new Date() })
+    .where(and(eq(merchants.id, m.id), or(isNull(merchants.payoutChangedAt), lt(merchants.payoutChangedAt, cutoff))))
+    .returning({ id: merchants.id });
+  if (!claimed.length) return err("A payout change is already in progress. Try again in a few minutes.");
+
   let txHash: string;
   try {
     txHash = await registerMerchantOnchain(m.chainMerchantId as Hex, payout);
   } catch (e) {
     console.error("registerMerchant failed", e);
+    await db.update(merchants).set({ payoutChangedAt: m.payoutChangedAt }).where(eq(merchants.id, m.id));
     return err(`Onchain registration failed: ${errorMessage(e)}`);
   }
   await db.update(merchants).set({ payoutAddress: payout, registeredTxHash: txHash }).where(eq(merchants.id, m.id));

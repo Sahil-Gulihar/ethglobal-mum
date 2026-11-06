@@ -7,8 +7,12 @@ export const maxDuration = 60;
 
 /** GET /api/cron/tick with `Authorization: Bearer $CRON_SECRET`: one indexer pass + due webhooks. */
 export async function GET(request: Request) {
+  const secret = env.cronSecret();
+  if (!secret) {
+    return Response.json({ error: { type: "server_error", message: "CRON_SECRET is not configured" } }, { status: 503 });
+  }
   const auth = request.headers.get("authorization") ?? "";
-  const expected = `Bearer ${env.cronSecret()}`;
+  const expected = `Bearer ${secret}`;
   const a = Buffer.from(auth);
   const b = Buffer.from(expected);
   if (a.length !== b.length || !timingSafeEqual(a, b)) {

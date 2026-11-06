@@ -3,8 +3,13 @@ export const env = {
   rpcUrl: () => must("WHITECHAIN_RPC_URL"),
   deployerKey: () => must("DEPLOYER_PRIVATE_KEY") as `0x${string}`,
   appUrl: () => process.env.APP_URL || "http://localhost:3000",
-  skipWorldId: () => process.env.SKIP_WORLD_ID !== "false", // default true until World ID lands
-  cronSecret: () => process.env.CRON_SECRET || "dev-cron-secret",
+  /** Explicit SKIP_WORLD_ID wins; when unset, skip only outside production (fail closed). */
+  skipWorldId: () =>
+    process.env.SKIP_WORLD_ID !== undefined && process.env.SKIP_WORLD_ID !== ""
+      ? process.env.SKIP_WORLD_ID !== "false"
+      : process.env.NODE_ENV !== "production",
+  /** null in production when CRON_SECRET is unset: the cron route then rejects every call. */
+  cronSecret: (): string | null => process.env.CRON_SECRET || (process.env.NODE_ENV === "production" ? null : "dev-cron-secret"),
 };
 
 function must(k: string): string {
