@@ -7,9 +7,9 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.appUrl()),
-  title: { default: "Whitechain Commerce", template: "%s · Whitechain Commerce" },
+  title: { default: "White Money", template: "%s · White Money" },
   twitter: { card: "summary" },
-  description: "Accept on-chain USDT payments in your store with Whitechain Commerce. Hosted checkout, payment links and direct wallet settlement.",
+  description: "Accept on-chain USDT payments in your store with White Money. Hosted checkout, payment links and direct wallet settlement.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

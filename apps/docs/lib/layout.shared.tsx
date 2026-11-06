@@ -3,16 +3,9 @@ import { dashboardUrl, gitConfig } from './shared';
 
 function LogoMark() {
   return (
-    <svg viewBox="0 0 32 32" aria-hidden className="size-6 shrink-0">
-      <rect width="32" height="32" rx="8" fill="var(--color-fd-foreground)" />
-      <path
-        d="M7.5 10.5 11.2 22l4.8-8.6 4.8 8.6 3.7-11.5"
-        fill="none"
-        stroke="var(--color-fd-background)"
-        strokeWidth="2.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg viewBox="0 0 1280 1280" aria-hidden className="size-6 shrink-0">
+      <rect width="1280" height="1280" rx="230" fill="var(--color-fd-foreground)" />
+      <path fill="var(--color-fd-background)" d="M123 430H244L317 649 410 430H488L571 649 661 430H779L887 590 1002 430H1128V824H1007V622L883 796 731 574 633 824H521L444 634 365 824H261Z" />
     </svg>
   );
 }
@@ -24,7 +17,7 @@ export function baseOptions(): BaseLayoutProps {
         <span className="inline-flex items-center gap-2 whitespace-nowrap text-sm font-medium tracking-[-0.02em]">
           <LogoMark />
           <span>
-            Whitechain <span className="text-fd-muted-foreground">Commerce</span>
+            White Money
           </span>
         </span>
       ),

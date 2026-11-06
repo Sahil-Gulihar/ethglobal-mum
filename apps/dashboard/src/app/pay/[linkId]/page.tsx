@@ -20,7 +20,7 @@ export default async function PayLinkPage({ params }: { params: Promise<{ linkId
         <h1 className="text-2xl font-semibold tracking-tight">Payment link unavailable</h1>
         <p className="text-sm text-muted-foreground">{r.message}</p>
         <Link href="/" className="text-sm font-medium text-primary underline underline-offset-4 hover:text-foreground">
-          Whitechain Commerce
+          White Money
         </Link>
       </div>
     </main>

@@ -6,7 +6,7 @@ import './global.css';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://whitechain-docs.vercel.app'),
-  title: { default: 'Whitechain Commerce Docs', template: '%s · Whitechain Commerce Docs' },
+  title: { default: 'White Money Docs', template: '%s · White Money Docs' },
   description: 'Accept USDT on Whitechain: checkout widget, hosted checkout, webhooks, refunds and the REST API.',
 };
 

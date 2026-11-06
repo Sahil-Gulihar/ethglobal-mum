@@ -32,7 +32,6 @@
   font-size: 15px;
   letter-spacing: -0.02em;
 }
-.brandSoft { font-weight: 500; color: var(--checkout-muted); margin-left: -5px; }
 .secure {
   display: inline-flex;
   align-items: center;
@@ -68,7 +67,6 @@
 }
 @media (max-width: 480px) {
   .top { min-height: 56px; padding: 12px 20px; }
-  .brandSoft { display: none; }
   .center { align-items: flex-start; padding: 28px 16px; }
   .bottom { padding: 0 24px 24px; }
 }

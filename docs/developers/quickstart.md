@@ -1,9 +1,9 @@
 ---
 title: "Store integration quickstart"
-description: "Add hosted USDT checkout to your store with the Whitechain Commerce API."
+description: "Add hosted USDT checkout to your store with the White Money API."
 ---
 
-Add **Pay with USDT** to your checkout. Your server creates a checkout link for each order. The shopper pays on the Whitechain Commerce checkout page. We then send your server a payment update through a webhook. This works with any backend that can send and receive HTTPS requests.
+Add **Pay with USDT** to your checkout. Your server creates a checkout link for each order. The shopper pays on the White Money checkout page. We then send your server a payment update through a webhook. This works with any backend that can send and receive HTTPS requests.
 
 If you only need to share a fixed-price checkout, start with [Payment links](./payment-links.md).
 
@@ -12,7 +12,7 @@ If you only need to share a fixed-price checkout, start with [Payment links](./p
 1. [Create a merchant account](https://100lana.com/signup) with the business name customers should see at checkout.
 2. If the dashboard asks you to verify your account, complete the World ID step.
 3. In the dashboard, connect your payout wallet or enter its address. Choose **Use as payout wallet** and wait for the dashboard to show that your wallet is ready.
-4. In **Developers**, choose **Create secret key**. Copy the `sk_test_` key and store it on your server as `WC_SECRET_KEY`. Set `WC_API_BASE` to the origin of your Whitechain Commerce instance, such as `https://100lana.com`. The SDK adds `/api/v1`.
+4. In **Developers**, choose **Create secret key**. Copy the `sk_test_` key and store it on your server as `WC_SECRET_KEY`. Set `WC_API_BASE` to the origin of your White Money instance, such as `https://100lana.com`. The SDK adds `/api/v1`.
 
 ## 2. Install an SDK
 

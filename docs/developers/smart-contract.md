@@ -3,7 +3,7 @@ title: "Smart contract"
 description: "The PaymentRouter contract moves USDT from the customer straight to your payout wallet, and back again for refunds."
 ---
 
-Every Whitechain Commerce payment and refund is a call to one small, non-upgradeable contract. It records which order was paid, emits an event that links the transfer to the order, and never holds a token balance. This page lists its full interface and shows how to check any payment on the chain yourself.
+Every White Money payment and refund is a call to one small, non-upgradeable contract. It records which order was paid, emits an event that links the transfer to the order, and never holds a token balance. This page lists its full interface and shows how to check any payment on the chain yourself.
 
 ## Deployment
 

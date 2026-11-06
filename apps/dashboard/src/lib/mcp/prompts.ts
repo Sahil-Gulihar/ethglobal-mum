@@ -14,7 +14,7 @@ const oneOf = <T extends { id: string }>(list: T[], v: string | undefined) => (v
 export const prompts: Prompt[] = [
   {
     name: "integrate_whitechain",
-    title: "Integrate Whitechain Commerce checkout",
+    title: "Integrate White Money checkout",
     description: "Add USDT checkout to the current codebase end to end: server route, checkout UI, verified webhooks and a testnet test.",
     arguments: [
       { name: "stack", description: `Repo stack: ${INTEGRATION_STACKS.map((s) => s.id).join(", ")}. Leave empty to detect it.` },
@@ -24,7 +24,7 @@ export const prompts: Prompt[] = [
       const stack = oneOf(INTEGRATION_STACKS, a.stack);
       const mode = oneOf(INTEGRATION_MODES, a.mode);
       return [
-        `Integrate Whitechain Commerce checkout into this codebase for the merchant "${m.name}".`,
+        `Integrate White Money checkout into this codebase for the merchant "${m.name}".`,
         "",
         stack ? `The stack is ${stack}.` : "First inspect the repo and decide which stack it is: nextjs, react-node, node or other.",
         `Then call the whitechain tool get_integration_guide with that stack${mode ? ` and mode "${mode}"` : ""} and follow the guide exactly.`,

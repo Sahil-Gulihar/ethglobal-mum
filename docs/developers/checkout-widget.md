@@ -3,9 +3,9 @@ title: "Checkout widget"
 description: "Embed a non-custodial USDT checkout in your React app with one component, <WhitechainCheckout />."
 ---
 
-The widget ships in `@whitechain-commerce/react`. It loads a checkout session, connects the customer's wallet, prompts them to switch networks if needed, checks their balance, asks for an exact-amount USDT approval when needed, sends the payment to the PaymentRouter contract, and waits until the Whitechain Commerce backend has verified the payment onchain.
+The widget ships in `@whitechain-commerce/react`. It loads a checkout session, connects the customer's wallet, prompts them to switch networks if needed, checks their balance, asks for an exact-amount USDT approval when needed, sends the payment to the PaymentRouter contract, and waits until the White Money backend has verified the payment onchain.
 
-The customer pays from their own wallet. The funds go straight to your registered payout wallet. Whitechain Commerce never holds them.
+The customer pays from their own wallet. The funds go straight to your registered payout wallet. White Money never holds them.
 
 If you would rather not embed anything, send the customer to the [hosted checkout](./hosted-checkout.md) instead. It is the same widget on a page we serve.
 
@@ -92,7 +92,7 @@ The demo store uses the same pattern in `apps/demo-store/src/app/api/orders/rout
 | Prop | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
 | `sessionId` | `string` | Yes | | The checkout session id (`cs_...`) returned by `createCheckoutSession` or `POST /api/v1/checkout_sessions`. |
-| `apiBase` | `string` | No | See [API base resolution](#api-base-resolution) | Origin of the Whitechain Commerce API, for example `"https://100lana.com"`. A trailing slash is removed. |
+| `apiBase` | `string` | No | See [API base resolution](#api-base-resolution) | Origin of the White Money API, for example `"https://100lana.com"`. A trailing slash is removed. |
 | `onSuccess` | `(result: CheckoutSuccess) => void` | No | | Called once, when the session is `paid` according to the backend. UI only. |
 | `onError` | `(error: Error) => void` | No | | Called on failures. Not called when the customer rejects a request in their wallet. |
 | `onCancel` | `() => void` | No | Navigate to the session's `cancelUrl` | Called when the customer clicks "Cancel and return to store". |
@@ -237,7 +237,7 @@ As soon as the wallet returns a transaction hash, the widget:
 2. Polls `GET /api/v1/checkout_sessions/{id}` every 2 seconds.
 3. Watches the transaction receipt itself (for up to 180 seconds).
 
-The screen shows "Confirming payment…", a link to the transaction, and "Transaction sent. Waiting for Whitechain Commerce to verify the payment onchain. You can keep this page open."
+The screen shows "Confirming payment…", a link to the transaction, and "Transaction sent. Waiting for White Money to verify the payment onchain. You can keep this page open."
 
 From here:
 
@@ -382,7 +382,7 @@ The widget injects its own stylesheet in a `<style>` tag inside the component. E
 - Text uses a system font stack.
 - On viewports 440 px wide or less, the card uses a smaller corner radius and amount size.
 - With `prefers-reduced-motion: reduce`, transitions are turned off and animations are cut to near-zero duration (except the spinner).
-- The footer reads "Non-custodial · Powered by Whitechain Commerce".
+- The footer reads "Non-custodial · Powered by White Money".
 
 Most of the widget's rules use a single class, and its `<style>` tag is rendered inside the component, so it usually comes after your stylesheets in the document. A plain `.my-class` rule with the same specificity can then lose to it. If you override styles through `className`, use a more specific selector, for example `.my-class.wcc-root`. Class names other than `wcc-root` are internal and may change.
 

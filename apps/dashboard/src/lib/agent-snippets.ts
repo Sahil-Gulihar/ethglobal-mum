@@ -49,7 +49,7 @@ export function agentClients(base: string): AgentClient[] {
       filename: ".vscode/mcp.json",
       code: JSON.stringify(
         {
-          inputs: [{ type: "promptString", id: "whitechain-secret-key", description: "Whitechain Commerce secret key", password: true }],
+          inputs: [{ type: "promptString", id: "whitechain-secret-key", description: "White Money secret key", password: true }],
           servers: { whitechain: { type: "http", url, headers: { Authorization: "Bearer ${input:whitechain-secret-key}" } } },
         },
         null,
@@ -165,19 +165,19 @@ export function integrationPrompts(base: string) {
     ...stacks.map((s) => ({
       id: s.id,
       name: s.name,
-      code: `Read ${base}/integrate.md?stack=${s.id} and integrate Whitechain Commerce checkout into this repo. Follow it end to end and finish with its checklist.`,
+      code: `Read ${base}/integrate.md?stack=${s.id} and integrate White Money checkout into this repo. Follow it end to end and finish with its checklist.`,
     })),
     {
       id: "payment-link",
       name: "No code: payment link",
-      code: `Read ${base}/integrate.md?mode=payment-link and add a "Pay with USDT" button to this site that uses a Whitechain Commerce payment link.`,
+      code: `Read ${base}/integrate.md?mode=payment-link and add a "Pay with USDT" button to this site that uses a White Money payment link.`,
     },
   ];
 }
 
 /** One self-contained prompt, shown on the Developers page, that a coding agent can follow to add payments to any repo. */
 export function agentSetupPrompt(base: string) {
-  return `Set up Whitechain Commerce payments (USDT on Whitechain Sepolia, testnet) in this app.
+  return `Set up White Money payments (USDT on Whitechain Sepolia, testnet) in this app.
 
 1. Work out the stack of this repo, then read the integration guide for it:
    ${base}/integrate.md?stack=<nextjs | react-node | node | other>

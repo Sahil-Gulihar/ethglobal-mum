@@ -9,7 +9,7 @@ import { env } from "@/lib/env";
 
 /**
  * GET /integrate.md?stack=nextjs|react-node|node|other&mode=widget|hosted|payment-link
- * Public Markdown prompt that coding agents follow to integrate Whitechain Commerce into a repo.
+ * Public Markdown prompt that coding agents follow to integrate White Money into a repo.
  */
 export function GET(req: Request) {
   const params = new URL(req.url).searchParams;

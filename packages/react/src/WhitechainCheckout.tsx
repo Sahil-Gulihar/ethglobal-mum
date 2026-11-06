@@ -521,7 +521,7 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
         <span>Pay directly from your wallet</span>
         <span className="wcc-foot-sep">·</span>
         <span>
-          Powered by <b>Whitechain Commerce</b>
+          Powered by <b>White Money</b>
         </span>
       </footer>
     </div>

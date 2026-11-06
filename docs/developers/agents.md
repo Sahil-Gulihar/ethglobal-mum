@@ -1,9 +1,9 @@
 ---
 title: "Agents and MCP"
-description: "Connect Claude, ChatGPT, Cursor, VS Code or your own agent to Whitechain Commerce over the Model Context Protocol."
+description: "Connect Claude, ChatGPT, Cursor, VS Code or your own agent to White Money over the Model Context Protocol."
 ---
 
-Whitechain Commerce has a hosted [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server. Any MCP client can use it to create checkouts, share payment links, look up payments and start refunds for your account. You can also add it to any repository, or give your own agent the same tools with the `whitechain-mcp` package.
+White Money has a hosted [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server. Any MCP client can use it to create checkouts, share payment links, look up payments and start refunds for your account. You can also add it to any repository, or give your own agent the same tools with the `whitechain-mcp` package.
 
 Agents can't move funds. Payments go straight from the customer's wallet to yours, and a refund an agent creates stays `pending` until you sign it with your payout wallet in the dashboard.
 
@@ -124,7 +124,7 @@ Anyone with this URL can act as your account, so treat it like the key itself.
 ```json
 {
   "inputs": [
-    { "type": "promptString", "id": "whitechain-secret-key", "description": "Whitechain Commerce secret key", "password": true }
+    { "type": "promptString", "id": "whitechain-secret-key", "description": "White Money secret key", "password": true }
   ],
   "servers": {
     "whitechain": {

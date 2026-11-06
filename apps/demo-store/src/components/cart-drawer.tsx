@@ -168,7 +168,7 @@ export function CartDrawer() {
               </>
             )}
           </button>
-          <p className="mt-3 text-center text-xs text-muted">Non-custodial · powered by Whitechain Commerce</p>
+          <p className="mt-3 text-center text-xs text-muted">Non-custodial · powered by White Money</p>
         </div>
       </aside>
     </div>

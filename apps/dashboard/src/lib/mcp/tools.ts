@@ -1,5 +1,5 @@
 /**
- * The Whitechain Commerce agent toolkit: every tool the MCP server exposes. Each tool is a zod input
+ * The White Money agent toolkit: every tool the MCP server exposes. Each tool is a zod input
  * schema plus a handler that runs as the merchant who owns the API key. Handlers reuse the same
  * library functions as the REST API, so agents and /api/v1 always behave the same way.
  */
@@ -94,7 +94,7 @@ export const tools: ToolDef[] = [
     name: "get_integration_guide",
     title: "Get the integration guide",
     description:
-      "Returns step-by-step instructions (Markdown) for adding Whitechain Commerce checkout to a codebase: what to inspect, env vars, server route, checkout UI, webhook verification, testing and a final checklist. Coding agents: call this before writing integration code and follow it.",
+      "Returns step-by-step instructions (Markdown) for adding White Money checkout to a codebase: what to inspect, env vars, server route, checkout UI, webhook verification, testing and a final checklist. Coding agents: call this before writing integration code and follow it.",
     input: z.object({
       stack: z.enum(INTEGRATION_STACKS.map((s) => s.id) as [string, ...string[]]).optional().describe(`The repo's stack: ${INTEGRATION_STACKS.map((s) => `${s.id} (${s.label})`).join(", ")}. Default other.`),
       mode: z.enum(INTEGRATION_MODES.map((m) => m.id) as [string, ...string[]]).optional().describe(`How customers pay: ${INTEGRATION_MODES.map((m) => `${m.id} (${m.label})`).join(", ")}. Default: hosted (the widget package is not on npm yet; use widget only if @whitechain-commerce/react resolves in the repo).`),

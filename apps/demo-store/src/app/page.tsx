@@ -7,7 +7,7 @@ export default function ShopPage() {
       <section className="mx-auto grid max-w-6xl gap-8 px-6 pb-14 pt-16 md:grid-cols-[1.2fr_1fr] md:items-end md:pt-24">
         <div className="animate-rise">
           <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-line bg-paper px-3 py-1.5 text-xs font-medium text-muted">
-            <span className="size-1.5 rounded-full bg-cardamom" /> A Whitechain Commerce demo store
+            <span className="size-1.5 rounded-full bg-cardamom" /> A White Money demo store
           </p>
           <h1 className="font-display text-5xl font-semibold leading-[1.04] tracking-[-0.05em] text-balance md:text-6xl">
             Small-batch chai, <span className="text-muted">paid in USDT.</span>

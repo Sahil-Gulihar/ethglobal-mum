@@ -10,9 +10,9 @@ import { describeTool, ToolError, tools, toolsByName } from "./tools";
 import { prompts } from "./prompts";
 
 const SUPPORTED_VERSIONS = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"];
-const SERVER_INFO = { name: "whitechain-commerce", title: "Whitechain Commerce", version: "1.0.0" };
+const SERVER_INFO = { name: "whitechain-commerce", title: "White Money", version: "1.0.0" };
 
-const INSTRUCTIONS = `Whitechain Commerce is a non-custodial USDT checkout.
+const INSTRUCTIONS = `White Money is a non-custodial USDT checkout.
 Use these tools to act for the merchant who owns this API key.
 - To get paid, create a checkout session (one-off order) or a payment link (reusable fixed price) and share its url.
 - Amounts are USDT decimal strings like "25.00".

@@ -1,5 +1,5 @@
 /**
- * The canonical "integrate Whitechain Commerce" prompt for coding agents, served as Markdown at
+ * The canonical "integrate White Money" prompt for coding agents, served as Markdown at
  * /integrate.md. Pure function: no DB, no env, safe to import anywhere.
  *
  * Every code sample here must match the real API (apps/dashboard/src/app/api/v1), the webhook format
@@ -55,11 +55,11 @@ export function integrationGuide(opts: { baseUrl: string; stack?: IntegrationSta
 // ---------------------------------------------------------------------------------------------
 
 function header(base: string, stackLabel: string, mode: "widget" | "hosted", defaulted: boolean) {
-  return `# Integrate Whitechain Commerce checkout (instructions for coding agents)
+  return `# Integrate White Money checkout (instructions for coding agents)
 
-You are a coding agent working inside a merchant's repository. Follow these instructions end to end to add Whitechain Commerce checkout. Do the work in the repository, then verify every item in the **Final checklist** before you say you are done.
+You are a coding agent working inside a merchant's repository. Follow these instructions end to end to add White Money checkout. Do the work in the repository, then verify every item in the **Final checklist** before you say you are done.
 
-Whitechain Commerce is a non-custodial USDT checkout. The customer pays from their own wallet straight to the merchant's payout wallet; the platform never holds funds. The merchant's server creates a **checkout session** with a secret key, the customer pays it (embedded widget or hosted page), and the platform sends a signed **\`payment.succeeded\` webhook** to the merchant's server, which fulfils the order.
+White Money is a non-custodial USDT checkout. The customer pays from their own wallet straight to the merchant's payout wallet; the platform never holds funds. The merchant's server creates a **checkout session** with a secret key, the customer pays it (embedded widget or hosted page), and the platform sends a signed **\`payment.succeeded\` webhook** to the merchant's server, which fulfils the order.
 
 - API base: \`${base}\`
 - Stack for this guide: **${stackLabel}**
@@ -105,7 +105,7 @@ Before writing code, find out and note down:
 4. **Existing payment code.** Stripe or other checkouts, webhook routes, "mark paid" functions, fulfilment jobs, emails. Reuse the existing order state machine and fulfilment function; add Whitechain as another way to pay, do not rewrite the flow.
 5. **Persistence for idempotency.** Where you can store the session id on the order and a processed-webhook-event table (or column) with a unique key.
 6. **The app's public URL** (for \`successUrl\`/\`cancelUrl\`) and how routes are named.
-7. **Whether \`@whitechain-commerce/react\` can be installed.** It is not on the public npm registry yet (\`npm view @whitechain-commerce/react\` returns 404). It is only available inside the Whitechain Commerce monorepo as a workspace package (\`"@whitechain-commerce/react": "workspace:*"\`). If you cannot install it, use the hosted checkout; the rest of this guide does not need any Whitechain package.`;
+7. **Whether \`@whitechain-commerce/react\` can be installed.** It is not on the public npm registry yet (\`npm view @whitechain-commerce/react\` returns 404). It is only available inside the White Money monorepo as a workspace package (\`"@whitechain-commerce/react": "workspace:*"\`). If you cannot install it, use the hosted checkout; the rest of this guide does not need any Whitechain package.`;
 }
 
 function decisionSection(base: string) {
@@ -136,7 +136,7 @@ function envSection(base: string, stack: IntegrationStack, mode: "widget" | "hos
   const rows = [
     `| \`WC_SECRET_KEY\` | Server only | \`sk_test_...\` | Authenticates \`POST /api/v1/checkout_sessions\`. Never expose it to the browser, never prefix it with \`NEXT_PUBLIC_\`/\`VITE_\`. |`,
     `| \`WC_WEBHOOK_SECRET\` | Server only | \`whsec_...\` | Signing secret of the webhook endpoint. Used to verify the \`WC-Signature\` header. |`,
-    `| \`WC_API_BASE\` | Server | \`${base}\` | Whitechain Commerce API origin, no trailing slash. |`,
+    `| \`WC_API_BASE\` | Server | \`${base}\` | White Money API origin, no trailing slash. |`,
   ];
   if (mode === "widget" && stack === "nextjs")
     rows.push(
@@ -161,7 +161,7 @@ Add them to \`.env.example\` (empty values for the secrets) and to the env schem
 function stepsIntro() {
   return `## Implementation
 
-Adapt names and paths to the repository's conventions. The code below is complete and correct for the Whitechain Commerce API; replace only the parts marked as "your code" (database access).
+Adapt names and paths to the repository's conventions. The code below is complete and correct for the White Money API; replace only the parts marked as "your code" (database access).
 
 ### Step 1: order fields
 
@@ -738,7 +738,7 @@ async function payWithUsdt(orderId: string) {
   });
   const body = await res.json();
   if (!res.ok) throw new Error(body.error ?? "Could not start checkout");
-  window.location.assign(body.url); // hosted checkout on the Whitechain Commerce domain
+  window.location.assign(body.url); // hosted checkout on the White Money domain
 }
 `,
 )}
@@ -846,11 +846,11 @@ function referenceSection(base: string) {
 // ---------------------------------------------------------------------------------------------
 
 function paymentLinkGuide(base: string) {
-  return `# Add a Whitechain Commerce payment link (instructions for coding agents)
+  return `# Add a White Money payment link (instructions for coding agents)
 
 You are a coding agent working inside a merchant's repository. The goal is a no-code USDT payment: a fixed-price **payment link** behind a button. No server code, keys or webhooks are needed in the repository.
 
-Whitechain Commerce is a non-custodial USDT checkout. A payment link is a reusable URL \`${base}/pay/pl_...\`; every visit opens a fresh hosted checkout for the link's fixed amount, and the customer pays from their wallet straight to the merchant's payout wallet.
+White Money is a non-custodial USDT checkout. A payment link is a reusable URL \`${base}/pay/pl_...\`; every visit opens a fresh hosted checkout for the link's fixed amount, and the customer pays from their wallet straight to the merchant's payout wallet.
 
 ## Choose this only if
 

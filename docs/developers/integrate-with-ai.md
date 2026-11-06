@@ -1,16 +1,16 @@
 ---
 title: "Integrate with AI"
-description: "Paste one prompt into your coding agent and it adds Whitechain Commerce checkout, webhooks and an order status page to your repository."
+description: "Paste one prompt into your coding agent and it adds White Money checkout, webhooks and an order status page to your repository."
 ---
 
-Whitechain Commerce publishes an integration guide written for coding agents such as Claude Code, Cursor and Codex. It is a single Markdown page with instructions the agent follows end to end inside your repository: what to look at first, which checkout to pick, the exact environment variables, complete server and client code, the security rules, how to test on testnet, and a checklist it has to verify before it says it is done.
+White Money publishes an integration guide written for coding agents such as Claude Code, Cursor and Codex. It is a single Markdown page with instructions the agent follows end to end inside your repository: what to look at first, which checkout to pick, the exact environment variables, complete server and client code, the security rules, how to test on testnet, and a checklist it has to verify before it says it is done.
 
 ## The one-line prompt
 
 Open your coding agent in the root of your repository and paste:
 
 ```text
-Read https://100lana.com/integrate.md?stack=nextjs and integrate Whitechain Commerce checkout into this repo.
+Read https://100lana.com/integrate.md?stack=nextjs and integrate White Money checkout into this repo.
 ```
 
 If you self-host, use your own dashboard URL: `{APP_URL}/integrate.md?stack=nextjs`. The guide fills in that URL as the API base everywhere.
@@ -53,7 +53,7 @@ Some steps still need you: creating the account and registering a payout wallet,
 
 ## Give the agent the MCP tools too
 
-If the agent is connected to the [Whitechain Commerce MCP server](./agents.md), the guide tells it to use the tools instead of sending you to the dashboard: `get_account` to check that the account can accept payments, `create_webhook_endpoint` to register the webhook URL and get its signing secret for `WC_WEBHOOK_SECRET`, `send_test_webhook` to check verification, and `create_checkout_session` and `get_checkout_session` to test.
+If the agent is connected to the [White Money MCP server](./agents.md), the guide tells it to use the tools instead of sending you to the dashboard: `get_account` to check that the account can accept payments, `create_webhook_endpoint` to register the webhook URL and get its signing secret for `WC_WEBHOOK_SECRET`, `send_test_webhook` to check verification, and `create_checkout_session` and `get_checkout_session` to test.
 
 To set that up in a repository, run this in its root:
 
@@ -62,7 +62,7 @@ npx whitechain-mcp init
 export WC_SECRET_KEY=sk_test_...
 ```
 
-`init` adds the `whitechain` server to `.mcp.json`, `.cursor/mcp.json` and `.vscode/mcp.json`, and a short Whitechain Commerce section to `AGENTS.md` so every agent working in the repository knows how payments work there. See [Agents and MCP](./agents.md#add-it-to-any-repository).
+`init` adds the `whitechain` server to `.mcp.json`, `.cursor/mcp.json` and `.vscode/mcp.json`, and a short White Money section to `AGENTS.md` so every agent working in the repository knows how payments work there. See [Agents and MCP](./agents.md#add-it-to-any-repository).
 
 ## Related
 

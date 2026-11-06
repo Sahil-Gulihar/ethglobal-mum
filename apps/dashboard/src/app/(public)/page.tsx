@@ -68,7 +68,7 @@ export default async function Landing() {
               src="/product/dashboard-sample.webp"
               alt="Chai House dashboard showing 73.99 USDT received after refunds and three sample payments"
               width={1120}
-              height={600}
+              height={480}
               unoptimized
             />
             <figcaption>Chai House dashboard · Synthetic payments</figcaption>
@@ -101,7 +101,7 @@ export default async function Landing() {
       </main>
       <footer className="public-frame landing-footer">
         <Wordmark />
-        <p>© {new Date().getFullYear()} Whitechain Commerce</p>
+        <p>© {new Date().getFullYear()} White Money</p>
         <Link href="/docs">Docs</Link>
         {!merchant && <Link href="/login">Log in</Link>}
         <a href="https://explorer.testnet.whitechain.io" target="_blank" rel="noreferrer">Whitechain Explorer ↗</a>

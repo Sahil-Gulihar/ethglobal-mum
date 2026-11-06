@@ -82,7 +82,7 @@ export function AuthForm({ mode, next }: { mode: "login" | "signup"; next?: stri
           </>
         ) : (
           <>
-            New to Whitechain Commerce?{" "}
+            New to White Money?{" "}
             <Link href="/signup" className="font-medium text-primary underline-offset-4 hover:underline">
               Create an account
             </Link>

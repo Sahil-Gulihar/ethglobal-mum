@@ -8,7 +8,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       <div className="flex flex-col px-6 py-7 sm:px-10 lg:px-12">
         <Wordmark />
         <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-16">{children}</main>
-        <p className="text-xs text-muted-foreground">Payments powered by Whitechain Commerce.</p>
+        <p className="text-xs text-muted-foreground">Payments powered by White Money.</p>
       </div>
       <aside className="hidden border-l border-border bg-card lg:block">
         <div className="flex h-full flex-col justify-between p-12">
@@ -17,7 +17,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
             <h2 className="text-[2rem] font-medium leading-tight tracking-tight">A simpler way to accept stablecoin payments.</h2>
             <p className="mt-5 text-base leading-relaxed text-muted-foreground">Give your customers a familiar checkout and receive USDT directly in your wallet.</p>
           </div>
-          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} Whitechain Commerce</p>
+          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} White Money</p>
         </div>
       </aside>
     </div>

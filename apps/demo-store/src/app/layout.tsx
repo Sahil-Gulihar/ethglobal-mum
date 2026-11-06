@@ -7,7 +7,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Chai & Co. · Small-batch masala chai",
-  description: "A demo merchant paying in USDT on Whitechain via Whitechain Commerce.",
+  description: "A demo merchant paying in USDT on Whitechain via White Money.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -21,7 +21,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <div className="mx-auto flex max-w-6xl flex-col gap-2 px-6 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
               <p>Chai &amp; Co. is a fictional demo store. No real tea will be shipped.</p>
               <p>
-                Payments by <span className="font-medium text-ink">Whitechain Commerce</span>
+                Payments by <span className="font-medium text-ink">White Money</span>
               </p>
             </div>
           </footer>

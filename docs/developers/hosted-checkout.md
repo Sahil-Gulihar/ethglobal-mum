@@ -1,9 +1,9 @@
 ---
 title: "Hosted checkout"
-description: "Send customers to a payment page that Whitechain Commerce serves, with no frontend code on your side."
+description: "Send customers to a payment page that White Money serves, with no frontend code on your side."
 ---
 
-Every checkout session has a `url` field. It points to the hosted checkout page, `/checkout/:sessionId` on the Whitechain Commerce dashboard. The page renders the same [checkout widget](./checkout-widget.md) you can embed, centered on its own page, and sends the customer back to your `successUrl` after they pay.
+Every checkout session has a `url` field. It points to the hosted checkout page, `/checkout/:sessionId` on the White Money dashboard. The page renders the same [checkout widget](./checkout-widget.md) you can embed, centered on its own page, and sends the customer back to your `successUrl` after they pay.
 
 ## How it works
 
@@ -116,7 +116,7 @@ The theme changes the checkout card. The page around it always has a dark backgr
 
 ## What the customer sees
 
-The page has a "Whitechain Commerce" header with a "Secure checkout" badge, the checkout card in the middle, and a footer that says "Funds go straight from your wallet to the merchant on Whitechain. We never hold your money." Search engines are asked not to index it.
+The page has a "White Money" header with a "Secure checkout" badge, the checkout card in the middle, and a footer that says "Funds go straight from your wallet to the merchant on Whitechain. We never hold your money." Search engines are asked not to index it.
 
 The card shows your merchant name, the order id, the amount in USDT and a countdown to the session's expiry (sessions last 30 minutes from creation). The customer then goes through the same steps as in the embedded widget: choose a wallet, switch networks if needed, check the balance, approve the exact amount if needed, pay and wait for verification. See [What the customer sees](./checkout-widget.md#what-the-customer-sees) for each screen, including expired sessions, errors and wallet rejections.
 
@@ -127,7 +127,7 @@ If the session id does not exist, the card shows "We couldn't load this checkout
 | | Hosted checkout | Embedded widget |
 | --- | --- | --- |
 | Frontend code | None. Redirect to `session.url`. | Render `<WhitechainCheckout />` in your React app. |
-| Where the customer pays | On the Whitechain Commerce domain. | On your own page, next to your order summary. |
+| Where the customer pays | On the White Money domain. | On your own page, next to your order summary. |
 | After payment | Automatic redirect to `successUrl` after 2 seconds. | Your `onSuccess` callback decides. The widget does not redirect on its own. |
 | Cancel | Navigates to `cancelUrl`. | Your `onCancel` callback, or `cancelUrl` if you do not pass one. |
 | Theme | `?theme=dark` query parameter. | `theme` prop. |

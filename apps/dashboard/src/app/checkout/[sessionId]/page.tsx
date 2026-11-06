@@ -26,7 +26,7 @@ export default async function CheckoutPage({
       <header className={styles.top}>
         <span className={styles.brand}>
           <LogoMark className="size-6" />
-          Whitechain <span className={styles.brandSoft}>Commerce</span>
+          White Money
         </span>
         <span className={styles.secure}>
           <Icon name="lock" className="size-3" />

@@ -3,7 +3,7 @@ title: "Webhooks"
 description: "Get a signed HTTP request on your server whenever a payment or refund is confirmed onchain."
 ---
 
-Webhooks are how your backend learns that money has moved. Whitechain Commerce watches the `PaymentRouter` contract, checks each payment against the checkout session it belongs to, and then sends a `POST` request to every enabled endpoint you have added. Fulfil orders from these requests, not from the browser. The `onSuccess` callback of the [checkout widget](./checkout-widget.md) is a UI signal only.
+Webhooks are how your backend learns that money has moved. White Money watches the `PaymentRouter` contract, checks each payment against the checkout session it belongs to, and then sends a `POST` request to every enabled endpoint you have added. Fulfil orders from these requests, not from the browser. The `onSuccess` callback of the [checkout widget](./checkout-widget.md) is a UI signal only.
 
 ## How it works
 

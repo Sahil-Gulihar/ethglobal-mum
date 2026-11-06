@@ -3,7 +3,7 @@ title: "Refunds"
 description: "Refunds send USDT from your payout wallet back to the customer's wallet, signed by you, because the platform never holds funds."
 ---
 
-Whitechain Commerce is non-custodial. A payment goes straight from the customer to your payout wallet, so there is no platform balance to refund from. A refund is an onchain transaction that your payout wallet signs: `refund(chainPaymentId, amount)` on the PaymentRouter, which moves the USDT from your payout wallet to the original payer. The API can record a refund request, but it cannot complete one.
+White Money is non-custodial. A payment goes straight from the customer to your payout wallet, so there is no platform balance to refund from. A refund is an onchain transaction that your payout wallet signs: `refund(chainPaymentId, amount)` on the PaymentRouter, which moves the USDT from your payout wallet to the original payer. The API can record a refund request, but it cannot complete one.
 
 ## How a refund works
 
