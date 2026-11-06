@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { useEffect, useRef, useState } from "react";
 import { formatUsdt } from "@/lib/catalog";
 import { useCart } from "./cart";
@@ -73,19 +75,17 @@ export function CartDrawer() {
 
   return (
     <div className="fixed inset-0 z-50" role="dialog" aria-modal aria-label="Your cart">
-      <button aria-label="Close cart" tabIndex={-1} className="animate-fade absolute inset-0 bg-ink/40" onClick={() => setOpen(false)} />
+      <button aria-label="Close cart" tabIndex={-1} className="animate-fade absolute inset-0 bg-black/60" onClick={() => setOpen(false)} />
       <aside ref={panelRef} className="animate-drawer absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-paper shadow-2xl">
         <div className="flex items-center justify-between border-b border-line px-6 py-5">
-          <h2 className="font-display text-2xl font-semibold">Your cart</h2>
+          <h2 className="font-display text-xl font-semibold tracking-tight">Your cart</h2>
           <button
             ref={closeRef}
             onClick={() => setOpen(false)}
             className="grid size-9 place-items-center rounded-full text-muted transition hover:bg-cream hover:text-ink"
             aria-label="Close"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
+            <HugeiconsIcon icon={Cancel01Icon} size={18} strokeWidth={1.8} aria-hidden />
           </button>
         </div>
 
@@ -139,10 +139,10 @@ export function CartDrawer() {
           </ul>
         )}
 
-        <div className="border-t border-line bg-cream/60 px-6 py-5">
+        <div className="border-t border-line bg-paper px-6 py-5">
           <div className="flex items-baseline justify-between">
             <span className="text-muted">Subtotal</span>
-            <span className="font-display text-2xl font-semibold tabular-nums">
+            <span className="font-display text-xl font-semibold tracking-tight tabular-nums">
               {formatUsdt(subtotalCents)} <span className="text-base font-normal text-muted">USDT</span>
             </span>
           </div>
@@ -155,7 +155,7 @@ export function CartDrawer() {
           <button
             disabled={lines.length === 0 || pending}
             onClick={checkout}
-            className="mt-4 flex h-13 w-full items-center justify-center gap-2 rounded-full bg-masala text-base font-semibold text-cream shadow-[0_8px_24px_-8px_rgba(181,72,42,0.6)] transition hover:bg-masala-dark active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+            className="mt-4 flex h-13 w-full items-center justify-center gap-2 rounded-xl bg-ink text-base font-semibold text-cream transition hover:bg-ink/85 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
           >
             {pending ? (
               <>
@@ -168,7 +168,7 @@ export function CartDrawer() {
               </>
             )}
           </button>
-          <p className="mt-3 text-center text-xs text-muted">Non-custodial · Whitechain Sepolia · powered by Whitechain Commerce</p>
+          <p className="mt-3 text-center text-xs text-muted">Non-custodial · powered by Whitechain Commerce</p>
         </div>
       </aside>
     </div>

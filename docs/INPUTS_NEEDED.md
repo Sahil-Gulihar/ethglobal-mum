@@ -36,7 +36,7 @@ Never paste secrets in chat or commit them. Put them in the local `.env` files (
 | --- | --- | --- | --- |
 | 4.1 | **Postgres connection string** (Neon or Supabase) | Step 1 (Blocker) | Or say "local", and we run Postgres in Docker. |
 | 4.2 | Hosting choice for dashboard + demo store (Vercel?) | Steps 9, 12 | Webhooks need a public URL. Vercel or a tunnel (ngrok/cloudflared) both work. |
-| 4.3 | Background worker hosting | Steps 7, 9 | The indexer and webhook retry loop need a long-running process or a cron job. Vercel cron is enough for the demo. |
+| 4.3 | Background worker hosting | Steps 7, 9 | The indexer and webhook retry loop need a supervised long-running process. |
 | 4.4 | Email for signup: magic link (needs Resend etc.) or plain email + password | Step 5 | Recommend email + password to save time. |
 
 ## 5. Decisions

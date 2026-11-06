@@ -197,7 +197,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 export function StatusPill({ status }: { status: Order["status"] }) {
   const map = {
-    pending: ["Awaiting payment", "bg-saffron/15 text-[#8a5a12]"],
+    pending: ["Awaiting payment", "bg-saffron/15 text-[#ebc484]"],
     paid: ["Paid · fulfilled", "bg-cardamom/15 text-cardamom"],
     partially_refunded: ["Partially refunded", "bg-masala/10 text-masala-dark"],
     refunded: ["Refunded", "bg-ink/10 text-ink"],

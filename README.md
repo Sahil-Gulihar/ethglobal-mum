@@ -94,12 +94,14 @@ pnpm i
 cp .env.example .env          # then fill in WHITECHAIN_RPC_URL, DEPLOYER_PRIVATE_KEY/ADDRESS (router owner), etc.
 docker compose up -d db       # Postgres on :5433
 pnpm db:push                  # create the schema
-pnpm dev                      # dashboard on :3000 and demo store on :3001
-pnpm worker                   # in another terminal: indexer + webhook delivery every 4 s
+pnpm dev                      # dashboard, demo store, and background worker
 ```
 
-Both apps load the **root** `.env`. Without the worker, payments are still confirmed through the `/submit` hint and
-`GET /api/cron/tick` (with `Authorization: Bearer $CRON_SECRET`), but webhooks are only sent by the worker or the cron tick.
+Both apps and the worker load the **root** `.env`. The worker scans the chain and delivers webhooks every 4 seconds.
+For deployment, run `pnpm worker` as a separate, supervised long-running process with the same database, RPC, and
+router configuration as the dashboard. Restart it on failure and monitor it: without it, the chain scan and webhook
+delivery stop. Environment variables supplied by the host work without a `.env` file. Webhooks are delivered at least
+once, so consumers must deduplicate events by ID.
 
 Contracts: `bash contracts/install-deps.sh && cd contracts && forge test`.
 
@@ -148,7 +150,7 @@ webhook delivery to the store, and partial and full refunds from the dashboard.
 2. Create a scratch database: `docker exec ethglobal-mum-db-1 psql -U wc -c 'create database wc_fork'`, then run
    `DATABASE_URL=postgres://wc:wc@localhost:5433/wc_fork pnpm db:push`.
 3. Export `WHITECHAIN_RPC_URL=http://127.0.0.1:8545`, `NEXT_PUBLIC_WHITECHAIN_RPC_URL=http://127.0.0.1:8545` and the
-   `wc_fork` `DATABASE_URL`, then run `pnpm dev` and `pnpm worker`. Shell variables take precedence over `.env`.
+   `wc_fork` `DATABASE_URL`, then run `pnpm dev`. Shell variables take precedence over `.env`.
 4. Fund a test customer:
    1. Find a USDT holder with `cast logs` on the USDT `Transfer` event.
    2. Run `cast rpc anvil_impersonateAccount <holder>`.

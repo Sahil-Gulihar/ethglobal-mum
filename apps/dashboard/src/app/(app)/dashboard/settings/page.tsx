@@ -76,7 +76,7 @@ export default async function SettingsPage() {
                       <Badge tone={active ? "success" : "warning"} dot>
                         {active ? "Active" : "Pending verification"}
                       </Badge>
-                      {active && env.skipWorldId() && <Badge>World ID skipped on testnet</Badge>}
+                      {active && env.skipWorldId() && <Badge>World ID skipped</Badge>}
                     </Row>
                     <Row label="Merchant ID" copy={m.id}>
                       <span className="font-mono text-xs">{m.id}</span>

@@ -61,7 +61,8 @@ type Claimed = { id: string; attempts: number };
 /**
  * Sends every pending delivery whose nextAttemptAt <= now. Rows are claimed with
  * FOR UPDATE SKIP LOCKED and leased (nextAttemptAt pushed forward) before any HTTP call,
- * so concurrent workers/cron ticks never double send. Returns the number of attempts made.
+ * to reduce concurrent sends. Delivery is at least once, including after a lease expires.
+ * Returns the number of attempts made.
  */
 export async function deliverDue(): Promise<number> {
   let total = 0;

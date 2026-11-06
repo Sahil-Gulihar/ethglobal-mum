@@ -11,8 +11,8 @@ export function Logo({ className = "" }: { className?: string }) {
         <path d="M24 14.5h1.5a3 3 0 0 1 0 6H23.4" fill="none" stroke="currentColor" strokeWidth="2" />
         <path d="M8.5 16h13" stroke="#fbf6ee" strokeWidth="1.2" opacity="0.5" />
       </svg>
-      <span className="font-display text-[22px] font-semibold tracking-tight text-ink">
-        Chai <span className="italic text-masala">&amp;</span> Co.
+      <span className="font-display text-lg font-bold tracking-tight text-ink">
+        Chai <span>&amp;</span> Co.
       </span>
     </span>
   );

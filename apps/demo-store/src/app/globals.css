@@ -1,22 +1,23 @@
 @import "tailwindcss";
 
 @theme {
-  --color-cream: #fbf6ee;
-  --color-paper: #fffdf9;
-  --color-ink: #2a1a12;
-  --color-masala: #b5482a;
-  --color-masala-dark: #963a21;
-  --color-saffron: #e5a13a;
-  --color-cardamom: #5f7a4e;
-  --color-muted: #7a6656;
-  --color-line: #eadfd0;
+  --color-cream: #111411;
+  --color-paper: #1b1f1c;
+  --color-ink: #f2f4f1;
+  --color-masala: #d3dfd4;
+  --color-masala-dark: #e2ece3;
+  --color-saffron: #b8c9bb;
+  --color-cardamom: #83bb94;
+  --color-muted: #a5afa7;
+  --color-line: #323a34;
   /* System stacks only: no network font fetch, works offline at the venue. */
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, ui-serif, serif;
+  --font-display: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
 html {
+  color-scheme: dark;
   background: var(--color-cream);
   color: var(--color-ink);
 }
@@ -49,3 +50,5 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .steam path, .animate-drawer, .animate-fade, .animate-rise { animation: none; }
 }
+
+:focus-visible { outline: 2px solid #96c5a2; outline-offset: 3px; }

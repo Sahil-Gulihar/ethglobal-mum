@@ -3,6 +3,10 @@
  *   pnpm --filter dashboard worker
  */
 import "../src/lib/indexer/node-shim";
+import { loadEnvConfig } from "@next/env";
+import { resolve } from "node:path";
+
+loadEnvConfig(resolve(__dirname, "../../.."), process.env.NODE_ENV !== "production");
 
 const INTERVAL_MS = 4000;
 

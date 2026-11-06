@@ -104,7 +104,7 @@ export function AdminView() {
                           ✓ Signature verified
                         </span>
                       ) : e.setupError ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-saffron/20 px-2 py-0.5 text-xs font-semibold text-[#8a5a12]">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-saffron/20 px-2 py-0.5 text-xs font-semibold text-[#ebc484]">
                           ⚠ Store setup error · 500
                         </span>
                       ) : (

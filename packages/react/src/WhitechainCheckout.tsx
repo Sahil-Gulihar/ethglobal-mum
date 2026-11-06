@@ -1,5 +1,8 @@
 "use client";
 
+import { HugeiconsIcon } from "@hugeicons/react";
+import { LockIcon as LockShape, Clock01Icon, AlertCircleIcon, Wallet01Icon, Tick01Icon } from "@hugeicons/core-free-icons";
+
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from "react";
 import {
   createPublicClient,
@@ -636,15 +639,7 @@ function Body(p: ViewProps & { amountLabel: string }) {
         <section className="wcc-body" key="success">
           <div className="wcc-center">
             <div className="wcc-badge-ic wcc-pop" data-kind="success">
-              <svg className="wcc-check" width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden>
-                <path
-                  d="M5 12.5l4.5 4.5L19 7.5"
-                  stroke="currentColor"
-                  strokeWidth="2.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <HugeiconsIcon icon={Tick01Icon} size={30} strokeWidth={2} aria-hidden />
             </div>
             <p className="wcc-title">{state.alreadyPaid ? "This order is already paid" : "Payment complete"}</p>
             <p className="wcc-text">
@@ -948,48 +943,11 @@ function Skeleton() {
 }
 
 // ---------- icons ----------
-const LockIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
-    <rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" strokeWidth="2" />
-    <path d="M8 11V8a4 4 0 118 0v3" stroke="currentColor" strokeWidth="2" />
-  </svg>
-);
-const ClockIcon = ({ size = 13 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-    <path d="M12 7v5l3 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-  </svg>
-);
-const AlertIcon = ({ size = 28 }: { size?: number }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    aria-hidden
-    style={{ flex: "none", marginTop: size < 20 ? 1 : 0 }}
-  >
-    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-    <path d="M12 7.5v5.5M12 16.2v.3" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-  </svg>
-);
-const WalletIcon = ({ size = 18 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden style={{ flex: "none" }}>
-    <rect x="3" y="6" width="18" height="13" rx="3" stroke="currentColor" strokeWidth="2" />
-    <path d="M16 12.5h2M3 9h15a3 3 0 013 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-  </svg>
-);
-const TickIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
-    <path
-      d="M5 12.5l4.5 4.5L19 7.5"
-      stroke="currentColor"
-      strokeWidth="3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
+const LockIcon = () => <HugeiconsIcon icon={LockShape} size={12} strokeWidth={1.8} aria-hidden />;
+const ClockIcon = ({ size = 13 }: { size?: number }) => <HugeiconsIcon icon={Clock01Icon} size={size} strokeWidth={1.8} aria-hidden />;
+const AlertIcon = ({ size = 28 }: { size?: number }) => <HugeiconsIcon icon={AlertCircleIcon} size={size} strokeWidth={1.8} aria-hidden style={{ flex: "none", marginTop: size < 20 ? 1 : 0 }} />;
+const WalletIcon = ({ size = 18 }: { size?: number }) => <HugeiconsIcon icon={Wallet01Icon} size={size} strokeWidth={1.8} aria-hidden style={{ flex: "none" }} />;
+const TickIcon = () => <HugeiconsIcon icon={Tick01Icon} size={12} strokeWidth={2} aria-hidden />;
 const UsdtIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
     <circle cx="12" cy="12" r="12" fill="#26A17B" />

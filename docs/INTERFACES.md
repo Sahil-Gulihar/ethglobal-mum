@@ -61,7 +61,6 @@ All errors use `{ "error": { "type", "message" } }`. CORS is open on `/api/v1/*`
 | `GET /api/v1/payments` | `Bearer` | `?limit=` → `{ data: PaymentObject[] }` |
 | `GET /api/v1/payments/:id` | `Bearer` | → `PaymentObject` |
 | `POST /api/v1/refunds` | `Bearer` | `{ paymentId, amount }` → `RefundObject` with status `pending`. The merchant confirms it from the dashboard by signing with the payout wallet (non-custodial, the API cannot move funds). |
-| `GET /api/cron/tick` | `Authorization: Bearer $CRON_SECRET` | Runs one indexer pass plus due webhook deliveries. `scripts/worker.ts` loops on the same functions every 4 s. |
 
 Hosted checkout: `GET /checkout/:sessionId` (dashboard page) renders `<WhitechainCheckout sessionId apiBase="" />` from the SDK, full page.
 

@@ -19,8 +19,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <div className="mx-auto flex max-w-6xl flex-col gap-2 px-6 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
               <p>Chai &amp; Co. is a fictional demo store. No real tea will be shipped.</p>
               <p>
-                Payments by <span className="font-medium text-ink">Whitechain Commerce</span> · USDT on Whitechain
-                Sepolia
+                Payments by <span className="font-medium text-ink">Whitechain Commerce</span>
               </p>
             </div>
           </footer>
