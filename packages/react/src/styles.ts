@@ -106,4 +106,5 @@ background:var(--wcc-soft);font-size:11.5px;color:var(--wcc-faint)}
 @keyframes wcc-pop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
 @media (max-width:440px){.wcc-root{border-radius:20px}.wcc-amount-value{font-size:34px}}
 @media (prefers-reduced-motion:reduce){.wcc-root *:not(.wcc-spin){animation-duration:.01ms!important;transition:none!important}}
+.wcc-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 `;

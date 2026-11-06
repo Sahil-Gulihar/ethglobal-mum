@@ -463,6 +463,9 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
         onDisconnect={disconnect}
         onCancel={cancel}
       />
+      <p className="wcc-sr" role="status" aria-live="polite">
+        {announce(state)}
+      </p>
       <footer className="wcc-foot">
         <LockIcon />
         <span>Non-custodial</span>
@@ -496,6 +499,31 @@ export interface ViewProps {
 }
 
 /** Internal: pure view, exported for previews/tests only (not part of the public API). */
+/** Short status line for screen readers (announced on phase changes and errors). */
+function announce(s: State): string {
+  if (s.error) return s.error;
+  switch (s.phase) {
+    case "connecting":
+      return "Connecting to your wallet.";
+    case "wrong_network":
+      return "Switch your wallet to Whitechain to continue.";
+    case "review":
+      return "Wallet connected. Review the payment.";
+    case "approving":
+      return s.waiting === "chain" ? "Waiting for the approval to confirm." : "Approve USDT spending in your wallet.";
+    case "paying":
+      return "Confirm the payment in your wallet.";
+    case "confirming":
+      return "Confirming payment.";
+    case "success":
+      return "Payment complete.";
+    case "expired":
+      return "This checkout has expired.";
+    default:
+      return "";
+  }
+}
+
 export function View(p: ViewProps) {
   const { state } = p;
   const session = state.session;

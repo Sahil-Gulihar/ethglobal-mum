@@ -152,3 +152,24 @@ test("error helpers", () => {
   assert.equal(formatCountdown(61_500), "1:01");
   assert.equal(formatCountdown(0), null);
 });
+
+test("confirming: released processing -> open goes back to review with an error", () => {
+  let s = reducer(reviewing(100_000_000n, 100_000_000n), { type: "PAY_START" });
+  s = reducer(s, { type: "PAY_SENT", hash: "0xb2" });
+  // Right after PAY_SENT the session is still open: must not reset.
+  s = reducer(s, { type: "SESSION_POLLED", session: session({ status: "open" }) });
+  assert.equal(s.phase, "confirming");
+  s = reducer(s, { type: "SESSION_POLLED", session: session({ status: "processing" }) });
+  s = reducer(s, { type: "SESSION_POLLED", session: session({ status: "open" }) });
+  assert.equal(s.phase, "review");
+  assert.match(s.error ?? "", /couldn't verify/);
+  assert.equal(s.payTx, null);
+});
+
+test("confirming after reload: expired or released sessions don't spin forever", () => {
+  let s = run({ type: "SESSION_LOADED", session: session({ status: "processing" }) });
+  assert.equal(s.phase, "confirming");
+  assert.equal(reducer(s, { type: "SESSION_POLLED", session: session({ status: "expired" }) }).phase, "expired");
+  s = reducer(s, { type: "SESSION_POLLED", session: session({ status: "open" }) });
+  assert.equal(s.phase, "connect", "no wallet connected after reload");
+});

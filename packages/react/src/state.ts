@@ -104,6 +104,8 @@ export function canPay(s: State): boolean {
   );
 }
 
+export const RELEASED_MESSAGE = "We couldn't verify that transaction. No payment was taken; you can try again.";
+
 export function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "SESSION_LOADED": {
@@ -202,7 +204,20 @@ export function reducer(state: State, action: Action): State {
     case "SESSION_POLLED": {
       const session = action.session;
       if (session.status === "paid") return { ...state, session, phase: "success", waiting: null, error: null };
-      if (session.status === "expired" && isPrePay(state.phase)) return { ...state, session, phase: "expired" };
+      if (session.status === "expired" && (isPrePay(state.phase) || state.phase === "confirming"))
+        return { ...state, session, phase: "expired", waiting: null };
+      // The worker released a `processing` session back to `open`: the hinted tx didn't pay it.
+      // Only on that transition: right after PAY_SENT the session is still `open` until /submit lands.
+      if (state.phase === "confirming" && state.session?.status === "processing" && session.status === "open") {
+        return {
+          ...state,
+          session,
+          phase: state.account ? connectedPhase(state.chainId) : "connect",
+          payTx: null,
+          waiting: null,
+          error: RELEASED_MESSAGE,
+        };
+      }
       return { ...state, session };
     }
     case "EXPIRE":
