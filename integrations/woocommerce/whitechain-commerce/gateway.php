@@ -49,7 +49,7 @@ final class Gateway extends \WC_Payment_Gateway {
                     throw new \RuntimeException('Order is ineligible.');
                 }
 
-                $origin = defined('WHITECHAIN_API_ORIGIN') ? rtrim(WHITECHAIN_API_ORIGIN, '/') : 'https://whitechain-dashboard.vercel.app';
+                $origin = defined('WHITECHAIN_API_ORIGIN') ? rtrim(WHITECHAIN_API_ORIGIN, '/') : 'https://100lana.com';
                 $checkout_origin = defined('WHITECHAIN_CHECKOUT_ORIGIN') ? rtrim(WHITECHAIN_CHECKOUT_ORIGIN, '/') : $origin;
                 $session = $order->get_meta('_whitechain_session');
                 if ($session) {
