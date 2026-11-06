@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { OnboardingChecklist } from "@/components/dashboard/onboarding";
 import { PaymentsTable } from "@/components/dashboard/payments-table";
 import { ExplorerLink } from "@/components/dashboard/explorer-link";
+import { AutoRefresh } from "@/components/dashboard/auto-refresh";
 import { CodeBlock } from "@/components/code-block";
 import { clientSnippet, serverSnippet } from "@/components/snippets";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,6 +24,7 @@ export default async function DashboardHome() {
 
   return (
     <>
+      <AutoRefresh active intervalMs={5000} />
       <PageHeader
         title={`Welcome, ${m.name}`}
         description="Here’s how your store is doing on Whitechain."
@@ -56,7 +58,9 @@ export default async function DashboardHome() {
               <ExplorerLink address={m.payoutAddress} label="View on explorer" />
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">Not connected yet</p>
+            <Link href="/dashboard/settings" className="inline-flex w-fit items-center gap-1 rounded text-sm font-medium text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring">
+              Add a payout wallet <Icon name="arrowRight" className="size-3.5" />
+            </Link>
           )}
         </Card>
       </section>
@@ -81,7 +85,7 @@ export default async function DashboardHome() {
           <CardTitle>Add checkout in about 20 lines</CardTitle>
           <CardDescription>Create a session on your server with your secret key, then render the checkout in your store.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 lg:grid-cols-2">
+        <CardContent className="grid gap-4">
           <CodeBlock filename="server.ts" code={serverSnippet(env.appUrl())} />
           <CodeBlock filename="Checkout.tsx" code={clientSnippet(env.appUrl())} />
         </CardContent>

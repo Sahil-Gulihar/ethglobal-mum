@@ -35,8 +35,13 @@ export function webhookSnippet() {
   return `import { verifyWebhook } from "@whitechain-commerce/react/server";
 
 export async function POST(req: Request) {
-  const body = await req.text();
-  const event = verifyWebhook(body, req.headers.get("wc-signature"), process.env.WC_WEBHOOK_SECRET!);
+  const body = await req.text(); // the raw body: the signature covers these exact bytes
+  let event;
+  try {
+    event = verifyWebhook(body, req.headers.get("wc-signature"), process.env.WC_WEBHOOK_SECRET!);
+  } catch {
+    return new Response("invalid signature", { status: 400 });
+  }
   if (event.type === "payment.succeeded") {
     // mark event.data.payment.orderId as paid (dedupe on event.id)
   }

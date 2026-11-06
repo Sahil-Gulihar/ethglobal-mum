@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -26,6 +26,7 @@ export function Dialog({
   dismissible?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
 
   useEffect(() => {
     const el = ref.current;
@@ -37,7 +38,7 @@ export function Dialog({
   return (
     <dialog
       ref={ref}
-      aria-labelledby="dialog-title"
+      aria-labelledby={titleId}
       onCancel={(e) => {
         e.preventDefault();
         if (dismissible) onOpenChange(false);
@@ -54,7 +55,7 @@ export function Dialog({
         <div className="flex flex-col gap-4 p-6">
           <div className="flex items-start justify-between gap-4">
             <div className="flex flex-col gap-1">
-              <h2 id="dialog-title" className="text-base font-semibold tracking-tight">
+              <h2 id={titleId} className="text-base font-semibold tracking-tight">
                 {title}
               </h2>
               {description && <p className="text-sm text-muted-foreground">{description}</p>}

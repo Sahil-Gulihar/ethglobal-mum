@@ -10,7 +10,7 @@ import { Icon, type IconName } from "@/components/icons";
 const features: { icon: IconName; title: string; body: string }[] = [
   { icon: "shield", title: "Non-custodial by design", body: "USDT moves from your customer’s wallet to yours in a single transfer. Our router never holds a balance, so there’s nothing to freeze or withdraw." },
   { icon: "zap", title: "Instant settlement", body: "Funds land in your payout wallet in the same block the customer pays. No payout schedule, no T+2, no reserve." },
-  { icon: "user", title: "Verified merchants", body: "Every merchant is registered onchain to a payout address, and Proof of Human verification keeps it one person, one store." },
+  { icon: "user", title: "Verified merchants", body: "Every merchant is registered onchain to a payout address. Proof of Human verification (one person, one store) is coming soon." },
   { icon: "undo", title: "Refunds linked onchain", body: "Full or partial refunds reference the original payment, so you, your customer and any auditor can trace every cent." },
 ];
 
@@ -235,7 +235,7 @@ function CheckoutMock() {
           <LogoMark className="size-3.5" /> Secured by Whitechain Commerce
         </p>
       </div>
-      <div className="absolute -bottom-6 -left-6 flex items-center gap-3 rounded-2xl border border-white/10 bg-[#141420] px-4 py-3 text-white shadow-xl">
+      <div className="absolute -bottom-11 -left-6 flex items-center gap-3 rounded-2xl border border-white/10 bg-[#141420] px-4 py-3 text-white shadow-xl">
         <span className="grid size-8 place-items-center rounded-full bg-[#5CF2B4]/15 text-[#5CF2B4]">
           <Icon name="check" />
         </span>
