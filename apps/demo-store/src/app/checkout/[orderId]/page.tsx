@@ -61,8 +61,7 @@ export default async function CheckoutPage({ params }: PageProps<"/checkout/[ord
         <div className="mt-6 flex gap-3 rounded-2xl bg-cardamom/10 p-4 text-sm leading-relaxed text-ink/80">
           <span aria-hidden className="text-cardamom">●</span>
           <p>
-            Your payment goes directly from your wallet to Chai &amp; Co. on Whitechain. Neither we nor Whitechain
-            Commerce ever hold your funds. We ship once our server receives a signed payment confirmation.
+            Your payment goes straight from your wallet to Chai &amp; Co.
           </p>
         </div>
       </section>

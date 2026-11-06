@@ -13,7 +13,7 @@ const checkoutExample = String.raw`curl --fail-with-body "$WC_API_BASE/checkout_
 const steps = [
   ["Set up your store", "Create an account and connect the wallet where you want to receive payments."],
   ["Add checkout", "Send customers to hosted checkout from your store, or share a fixed-price payment link."],
-  ["Get paid directly", "Your customer pays in USDT. A signed webhook tells your store when the payment settles."],
+  ["Get paid directly", "Customer payments go straight to your wallet. Your store gets an update when they’re confirmed."],
 ];
 
 export default async function Landing() {
@@ -27,8 +27,8 @@ export default async function Landing() {
       <main className="public-frame landing-main vbg-report">
         <section className="landing-hero" aria-labelledby="landing-title">
           <div className="landing-intro">
-            <h1 className="vbg-display" id="landing-title">Accept on-chain payments on Whitechain</h1>
-            <p className="landing-lede">Let customers pay in USDT on Whitechain. Payments settle directly to your wallet, and signed webhooks tell your store when to fulfil an order.</p>
+            <h1 className="vbg-display" id="landing-title">Accept USDT payments</h1>
+            <p className="landing-lede">Let customers pay in USDT. Payments go straight to your wallet, and your store gets an update when an order is paid.</p>
             <div className="public-actions">
               <Link href={destination} className="public-primary">{cta} <Icon name="arrowRight" /></Link>
               <Link href="/docs" className="public-secondary">Integration guide</Link>
@@ -44,8 +44,8 @@ export default async function Landing() {
               </div>
               <dl>
                 <div><dt>Checkout</dt><dd>Payment received</dd></div>
-                <div><dt>Settlement</dt><dd>Merchant wallet</dd></div>
-                <div><dt>Store notification</dt><dd>Signed webhook</dd></div>
+                <div><dt>Paid to</dt><dd>Store wallet</dd></div>
+                <div><dt>Store notification</dt><dd>Payment confirmed</dd></div>
               </dl>
             </div>
             <p>Illustrative receipt</p>
@@ -54,7 +54,7 @@ export default async function Landing() {
 
         <section id="payments" className="landing-section landing-payments" aria-labelledby="payments-title">
           <div>
-            <h2 className="vbg-heading-24" id="payments-title">See what settled</h2>
+            <h2 className="vbg-heading-24" id="payments-title">See your payments</h2>
             <p>Track USDT payments in the dashboard and issue full or partial refunds.</p>
           </div>
           <figure className="landing-preview">
@@ -70,7 +70,7 @@ export default async function Landing() {
         </section>
 
         <section id="how" className="landing-section">
-          <h2 className="vbg-heading-24">From setup to settlement</h2>
+          <h2 className="vbg-heading-24">Start taking payments</h2>
           <ol className="landing-steps">
             {steps.map(([title, description], index) => (
               <li key={title}>
@@ -85,7 +85,7 @@ export default async function Landing() {
         <section id="developers" className="landing-section landing-developers">
           <div>
             <h2 className="vbg-heading-24">Integrate with your store</h2>
-            <p>Create a checkout session on your server and send customers to the hosted checkout URL in the response. Verify the signed webhook before fulfilling the order.</p>
+            <p>Create a checkout link on your server and send shoppers to it. When your server receives a payment update, check its signature before marking the order as paid.</p>
             <Link href="/docs/quickstart" className="public-secondary">Integration quickstart <Icon name="arrowRight" /></Link>
           </div>
           <div className="landing-code">

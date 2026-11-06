@@ -13,8 +13,7 @@ export function SiteHeader() {
     <>
       <div className="bg-paper text-center text-[13px] text-muted">
         <p className="mx-auto max-w-6xl px-6 py-2">
-          Now accepting <span className="font-semibold text-ink">USDT on Whitechain</span>: pay straight from
-          your wallet, settled to us in seconds.
+          Pay with <span className="font-semibold text-ink">USDT</span> straight from your wallet.
         </p>
       </div>
       <header className="sticky top-0 z-30 border-b border-line bg-cream">

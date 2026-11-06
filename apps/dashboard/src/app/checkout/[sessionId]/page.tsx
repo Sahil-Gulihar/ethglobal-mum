@@ -39,7 +39,7 @@ export default async function CheckoutPage({
       </section>
 
       <footer className={styles.bottom}>
-        Funds go straight from your wallet to the merchant on Whitechain. We never hold your money.
+        You pay the store directly from your wallet.
       </footer>
     </main>
   );

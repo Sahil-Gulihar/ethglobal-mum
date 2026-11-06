@@ -99,7 +99,7 @@ function PayoutWalletFormInner({ currentPayout, currentTxHash, submitLabel = "Us
             </Button>
           )}
           <p className="text-xs text-muted-foreground">
-            You won&apos;t sign anything. We register this address onchain so payments settle directly to it, and refunds are signed from it.
+            Customer payments go to this wallet. Use the same wallet to approve refunds.
           </p>
         </div>
       ) : (
@@ -130,7 +130,7 @@ function PayoutWalletFormInner({ currentPayout, currentTxHash, submitLabel = "Us
       {done && !pending && (
         <Alert tone="success">
           <span className="flex flex-wrap items-center gap-2">
-            <Icon name="check" /> Payout wallet registered onchain. <ExplorerLink hash={done.txHash} label="View transaction" />
+            <Icon name="check" /> Payout wallet ready. <ExplorerLink hash={done.txHash} label="View transaction" />
           </span>
         </Alert>
       )}

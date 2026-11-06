@@ -104,7 +104,7 @@ export function canPay(s: State): boolean {
   );
 }
 
-export const RELEASED_MESSAGE = "We couldn't verify that transaction. No payment was taken; you can try again.";
+export const RELEASED_MESSAGE = "We couldn’t confirm your payment. Check your wallet before trying again.";
 
 export function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -271,7 +271,7 @@ export function steps(s: State): Step[] {
   if (showApprove)
     list.push({
       key: "approve",
-      label: "Approve USDT",
+      label: "Allow USDT payment",
       status: s.phase === "approving" ? "active" : idx > at("approving") ? "done" : "todo",
     });
   list.push({

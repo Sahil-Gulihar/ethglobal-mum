@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { formatUsdt } from "@/lib/catalog";
-import type { Order, WebhookLogEntry } from "@/lib/types";
+import type { Order } from "@/lib/types";
 import { shortHash, timeAgo, usePoll } from "@/components/use-poll";
 
-type Payload = { order: Order; events: WebhookLogEntry[] };
+type Payload = { order: Order };
 
 export function OrderStatusView({ orderId, justPaid = false }: { orderId: string; justPaid?: boolean }) {
   const { data, error } = usePoll<Payload>(`/api/orders/${orderId}`, (d) =>
@@ -15,8 +15,8 @@ export function OrderStatusView({ orderId, justPaid = false }: { orderId: string
   if (error && !data) {
     return (
       <div className="mx-auto max-w-2xl px-6 py-24 text-center">
-        <h1 className="font-display text-3xl font-semibold">Order not found</h1>
-        <p className="mt-2 text-muted">{error}</p>
+        <h1 className="font-display text-3xl font-semibold">We couldn’t load your order</h1>
+        <p className="mt-2 text-muted">Check the link or try again in a moment.</p>
         <Link href="/" className="mt-6 inline-block text-masala underline underline-offset-4">
           Back to the shop
         </Link>
@@ -31,9 +31,8 @@ export function OrderStatusView({ orderId, justPaid = false }: { orderId: string
     );
   }
 
-  const { order, events } = data;
+  const { order } = data;
   const paid = order.status !== "pending";
-  const fulfilEvent = events.find((e) => e.eventId === order.fulfilledByEventId);
   const refunded = order.status === "refunded";
   const partlyRefunded = order.status === "partially_refunded";
 
@@ -53,26 +52,14 @@ export function OrderStatusView({ orderId, justPaid = false }: { orderId: string
             </span>
             <div>
               <h1 className="font-display text-3xl font-semibold tracking-tight">
-                {refunded ? "Order refunded" : partlyRefunded ? "Partially refunded" : "Fulfilled via verified webhook ✓"}
+                {refunded ? "Order refunded" : partlyRefunded ? "Partially refunded" : "Payment confirmed"}
               </h1>
               <p className="mt-1 text-ink/70">
-                {refunded ? (
-                  <>
-                    The full amount was returned to your wallet. We recorded it from a signature-verified{" "}
-                    <code className="font-mono text-sm">refund.succeeded</code> webhook.
-                  </>
-                ) : partlyRefunded ? (
-                  <>
-                    Part of your payment was returned to your wallet ({order.amountRefunded} USDT). The rest of your order is
-                    still on its way.
-                  </>
-                ) : (
-                  <>
-                    Thank you! Your chai is being packed. Our server marked this order paid only after receiving a{" "}
-                    <span className="font-medium">signature-verified</span> <code className="font-mono text-sm">payment.succeeded</code>{" "}
-                    webhook from Whitechain Commerce.
-                  </>
-                )}
+                {refunded
+                  ? "The full amount was returned to your wallet."
+                  : partlyRefunded
+                    ? `${order.amountRefunded} USDT was returned to your wallet.`
+                    : "Thanks for your order!"}
               </p>
             </div>
           </div>
@@ -81,15 +68,15 @@ export function OrderStatusView({ orderId, justPaid = false }: { orderId: string
             <Field label="Status">
               <StatusPill status={order.status} />
             </Field>
-            <Field label="Transaction">
+            <Field label="Payment details">
               {order.payment ? (
                 <a
                   href={order.payment.explorerUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="font-mono text-masala underline underline-offset-4 hover:text-masala-dark"
+                  className="text-masala underline underline-offset-4 hover:text-masala-dark"
                 >
-                  {shortHash(order.payment.txHash)} ↗
+                  View payment ↗
                 </a>
               ) : (
                 "—"
@@ -98,10 +85,7 @@ export function OrderStatusView({ orderId, justPaid = false }: { orderId: string
             <Field label="Paid from">
               <span className="font-mono">{order.payment ? shortHash(order.payment.payer) : "—"}</span>
             </Field>
-            <Field label="Webhook event">
-              <span className="font-mono">{order.fulfilledByEventId ?? "—"}</span>
-            </Field>
-            <Field label="Received">{fulfilEvent ? timeAgo(fulfilEvent.receivedAt) : order.paidAt ? timeAgo(order.paidAt) : "—"}</Field>
+            <Field label="Paid">{order.paidAt ? timeAgo(order.paidAt) : "—"}</Field>
           </dl>
         </div>
       ) : (
@@ -113,11 +97,10 @@ export function OrderStatusView({ orderId, justPaid = false }: { orderId: string
             </span>
             <div>
               <h1 className="font-display text-3xl font-semibold tracking-tight">
-                {justPaid ? "Payment received, confirming…" : "Waiting for payment confirmation"}
+                {justPaid ? "Confirming your payment…" : "Waiting for payment"}
               </h1>
               <p className="mt-1 text-ink/70">
-                We fulfil orders only when our server receives a signed <code className="font-mono text-sm">payment.succeeded</code>{" "}
-                webhook, never from the browser. This page updates automatically.
+                This page will update when your payment is confirmed.
               </p>
               {!justPaid && (
                 <Link
@@ -143,11 +126,11 @@ export function OrderStatusView({ orderId, justPaid = false }: { orderId: string
               <li key={r.id} className="flex items-center justify-between gap-4 py-3">
                 <div>
                   <p className="font-medium">{r.amount} USDT returned to your wallet</p>
-                  <p className="text-muted">via verified refund.succeeded webhook · {timeAgo(r.recordedAt)}</p>
+                  <p className="text-muted">{timeAgo(r.recordedAt)}</p>
                 </div>
                 {r.explorerUrl && r.txHash && (
-                  <a href={r.explorerUrl} target="_blank" rel="noreferrer" className="font-mono text-masala underline underline-offset-4">
-                    {shortHash(r.txHash)} ↗
+                  <a href={r.explorerUrl} target="_blank" rel="noreferrer" className="text-masala underline underline-offset-4">
+                    View refund ↗
                   </a>
                 )}
               </li>
@@ -178,9 +161,6 @@ export function OrderStatusView({ orderId, justPaid = false }: { orderId: string
         <Link href="/" className="text-muted hover:text-ink">
           ← Back to the shop
         </Link>
-        <Link href="/admin" className="text-muted hover:text-ink">
-          View webhook log →
-        </Link>
       </div>
     </div>
   );
@@ -198,7 +178,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 export function StatusPill({ status }: { status: Order["status"] }) {
   const map = {
     pending: ["Awaiting payment", "bg-saffron/15 text-saffron"],
-    paid: ["Paid · fulfilled", "bg-cardamom/15 text-cardamom"],
+    paid: ["Paid", "bg-cardamom/15 text-cardamom"],
     partially_refunded: ["Partially refunded", "bg-masala/10 text-masala-dark"],
     refunded: ["Refunded", "bg-ink/10 text-ink"],
   } as const;

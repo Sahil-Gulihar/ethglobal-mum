@@ -39,14 +39,14 @@ export function OnboardingChecklist(p: OnboardingProps) {
     },
     {
       key: "verify",
-      title: "Verify you’re human",
-      description: "One person, one merchant account. Prove you're a unique human with World ID.",
+      title: "Verify your account",
+      description: "Use World ID to verify your account.",
       done: p.verified,
       skipped: p.verified && !p.worldVerified,
       body: p.verified ? (
         <div className="flex items-center gap-3 rounded-sm border-[0.5px] border-dashed px-3 py-2.5 text-sm text-muted-foreground">
           <Icon name="shield" className="text-primary" />
-          {p.worldVerified ? "Verified with World ID. Your account is active." : "Verification is skipped. Your account is active."}
+          {p.worldVerified ? "Your account is verified and ready to use." : "Your account is ready to use."}
         </div>
       ) : (
         <WorldIdVerifyButton />
@@ -55,7 +55,7 @@ export function OnboardingChecklist(p: OnboardingProps) {
     {
       key: "payout",
       title: "Connect your payout wallet",
-      description: "Payments settle directly to this wallet. We never hold your funds.",
+      description: "Customer payments go straight to this wallet.",
       done: p.payout.done,
       body: p.verified ? (
         <PayoutWalletForm currentPayout={p.payout.address} currentTxHash={p.payout.txHash} />
@@ -72,8 +72,8 @@ export function OnboardingChecklist(p: OnboardingProps) {
     },
     {
       key: "webhook",
-      title: "Add a webhook endpoint",
-      description: "Fulfil orders from signed events, never from the browser callback.",
+      title: "Set up payment updates",
+      description: "Add a webhook so your server knows when it’s safe to fulfil an order. Check the signature before updating the order.",
       done: p.webhook,
       body: <AddWebhookForm />,
     },
@@ -115,7 +115,7 @@ export function OnboardingChecklist(p: OnboardingProps) {
                 <div className="flex flex-col gap-0.5">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className={cn("text-sm font-semibold", s.done && !isCurrent && "text-muted-foreground")}>{s.title}</p>
-                    {s.skipped && <Badge>Verification skipped</Badge>}
+                    {s.skipped && <Badge>Account active</Badge>}
                     <span className="sr-only">{s.done ? "(done)" : isCurrent ? "(current step)" : "(to do)"}</span>
                   </div>
                   <p className="text-sm text-muted-foreground">{s.description}</p>

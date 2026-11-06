@@ -162,7 +162,7 @@ test("confirming: released processing -> open goes back to review with an error"
   s = reducer(s, { type: "SESSION_POLLED", session: session({ status: "processing" }) });
   s = reducer(s, { type: "SESSION_POLLED", session: session({ status: "open" }) });
   assert.equal(s.phase, "review");
-  assert.match(s.error ?? "", /couldn't verify/);
+  assert.match(s.error ?? "", /Check your wallet before trying again/);
   assert.equal(s.payTx, null);
 });
 

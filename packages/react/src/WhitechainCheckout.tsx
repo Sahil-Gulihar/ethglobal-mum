@@ -23,7 +23,7 @@ import {
   whitechainSepolia,
   type PublicCheckoutSession,
 } from "@whitechain-commerce/core";
-import { getSession, resolveApiBase, submitTx } from "./api";
+import { getSession, resolveApiBase, submitTx, WhitechainApiError } from "./api";
 import {
   amountUnits,
   canPay,
@@ -104,8 +104,8 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
     }
   }, []);
   const fail = useCallback(
-    (err: unknown) => {
-      dispatch({ type: "FAIL", message: errorMessage(err) });
+    (err: unknown, message: string) => {
+      dispatch({ type: "FAIL", message: isUserRejection(err) ? "You canceled the request in your wallet." : message });
       reportError(err);
     },
     [reportError],
@@ -161,7 +161,7 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
           dispatch({ type: "FAIL", message: "A connection request is already open. Check your wallet." });
           return;
         }
-        fail(err);
+        fail(err, "We couldn’t connect your wallet. Open your wallet and try again.");
       }
     },
     [fail],
@@ -220,7 +220,7 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
         throw new Error("Your wallet is still on another network. Switch networks to continue.");
       dispatch({ type: "CHAIN_CHANGED", chainId });
     } catch (err) {
-      fail(err);
+      fail(err, "We couldn’t switch networks. Choose Whitechain in your wallet and try again.");
     }
   }, [provider, fail]);
 
@@ -232,7 +232,10 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
       .then((session) => dispatch({ type: "SESSION_LOADED", session }))
       .catch((err) => {
         if (ac.signal.aborted) return;
-        dispatch({ type: "LOAD_FAILED", message: errorMessage(err) });
+        const message = err instanceof WhitechainApiError && err.status === 404
+          ? "This payment link couldn’t be found. Ask the store for a new link."
+          : "Check your connection and try again.";
+        dispatch({ type: "LOAD_FAILED", message });
         reportError(err);
       });
     return () => ac.abort();
@@ -280,7 +283,7 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
         if (!cancelled) dispatch({ type: "BALANCES_LOADED", balance, allowance, gas });
       } catch (err) {
         if (!cancelled && stateRef.current.balance === null)
-          dispatch({ type: "FAIL", message: `Could not read your USDT balance: ${errorMessage(err)}` });
+          dispatch({ type: "FAIL", message: "We couldn’t check your balance. Check your connection and try again." });
       }
     };
     void read();
@@ -366,7 +369,7 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
         setTimeout(() => submitTx(apiBase, session.id, hash).catch(reportError), 3000),
       );
     } catch (err) {
-      fail(err);
+      fail(err, "We couldn’t complete the payment. Check your wallet before trying again.");
     }
   }, [walletClient, publicClient, apiBase, fail, reportError]);
 
@@ -381,7 +384,7 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
         if (!cancelled && r.status !== "success")
           dispatch({
             type: "PAY_REVERTED",
-            message: "The payment transaction reverted onchain. No funds moved; you can try again.",
+            message: "The payment didn’t go through. You can try again.",
           });
       })
       .catch(() => {
@@ -474,7 +477,7 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
       </p>
       <footer className="wcc-foot">
         <LockIcon />
-        <span>Non-custodial</span>
+        <span>Pay directly from your wallet</span>
         <span className="wcc-foot-sep">·</span>
         <span>
           Powered by <b>Whitechain Commerce</b>
@@ -516,7 +519,7 @@ function announce(s: State): string {
     case "review":
       return "Wallet connected. Review the payment.";
     case "approving":
-      return s.waiting === "chain" ? "Waiting for the approval to confirm." : "Approve USDT spending in your wallet.";
+      return s.waiting === "chain" ? "Waiting for your wallet approval." : "Allow this checkout to use your USDT.";
     case "paying":
       return "Confirm the payment in your wallet.";
     case "confirming":
@@ -640,15 +643,15 @@ function Body(p: ViewProps & { amountLabel: string }) {
             </div>
             <p className="wcc-title">{state.alreadyPaid ? "This order is already paid" : "Payment complete"}</p>
             <p className="wcc-text">
-              {amountLabel} USDT sent to {session.merchant.name.replace(/\.+$/, "")}. Settled and verified on Whitechain.
+              {amountLabel} USDT sent to {session.merchant.name.replace(/\.+$/, "")}.
             </p>
           </div>
           {r?.txHash ? (
             <div className="wcc-rows">
               <div className="wcc-row">
-                <span className="wcc-row-k">Transaction</span>
+                <span className="wcc-row-k">Payment details</span>
                 <a className="wcc-row-v wcc-mono" href={r.explorerUrl} target="_blank" rel="noreferrer">
-                  {short(r.txHash)} ↗
+                  View payment ↗
                 </a>
               </div>
             </div>
@@ -730,7 +733,7 @@ function Body(p: ViewProps & { amountLabel: string }) {
         <section className="wcc-body" key="network">
           <p className="wcc-title">Switch networks</p>
           <p className="wcc-text">
-            Switch to chain {WHITECHAIN_CHAIN_ID} in your wallet to continue.
+            Choose Whitechain in your wallet to continue.
           </p>
           <ErrorBanner message={state.error} onDismiss={p.onDismissError} />
           <AccountRow state={state} onDisconnect={p.onDisconnect} />
@@ -778,7 +781,6 @@ function ReviewBody(p: ViewProps & { amountLabel: string }) {
   const lowBalance = insufficientBalance(state);
   const noGas = insufficientGas(state);
   const stepList = steps(state);
-  const txHash = state.payTx ?? (state.phase === "approving" ? state.approveTx : null);
 
   let button: ReactNode;
   if (state.phase === "review") {
@@ -788,8 +790,6 @@ function ReviewBody(p: ViewProps & { amountLabel: string }) {
           <>
             <span className="wcc-spin" /> Checking balance…
           </>
-        ) : needsApproval(state) ? (
-          `Approve & pay ${amountLabel} USDT`
         ) : (
           `Pay ${amountLabel} USDT`
         )}
@@ -799,8 +799,8 @@ function ReviewBody(p: ViewProps & { amountLabel: string }) {
     const label =
       state.phase === "approving"
         ? state.waiting === "wallet"
-          ? "Approve USDT in your wallet…"
-          : "Waiting for approval to confirm…"
+          ? "Allow this checkout to use your USDT…"
+          : "Waiting for wallet approval…"
         : state.phase === "paying"
           ? "Confirm payment in your wallet…"
           : "Confirming payment…";
@@ -820,7 +820,7 @@ function ReviewBody(p: ViewProps & { amountLabel: string }) {
           <span>
             Not enough USDT. Top up this wallet from the{" "}
             <a href={FAUCET_URL} target="_blank" rel="noreferrer">
-              Whitechain faucet
+              Whitechain test funds page
             </a>
             , then come back. We refresh your balance automatically.
           </span>
@@ -831,7 +831,7 @@ function ReviewBody(p: ViewProps & { amountLabel: string }) {
           <span>
             You need a little WBT for network fees. Get some from the{" "}
             <a href={FAUCET_URL} target="_blank" rel="noreferrer">
-              Whitechain faucet
+              Whitechain test funds page
             </a>
             .
           </span>
@@ -864,10 +864,6 @@ function ReviewBody(p: ViewProps & { amountLabel: string }) {
           </>
         ) : null}
         <div className="wcc-row">
-          <span className="wcc-row-k">Chain ID</span>
-          <span className="wcc-row-v">{WHITECHAIN_CHAIN_ID}</span>
-        </div>
-        <div className="wcc-row">
           <span className="wcc-row-k">Total</span>
           <span className="wcc-row-v" style={{ fontWeight: 700 }}>
             {amountLabel} USDT
@@ -894,7 +890,7 @@ function ReviewBody(p: ViewProps & { amountLabel: string }) {
             ) : null}
             {s.key === "confirm" && s.status === "active" && state.payTx ? (
               <a className="wcc-step-note" href={explorerTx(state.payTx)} target="_blank" rel="noreferrer">
-                View tx ↗
+                View payment ↗
               </a>
             ) : null}
           </li>
@@ -903,8 +899,7 @@ function ReviewBody(p: ViewProps & { amountLabel: string }) {
       {button}
       {state.phase === "confirming" ? (
         <p className="wcc-text" style={{ margin: "10px 0 0", textAlign: "center", fontSize: 12 }}>
-          {txHash ? "Transaction sent. " : ""}Waiting for Whitechain Commerce to verify the payment onchain. You can
-          keep this page open.
+          This page will update once your payment is confirmed.
         </p>
       ) : null}
       {state.phase === "review" && p.canCancel ? (

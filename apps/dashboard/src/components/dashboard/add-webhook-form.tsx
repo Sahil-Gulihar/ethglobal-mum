@@ -30,7 +30,7 @@ export function AddWebhookForm({ onAdded }: { onAdded?: () => void }) {
         });
       }}
     >
-      <Label htmlFor="webhook-url">Endpoint URL</Label>
+      <Label htmlFor="webhook-url">Webhook URL</Label>
       <div className="flex flex-col gap-2 sm:flex-row">
         <Input
           id="webhook-url"
@@ -53,7 +53,7 @@ export function AddWebhookForm({ onAdded }: { onAdded?: () => void }) {
         <FieldError id="webhook-url-error">{error}</FieldError>
       ) : (
         <p id="webhook-url-hint" className="text-xs text-muted-foreground">
-          We&apos;ll POST signed <code className="font-mono">payment.succeeded</code> and <code className="font-mono">refund.succeeded</code> events here.
+          Your server receives a signed update here when a payment or refund is confirmed.
         </p>
       )}
     </form>

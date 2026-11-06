@@ -3,7 +3,7 @@ title: "Store integration quickstart"
 description: "Add hosted USDT checkout to your store with the Whitechain Commerce API."
 ---
 
-Add **Pay with USDT** to your checkout. Your server creates a session for an order, the shopper pays on a page hosted by Whitechain Commerce, and a signed webhook tells your store when to fulfil the order. Use this flow with any backend that can make HTTPS requests and receive webhooks.
+Add **Pay with USDT** to your checkout. Your server creates a checkout link for each order. The shopper pays on the Whitechain Commerce checkout page. We then send your server a payment update through a webhook. This works with any backend that can send and receive HTTPS requests.
 
 If you only need to share a fixed-price checkout, start with [Payment links](./payment-links.md).
 
@@ -11,7 +11,7 @@ If you only need to share a fixed-price checkout, start with [Payment links](./p
 
 1. [Create a merchant account](https://whitechain-dashboard.vercel.app/signup) with the business name customers should see at checkout.
 2. If the dashboard asks you to verify your account, complete the World ID step.
-3. In the dashboard, connect your payout wallet or enter its address. Choose **Use as payout wallet** and wait for the dashboard to show that it is registered on-chain.
+3. In the dashboard, connect your payout wallet or enter its address. Choose **Use as payout wallet** and wait for the dashboard to show that your wallet is ready.
 4. In **Developers**, choose **Create secret key**. Copy the `sk_test_` key and store it on your server as `WC_SECRET_KEY`. Use the API base URL shown there (ending in `/api/v1`) as `WC_API_BASE`.
 
 ## 2. Create a session for each order

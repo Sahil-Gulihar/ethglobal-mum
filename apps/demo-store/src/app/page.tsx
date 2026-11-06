@@ -14,8 +14,7 @@ export default function ShopPage() {
           </h1>
         </div>
         <p className="animate-rise max-w-md text-base leading-relaxed text-muted text-pretty [animation-delay:80ms]">
-          Hand-pounded spices, strong Assam leaf and the cups to drink it from. Check out in seconds with your
-          wallet: funds go straight to us on Whitechain, no middleman holding your money.
+          Hand-pounded spices, strong Assam leaf and the cups to drink it from. Pay us directly from your wallet at checkout.
         </p>
       </section>
 
@@ -33,8 +32,8 @@ export default function ShopPage() {
         <div className="mt-16 grid gap-7 rounded-2xl border border-line bg-paper p-7 sm:grid-cols-3 sm:p-9">
           {[
             ["Pay from your wallet", "MetaMask or any browser wallet. No card, no account."],
-            ["Settled in seconds", "USDT lands directly in our payout wallet on Whitechain."],
-            ["Verified fulfilment", "We ship only after a signed, server-verified payment webhook."],
+            ["Pay in USDT", "Prices are shown in USDT from browsing to checkout."],
+            ["See your order status", "Your order page updates when your payment is confirmed."],
           ].map(([title, body]) => (
             <div key={title}>
               <p className="font-display text-base font-semibold">{title}</p>
