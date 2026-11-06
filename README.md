@@ -12,6 +12,19 @@ Whitechain Commerce lets merchants add on-chain USDT payments to their stores. C
 
 For contributors and operators: [self-hosting](docs/SELF_HOSTING.md), [maintainer testing](docs/MAINTAINER_TESTING.md), [product spec](docs/SPEC.md), and [deployments](docs/DEPLOYMENTS.md).
 
+## WooCommerce plugin
+
+[Download the WooCommerce plugin ZIP](https://github.com/Sahil-Gulihar/ethglobal-mum/releases/download/woocommerce-v0.1.0/whitechain-commerce-woocommerce.zip). This testnet prerelease supports Classic Checkout and Checkout Blocks on USD stores. It charges 1 testnet USDT per USD.
+
+1. In WordPress, go to **Plugins → Add New → Upload Plugin**, upload the ZIP, and activate **Whitechain Commerce**. Make sure WooCommerce is active and your store currency is USD.
+2. In the [Whitechain dashboard](https://100lana.com), register a testnet payout wallet and create a test API key.
+3. In **WooCommerce → Settings → Payments → Whitechain Commerce**, enter the API key and copy the webhook URL shown in the settings.
+4. Add that URL as a webhook endpoint in the Whitechain dashboard. Paste its signing secret into the WooCommerce settings, enable the gateway, and save.
+
+The v0.1.0 ZIP defaults to the original Vercel hostname. To use the current Whitechain domain with this ZIP, add `define('WHITECHAIN_API_ORIGIN', 'https://100lana.com');` to `wp-config.php` before the line that loads WordPress.
+
+[Full WooCommerce setup guide](integrations/woocommerce/README.md)
+
 ## Why Whitechain
 
 Customers pay in USDT on Whitechain and the funds go directly to the merchant's wallet. Each confirmed payment and refund has a transaction record you can verify on the block explorer.
