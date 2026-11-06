@@ -204,6 +204,11 @@ function saveEnv(/** @type {string} */ file, /** @type {string} */ name, /** @ty
 async function login() {
   const save = flag("save");
   const printKey = rest.includes("--print-key");
+  if (!save && !printKey) {
+    // Approving a key nobody keeps would leave an orphan key on the account.
+    console.error("Pass --save=.env.local (recommended) or --print-key so the new key isn't lost after you approve it.");
+    process.exit(1);
+  }
   const timeoutS = Number(flag("timeout") || 600);
   const name = flag("name") || `whitechain-mcp on ${os.hostname()}`.slice(0, 60);
   const c = await startConnect({ baseUrl: flag("base-url") || undefined, clientName: name });
@@ -214,7 +219,6 @@ async function login() {
 
 Confirmation code: ${c.code}
 Check that the page shows the same code. Waiting for approval...`);
-  if (!save && !printKey) console.error("(Tip: add --save=.env.local to keep the key. Without --save or --print-key it is discarded.)");
 
   const ac = new AbortController();
   process.once("SIGINT", () => ac.abort(new Error("Cancelled.")));

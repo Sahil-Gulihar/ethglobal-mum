@@ -32,7 +32,7 @@ Rules for endpoints:
 | Delete | **Delete** removes the endpoint and its delivery log. |
 | URL checks | Checked when you add the endpoint and again before every delivery. See [URL restrictions](#url-restrictions). |
 
-Endpoints are managed in the dashboard only. There is no API for them yet.
+Manage endpoints in the dashboard, or let an agent do it with the MCP tools `create_webhook_endpoint`, `send_test_webhook`, `list_webhook_deliveries` and `redeliver_webhook` (see [Agents and MCP](./agents.md#webhooks)). There is no REST API for them yet.
 
 ## Event types
 
@@ -431,7 +431,7 @@ Register a public HTTPS URL that receives POST requests. The hosted service chec
 ## Limitations
 
 - Two event types only: `payment.succeeded` and `refund.succeeded`.
-- No per-endpoint event filtering, no API to manage endpoints or list events, and no secret rotation.
+- No per-endpoint event filtering, no REST API to manage endpoints or list events (the MCP server has tools for both), and no secret rotation.
 - No test event for `refund.succeeded`.
 - No ordering guarantee between events.
 - Testnet only (Whitechain Sepolia, chain `1874`). There is no live mode.
