@@ -77,7 +77,7 @@ export function OnboardingChecklist(p: OnboardingProps) {
 
   return (
     <Card className="overflow-hidden">
-      <div className="flex flex-col gap-4 border-b bg-muted p-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 border-b bg-muted px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
           <h2 className="text-base font-semibold tracking-tight">Get set up to accept USDT</h2>
           <p className="text-sm text-muted-foreground">Finish these steps to take your first payment on Whitechain.</p>
@@ -95,7 +95,7 @@ export function OnboardingChecklist(p: OnboardingProps) {
         {steps.map((s, i) => {
           const isCurrent = i === current;
           return (
-            <li key={s.key} className={cn("flex gap-4 px-5 py-4", isCurrent && "bg-muted")}>
+            <li key={s.key} className={cn("flex gap-3 px-5 py-2.5", isCurrent && "bg-muted")}>
               <span
                 aria-hidden
                 className={cn(

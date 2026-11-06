@@ -12,7 +12,8 @@ const panelButton = "grid size-8 shrink-0 place-items-center rounded-[5px] text-
 export function DashboardShell({ account, network, children }: { account: ReactNode; network: ReactNode; children: ReactNode }) {
   const pathname = usePathname();
   const section = dashboardLinks.find(({ href }) => href === pathname || (href !== "/dashboard" && pathname.startsWith(`${href}/`)));
-  const isDetail = section && section.href !== pathname;
+  const isSetup = pathname === "/dashboard/setup";
+  const parent = isSetup ? dashboardLinks[0] : section && section.href !== pathname ? section : null;
   const [compact, setCompact] = useState(false);
   const drawer = useRef<HTMLDialogElement>(null);
 
@@ -79,11 +80,11 @@ export function DashboardShell({ account, network, children }: { account: ReactN
       <div className="dashboard-inset flex min-w-0 flex-col rounded-md border-[0.5px] border-[var(--dashboard-frame)] bg-background">
         <header className="flex h-12 shrink-0 items-center gap-3 border-b-[0.5px] border-white/10 px-4 text-sm min-[721px]:px-5">
           <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-2">
-            {isDetail ? (
+            {parent ? (
               <>
-                <Link href={section.href} className="text-muted-foreground hover:text-foreground">{section.label}</Link>
+                <Link href={parent.href} className="text-muted-foreground hover:text-foreground">{parent.label}</Link>
                 <span aria-hidden="true" className="text-muted-foreground">/</span>
-                <span aria-current="page">Payment details</span>
+                <span aria-current="page">{isSetup ? "Setup" : "Payment details"}</span>
               </>
             ) : <span aria-current="page">{section?.label ?? "Dashboard"}</span>}
           </nav>
