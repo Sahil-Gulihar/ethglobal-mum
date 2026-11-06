@@ -69,7 +69,7 @@ Hosted checkout: `GET /checkout/:sessionId` (dashboard page) renders `<Whitechai
 
 - `src/lib/indexer/index.ts`: `runIndexerOnce(): Promise<{ fromBlock, toBlock, processed }>` and `validateTx(txHash)`. Both run the full settlement check (SPEC §6) and are idempotent.
 - `src/lib/webhooks/index.ts`: `enqueueEvent(merchantId, type, payloadBuilder)` (creates one event plus one delivery per enabled endpoint) and `deliverDue(): Promise<number>`. Retry schedule after a failure: +1 min, +5 min, +30 min, then `failed`. Every attempt goes into `webhook_attempts`. 10 s timeout. Any 2xx counts as success.
-- Serializers in `src/lib/serializers.ts` (owned by the API agent): `toPaymentObject(paymentRow, sessionRow)`, `toRefundObject(...)`, `toPublicSession(...)`, `toCheckoutSession(...)`. The indexer imports these to build webhook payloads.
+- Serializers in `src/lib/serializers.ts` (already written): `toPaymentObject(paymentRow, sessionRow)`, `toRefundObject(...)`, `toPublicSession(...)`, `toCheckoutSession(...)`. The indexer imports these to build webhook payloads.
 
 ## Webhook format
 
