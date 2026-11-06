@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireMerchant } from "@/lib/auth";
 import { env } from "@/lib/env";
-import { agentClients, sdkSnippets } from "@/lib/agent-snippets";
+import { agentClients, integrationPrompts, sdkSnippets } from "@/lib/agent-snippets";
 import { describeTool, tools } from "@/lib/mcp/tools";
 import { listApiKeys } from "../_lib/queries";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -30,7 +30,7 @@ export default async function AgentsPage() {
     <>
       <PageHeader
         title="Agents"
-        description="Let AI agents create checkouts, share payment links, look up payments and start refunds for you over MCP."
+        description="Agents can do what you can do here: take payments with links and checkouts, confirm them onchain, manage webhooks and refunds, and integrate checkout into your code."
         actions={
           <>
             <Link href="/docs/agents" className={buttonVariants({ variant: "outline" })}>
@@ -70,6 +70,30 @@ export default async function AgentsPage() {
                     <CodeBlock code={c.code} filename={c.filename} className="mt-auto" />
                   </Card>
                 ))}
+              </div>
+            ),
+          },
+          {
+            label: "Integrate with AI",
+            content: (
+              <div className="flex flex-col gap-4">
+                <p className="text-sm text-muted-foreground">
+                  Paste one of these into a coding agent (Claude Code, Cursor, Codex and others) inside the repo you want to take payments in. The agent reads
+                  the{" "}
+                  <a href={`${base}/integrate.md`} target="_blank" rel="noreferrer" className="text-foreground underline underline-offset-4">
+                    integration guide
+                  </a>
+                  , adds the server route, checkout and verified webhooks, and tests a payment. With the MCP server connected it also registers the webhook
+                  and confirms the test payment for you, or you can run the <span className="font-mono text-xs text-foreground">integrate_whitechain</span> prompt.
+                </p>
+                <div className="grid gap-4 lg:grid-cols-2">
+                  {integrationPrompts(base).map((p) => (
+                    <div key={p.id} className="flex min-w-0 flex-col gap-2">
+                      <h2 className="text-sm font-medium">{p.name}</h2>
+                      <CodeBlock code={p.code} filename="prompt" className="[&_pre]:whitespace-pre-wrap" />
+                    </div>
+                  ))}
+                </div>
               </div>
             ),
           },

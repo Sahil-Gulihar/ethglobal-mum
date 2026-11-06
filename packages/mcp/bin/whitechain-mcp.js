@@ -166,7 +166,8 @@ function init() {
 
 This project takes USDT payments with Whitechain Commerce (non-custodial, Whitechain Sepolia, chain 1874).
 
-- Agents: use the \`whitechain\` MCP server (tools such as \`create_checkout_session\`, \`create_payment_link\`, \`list_payments\`, \`create_refund\`).
+- Agents: use the \`whitechain\` MCP server. It can do everything the dashboard does except identity, payout wallet, refund signing and keys (those come back as \`humanActions\` links for the user). Confirm payments with \`wait_for_payment\`, never by trusting the client.
+- Integrating or changing payment code: first read ${base}/integrate.md (or call the \`get_integration_guide\` tool) and follow it.
 - Code: create checkout sessions server-side with \`POST ${base}/api/v1/checkout_sessions\` and \`Authorization: Bearer $WC_SECRET_KEY\`. Never expose the secret key to the browser.
 - Verify webhook signatures with \`WC_WEBHOOK_SECRET\` before trusting a payment.
 - Refunds created by an agent stay pending until the merchant signs them in the dashboard.

@@ -15,6 +15,13 @@ export function agentClients(base: string): AgentClient[] {
       code: `npx @whitechain-commerce/mcp init${base === DEFAULT_BASE ? "" : ` --base-url=${base}`}\nexport WC_SECRET_KEY=${KEY_PLACEHOLDER}`,
     },
     {
+      id: "login",
+      name: "Connect with approval",
+      where: "No key to copy: the agent makes its own key, you approve it on a /connect page after matching a code, and it can save WC_SECRET_KEY for you.",
+      filename: "terminal",
+      code: `npx @whitechain-commerce/mcp login --name="My agent" --save=.env.local${base === DEFAULT_BASE ? "" : ` \\\n  --base-url=${base}`}`,
+    },
+    {
       id: "claude-code",
       name: "Claude Code",
       where: "One command. Add --scope project to share it with your team through .mcp.json.",
@@ -145,3 +152,25 @@ for (const call of res.choices[0].message.tool_calls ?? []) {
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_sales_summary","arguments":{}}}'`,
   },
 ];
+
+/** One-line prompts that hand a coding agent the integration guide for each stack. */
+export function integrationPrompts(base: string) {
+  const stacks = [
+    { id: "nextjs", name: "Next.js" },
+    { id: "react-node", name: "React + Node.js" },
+    { id: "node", name: "Node.js server" },
+    { id: "other", name: "Any other stack" },
+  ];
+  return [
+    ...stacks.map((s) => ({
+      id: s.id,
+      name: s.name,
+      code: `Read ${base}/integrate.md?stack=${s.id} and integrate Whitechain Commerce checkout into this repo. Follow it end to end and finish with its checklist.`,
+    })),
+    {
+      id: "payment-link",
+      name: "No code: payment link",
+      code: `Read ${base}/integrate.md?mode=payment-link and add a "Pay with USDT" button to this site that uses a Whitechain Commerce payment link.`,
+    },
+  ];
+}

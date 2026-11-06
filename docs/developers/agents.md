@@ -154,21 +154,68 @@ Clients that can only start a local command can run the package, which passes me
 
 ## Tools
 
+Agents can do everything a person can do in the dashboard, except four things kept for the account owner on purpose: verifying identity with World ID, setting or changing the payout wallet, signing refunds with that wallet, and creating or revoking keys. When one of those is needed, tools return `humanActions`: a reason and a dashboard link for the agent to show you.
+
+### Account and reports
+
 | Tool | Access | What it does |
 | --- | --- | --- |
-| `get_account` | Read | Business name, verification status, payout wallet, network and contract addresses |
-| `get_sales_summary` | Read | Lifetime payment count, gross, refunded and net USDT |
-| `create_checkout_session` | Write | Creates a checkout for `amount` and returns the hosted checkout `url`. `orderId` is optional and acts as the idempotency key |
-| `get_checkout_session` | Read | Session status: `open`, `processing`, `complete` or `expired` |
+| `get_account` | Read | Business name, status, payout wallet, setup checklist, network and contract addresses, and any `humanActions` still needed. Call it first |
+| `get_sales_summary` | Read | Lifetime payment count, gross, refunded and net USDT, plus payments per day for the last 14 days |
+| `update_business_name` | Write | Renames the business shown on checkout pages |
+| `export_ledger_csv` | Read | Every payment and completed refund as CSV, optionally between `from` and `to` dates |
+
+### Getting paid
+
+| Tool | Access | What it does |
+| --- | --- | --- |
+| `create_payment_link` | Write | A reusable fixed-price link (`/pay/pl_...`) to share anywhere |
+| `list_payment_links` | Read | Links with their url, price, on/off state and takings |
+| `get_payment_link` | Read | One link with its recent checkouts and payments |
+| `set_payment_link_active` | Write | Turns a link on or off |
+| `create_checkout_session` | Write | A one-off checkout for `amount`, returning the hosted checkout `url`. `orderId` is optional and acts as the idempotency key |
+| `get_checkout_session` | Read | Session status: `open`, `processing`, `paid` or `expired` |
+| `wait_for_payment` | Read | Waits up to 50 seconds for a session or a payment link to be paid and returns the confirmed payment. It checks the chain itself, so it confirms payments even with no background worker and when the customer closed the page right after paying |
 | `list_payments` | Read | Confirmed payments, newest first (`limit` 1 to 100) |
 | `get_payment` | Read | One payment with its refunds |
-| `create_refund` | Write | Creates a pending full or partial refund and returns the `approveUrl` where you sign it |
+
+### Refunds
+
+| Tool | Access | What it does |
+| --- | --- | --- |
+| `create_refund` | Write | Creates a pending full or partial refund and returns the `approveUrl` where you sign it with your payout wallet |
+| `cancel_refund` | Write | Discards a pending refund that hasn't been signed |
 | `list_refunds` | Read | Refunds, optionally for one `paymentId` |
-| `create_payment_link` | Write | A reusable fixed-price link (`/pay/pl_...`) |
-| `list_payment_links` | Read | Links with their url, price, on/off state and takings |
-| `set_payment_link_active` | Write | Turns a link on or off |
+
+### Webhooks
+
+| Tool | Access | What it does |
+| --- | --- | --- |
+| `list_webhook_endpoints` | Read | Endpoints and whether each is on |
+| `create_webhook_endpoint` | Write | Registers a URL and returns its signing secret (`whsec_...`) for `WC_WEBHOOK_SECRET` |
+| `get_webhook_secret` | Read | The signing secret of an endpoint |
+| `set_webhook_endpoint_enabled` | Write | Pauses or resumes an endpoint |
+| `delete_webhook_endpoint` | Write | Removes an endpoint |
+| `send_test_webhook` | Write | Sends a signed test `payment.succeeded` now and reports the HTTP status |
+| `list_webhook_deliveries` | Read | Recent deliveries with status, attempts and the last error |
+| `redeliver_webhook` | Write | Sends a past delivery again |
+
+### Integrating code
+
+| Tool | Access | What it does |
+| --- | --- | --- |
+| `get_integration_guide` | Read | Step-by-step Markdown instructions for adding checkout to a codebase, for a `stack` (`nextjs`, `react-node`, `node`, `other`) and `mode` (`widget`, `hosted`, `payment-link`). The same guide is public at `/integrate.md`; see [Integrate with AI](./integrate-with-ai.md) |
 
 Amounts are USDT decimal strings such as `"25.00"`. Sessions created by an agent get `metadata.source = "mcp"`, so you can tell them apart in webhooks. Tools report problems, such as an amount larger than what's left to refund, as tool errors the agent can read and fix; they use the same rules as the [API](./api-reference.md).
+
+## Prompts
+
+The server also offers ready-made prompts. Clients that support MCP prompts show them as commands (in Claude Code, `/mcp__whitechain__integrate_whitechain`).
+
+| Prompt | Arguments | What it does |
+| --- | --- | --- |
+| `integrate_whitechain` | `stack`, `mode` (optional) | Integrates checkout into the open codebase: follows the integration guide, registers and tests the webhook, and takes a testnet payment |
+| `get_paid` | `amount`, `for` | Creates a payment link, gives you the URL, and confirms the payment when it lands |
 
 ## Build your own agent
 
