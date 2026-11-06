@@ -2,9 +2,9 @@ import { CopyButton } from "@/components/ui/copy-button";
 import { codeHighlighter, codeThemes } from "@/lib/code-highlighting";
 import { cn } from "@/lib/utils";
 
-export async function CodeBlock({ code, language, filename, className }: { code: string; language: string; filename?: string; className?: string }) {
+export async function CodeBlock({ code, language, filename, className }: { code: string; language?: string; filename?: string; className?: string }) {
   const highlighter = await codeHighlighter;
-  const html = highlighter.codeToHtml(code, { ...codeThemes, lang: language });
+  const html = highlighter.codeToHtml(code, { ...codeThemes, lang: language ?? "text" });
   return (
     <div className={cn("overflow-hidden rounded-md border-[0.5px] bg-card text-foreground", className)}>
       <div className="flex items-center justify-between min-h-9 border-b-[0.5px] px-3">
