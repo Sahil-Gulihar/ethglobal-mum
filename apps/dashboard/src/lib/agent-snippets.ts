@@ -174,3 +174,29 @@ export function integrationPrompts(base: string) {
     },
   ];
 }
+
+/** One self-contained prompt, shown on the Developers page, that a coding agent can follow to add payments to any repo. */
+export function agentSetupPrompt(base: string) {
+  return `Set up Whitechain Commerce payments (USDT on Whitechain Sepolia, testnet) in this app.
+
+1. Work out the stack of this repo, then read the integration guide for it:
+   ${base}/integrate.md?stack=<nextjs | react-node | node | other>
+   Follow it end to end. Use the embedded checkout widget if the frontend is React, otherwise the hosted checkout redirect.
+
+2. Build what the guide describes:
+   - a server route that prices the order on the server and creates a checkout session
+   - the checkout: the <WhitechainCheckout /> widget, or a redirect to the session's url
+   - a webhook route that verifies the WC-Signature header on the raw body and marks the order paid on payment.succeeded (dedupe on event.id)
+   - an order page that shows the status from this app's own database
+
+3. Read config from environment variables, never hardcode it:
+   WC_API_BASE=${base}
+   NEXT_PUBLIC_WC_API_BASE=${base}   (only if checkout runs in the browser)
+   WC_SECRET_KEY=sk_test_...         (I create this at ${base}/dashboard/developers)
+   WC_WEBHOOK_SECRET=whsec_...       (I get this at ${base}/dashboard/webhooks after adding the endpoint)
+   Add them to .env.example, and ask me for the real values instead of inventing them.
+
+4. Rules: never trust an amount from the browser. Fulfil orders only from a verified webhook, not from onSuccess or the success redirect. Keep sk_ and whsec_ values on the server.
+
+5. Finish with the guide's checklist, then tell me exactly what is left for me: the webhook URL to add in the dashboard, the env values to fill in, and how to make a test payment.`;
+}

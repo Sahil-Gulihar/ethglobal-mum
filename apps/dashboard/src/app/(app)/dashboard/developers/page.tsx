@@ -14,6 +14,9 @@ import { Badge } from "@/components/ui/badge";
 import { CopyButton } from "@/components/ui/copy-button";
 import { buttonVariants } from "@/components/ui/button";
 import { formatDate, relativeTime } from "@/lib/utils";
+import { agentSetupPrompt } from "@/lib/agent-snippets";
+import { CodeBlock } from "@/components/code-block";
+import Link from "next/link";
 
 import { DashboardPager, DashboardSections } from "@/components/dashboard/dashboard-pages";
 import { pageItems } from "@/lib/dashboard-pages";
@@ -25,6 +28,7 @@ export default async function DevelopersPage() {
   const keys = await listApiKeys(m.id);
   const apiBase = env.appUrl().replace(/\/$/, "");
   const verified = m.status === "active";
+  const prompt = agentSetupPrompt(apiBase);
 
   return (
     <>
@@ -44,6 +48,25 @@ export default async function DevelopersPage() {
           </>
         }
       />
+
+      <Card className="flex min-w-0 flex-col gap-3 p-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex min-w-0 flex-col gap-1">
+            <h2 className="text-sm font-medium">Set up payments with an AI agent</h2>
+            <p className="text-sm text-muted-foreground">
+              Paste this into Claude Code, Cursor, Codex or any coding agent, inside the repo that should take payments. It adds checkout, verified
+              webhooks and order status, then tells you what&apos;s left to do.
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <Link href="/dashboard/agents" className={buttonVariants({ variant: "outline", size: "sm" })}>
+              More prompts
+            </Link>
+            <CopyButton value={prompt} label="Copy prompt" showLabel className="h-8 border border-border px-2.5 text-foreground" />
+          </div>
+        </div>
+        <CodeBlock code={prompt} filename="prompt for agents" className="[&_pre]:max-h-64 [&_pre]:whitespace-pre-wrap" />
+      </Card>
 
       <DashboardSections
         sections={[
