@@ -95,6 +95,7 @@ async function main() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const hash = await wallet.writeContract({ address: router, abi: mockAbi, functionName: fn, args: args as any });
     await pub.waitForTransactionReceipt({ hash });
+    await pub.request({ method: "anvil_mine" as never, params: ["0x1"] as never }); // 1 confirmation
     return hash;
   };
   const sessionStatus = async (id: string) => (await db.select().from(checkoutSessions).where(eq(checkoutSessions.id, id)))[0].status;
@@ -109,7 +110,13 @@ async function main() {
 
     // 1. Valid payment via validateTx racing runIndexerOnce: exactly one payment row + one event.
     const good = await mkSession(49_990_000n);
-    const h1 = await send("settle", [good.pid, mid, good.oid, payout, USDT_ADDRESS, 49_990_000n]);
+    const h1Hash = await wallet.writeContract({ address: router, abi: mockAbi, functionName: "settle", args: [good.pid, mid, good.oid, payout, USDT_ADDRESS, 49_990_000n] });
+    await pub.waitForTransactionReceipt({ hash: h1Hash });
+    const h1 = h1Hash;
+    // In the head block (0 confirmations): validateTx must not act on it yet.
+    const v0 = await validateTx(h1, undefined, 0);
+    assert.deepEqual(v0, { ok: false, reason: "pending" }, "0-conf tx is not accepted");
+    assert.equal(await sessionStatus(good.id), "processing");
     const vPending = await validateTx(`0x${"00".repeat(32)}`);
     assert.deepEqual(vPending, { ok: false, reason: "pending" });
     await pub.request({ method: "anvil_mine" as never, params: ["0x1"] as never }); // 1 confirmation for getLogs
@@ -126,11 +133,10 @@ async function main() {
     assert.equal((evs1[0].payload as { data: { payment: { id: string } } }).data.payment.id, p1.id);
     assert.equal((await db.select().from(webhookDeliveries).where(eq(webhookDeliveries.eventId, evs1[0].id))).length, 1);
 
-    // 2. Rejections: wrong amount, wrong token, wrong payout, wrong merchant, wrong decimals.
+    // 2. Rejections: wrong amount, wrong token, wrong merchant, wrong paymentId, wrong decimals.
     const cases: { name: string; s: Awaited<ReturnType<typeof mkSession>>; args: (s: Awaited<ReturnType<typeof mkSession>>) => readonly unknown[] }[] = [];
     cases.push({ name: "amount", s: await mkSession(1_000_000n), args: (s) => [s.pid, mid, s.oid, payout, USDT_ADDRESS, 999_999n] });
     cases.push({ name: "token", s: await mkSession(1_000_000n), args: (s) => [s.pid, mid, s.oid, payout, router, 1_000_000n] });
-    cases.push({ name: "payout", s: await mkSession(1_000_000n), args: (s) => [s.pid, mid, s.oid, account.address, USDT_ADDRESS, 1_000_000n] });
     const otherMid = chainMerchantId("mer_other");
     cases.push({ name: "merchant", s: await mkSession(1_000_000n), args: (s) => [chainPaymentId(otherMid, s.oid), otherMid, s.oid, payout, USDT_ADDRESS, 1_000_000n] });
     cases.push({ name: "paymentId", s: await mkSession(1_000_000n), args: (s) => [`0x${"ee".repeat(32)}`, mid, s.oid, payout, USDT_ADDRESS, 1_000_000n] });
@@ -147,6 +153,12 @@ async function main() {
     const hl = await send("settle", [late.pid, mid, late.oid, payout, USDT_ADDRESS, 2_000_000n]);
     assert.equal((await validateTx(hl)).ok, true);
     assert.equal(await sessionStatus(late.id), "paid");
+
+    // 3b. Payout differs from the merchant's current DB payout (changed after pay time): still recorded.
+    const moved = await mkSession(3_000_000n);
+    const hm = await send("settle", [moved.pid, mid, moved.oid, account.address, USDT_ADDRESS, 3_000_000n]);
+    assert.equal((await validateTx(hm)).ok, true, "old payout still accepted");
+    assert.equal(await sessionStatus(moved.id), "paid");
 
     // 4. Refunds: one matched to a pending API request, one dashboard-initiated (new row).
     const reqRefund = newId("re");
@@ -175,16 +187,24 @@ async function main() {
     await pub.request({ method: "anvil_mine" as never, params: ["0x1"] as never });
     await runIndexerOnce();
     const evTypes = (await db.select().from(webhookEvents).where(eq(webhookEvents.merchantId, merchantId))).map((e) => e.type).sort();
-    assert.deepEqual(evTypes, ["payment.succeeded", "payment.succeeded", "refund.succeeded", "refund.succeeded"]);
-    for (const c of cases) assert.equal(await sessionStatus(c.s.id), "processing", `${c.name}: stays unpaid (no submitted tx hint)`);
+    assert.deepEqual(evTypes, ["payment.succeeded", "payment.succeeded", "payment.succeeded", "refund.succeeded", "refund.succeeded"]);
+    for (const c of cases) {
+      // A wrong-amount payment burns the order id onchain, so that session is expired; others stay unpaid.
+      const want = c.name === "amount" ? "expired" : "processing";
+      assert.equal(await sessionStatus(c.s.id), want, `${c.name}: ${want}`);
+    }
 
-    // 6. Sweep: a processing session whose hinted tx is invalid goes back to open.
+    // 6. Sweep: a processing session whose hinted tx paid something else goes back to open.
     const hinted = await mkSession(5_000_000n);
-    const hb = await send("settle", [hinted.pid, mid, hinted.oid, payout, USDT_ADDRESS, 4n]);
-    await db.update(checkoutSessions).set({ submittedTxHash: hb }).where(eq(checkoutSessions.id, hinted.id));
-    await pub.request({ method: "anvil_mine" as never, params: ["0x1"] as never });
+    await db.update(checkoutSessions).set({ submittedTxHash: hl.toLowerCase() }).where(eq(checkoutSessions.id, hinted.id));
     await runIndexerOnce();
     assert.equal(await sessionStatus(hinted.id), "open");
+    // ...and one front-run with a dust amount is expired, so the merchant API issues a fresh session.
+    const dusted = await mkSession(5_000_000n);
+    const hb = await send("settle", [dusted.pid, mid, dusted.oid, payout, USDT_ADDRESS, 1n]);
+    await db.update(checkoutSessions).set({ submittedTxHash: hb }).where(eq(checkoutSessions.id, dusted.id));
+    await runIndexerOnce();
+    assert.equal(await sessionStatus(dusted.id), "expired");
 
     console.log("PASS indexer e2e");
   } finally {

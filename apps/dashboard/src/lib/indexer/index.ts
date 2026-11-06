@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, eq, isNotNull, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNotNull, sql } from "drizzle-orm";
 import { getAbiItem, parseEventLogs, TransactionNotFoundError, TransactionReceiptNotFoundError, type Hex, type Log, type TransactionReceipt } from "viem";
 import {
   chainPaymentId,
@@ -88,14 +88,24 @@ async function handleSettled(ev: SettledLog, ctx: Ctx): Promise<HandleResult> {
   const [existing] = await db.select({ id: payments.id }).from(payments).where(eq(payments.sessionId, session.id));
   if (existing) return { ok: true, kind: "payment", id: existing.id, created: false };
 
-  if (amount !== BigInt(session.amountUnits))
+  if (amount !== BigInt(session.amountUnits)) {
+    // The router allows one payment per (merchant, order), so this order id is now used up onchain.
+    // Expire the session so the merchant API issues a fresh one instead of returning an unpayable session.
+    const burned = await db
+      .update(checkoutSessions)
+      .set({ status: "expired" })
+      .where(and(eq(checkoutSessions.id, session.id), inArray(checkoutSessions.status, ["open", "processing"])))
+      .returning({ id: checkoutSessions.id });
+    if (burned.length) warn(`session ${session.id} expired: its order id was used by a wrong-amount payment`);
     return fail(`amount ${amount} != session ${session.id} amountUnits ${session.amountUnits}`);
+  }
   const decimals = await usdtDecimals();
   if (session.decimals !== decimals) return fail(`session priced with ${session.decimals} decimals, token has ${decimals}`);
   const receipt = await ctx.receipt(ev.transactionHash);
   if (receipt.status !== "success") return fail("tx receipt status is not success");
-  if (!merchant.payoutAddress || lc(payout) !== lc(merchant.payoutAddress))
-    return fail(`payout ${payout} != merchant payout ${merchant.payoutAddress}`);
+  // No check of `payout` against merchants.payoutAddress: the verified router paid whatever payout was
+  // registered onchain at pay time. Comparing with the current DB value would drop real payments made
+  // before a payout change (e.g. while the worker was behind).
 
   const ts = await ctx.timestamp(ev.blockNumber);
   const paidAt = new Date(Number(ts) * 1000);
@@ -300,7 +310,7 @@ export type ValidateResult =
  * Validates a specific tx right away (used by POST /checkout_sessions/:id/submit).
  * Never trusts the hint: runs exactly the same checks as the indexer on the tx's router logs.
  */
-export async function validateTx(txHash: string, ctx = new Ctx()): Promise<ValidateResult> {
+export async function validateTx(txHash: string, ctx = new Ctx(), confirmWaitMs = 8000): Promise<ValidateResult> {
   if (!/^0x[0-9a-fA-F]{64}$/.test(txHash)) return { ok: false, reason: "invalid" };
   let receipt: TransactionReceipt;
   try {
@@ -312,6 +322,8 @@ export async function validateTx(txHash: string, ctx = new Ctx()): Promise<Valid
     throw e;
   }
   if (receipt.status !== "success") return { ok: false, reason: "reverted" };
+  // Same confirmation depth as the getLogs pass: don't act on a tx in the head block (reorg risk).
+  if (!(await waitForConfirmations(ctx, receipt.blockNumber, confirmWaitMs))) return { ok: false, reason: "pending" };
   const router = lc(getRouterAddress());
   const evs = parseEventLogs({
     abi: paymentRouterAbi,
@@ -322,6 +334,17 @@ export async function validateTx(txHash: string, ctx = new Ctx()): Promise<Valid
   const results: HandleResult[] = [];
   for (const ev of evs) results.push(await handle(ev, ctx));
   return results.every((r) => r.ok) ? { ok: true, results } : { ok: false, reason: "invalid", results };
+}
+
+/** Waits up to `maxMs` for `blockNumber` to have CONFIRMATIONS blocks on top of it. */
+async function waitForConfirmations(ctx: Ctx, blockNumber: bigint, maxMs: number): Promise<boolean> {
+  const deadline = Date.now() + maxMs;
+  for (;;) {
+    const head = await ctx.client.getBlockNumber({ cacheTime: 0 });
+    if (blockNumber <= head - CONFIRMATIONS) return true;
+    if (Date.now() >= deadline) return false;
+    await new Promise((r) => setTimeout(r, 1000));
+  }
 }
 
 /** True if the node knows the tx (mined or in its mempool). Errors count as known, to stay conservative. */
@@ -345,7 +368,7 @@ async function sweepProcessing(ctx: Ctx) {
     .where(and(eq(checkoutSessions.status, "processing"), isNotNull(checkoutSessions.submittedTxHash)))
     .limit(20);
   for (const s of rows) {
-    const r = await validateTx(s.txHash!, ctx);
+    const r = await validateTx(s.txHash!, ctx, 0);
     const expired = Date.now() > s.expiresAt.getTime() + EXPIRY_GRACE_MS;
     // Mined but didn't pay THIS session (reverted, invalid, or someone else's tx): release it.
     // If it did pay this session, the status is already `paid` and the guarded update is a no-op.
