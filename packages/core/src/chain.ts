@@ -11,11 +11,11 @@ export const EXPLORER_URL = "https://explorer.testnet.whitechain.io";
 
 /**
  * Public RPC used by browsers (wallet_addEthereumChain). Servers use WHITECHAIN_RPC_URL from env.
- * TODO(contracts agent): confirm the official public RPC for chain 1874 from docs.whitechain.io.
- * NOTE: https://rpc-testnet.whitechain.io returns chainId 2625 (a different network), do NOT use it.
+ * Official keyless public RPC for chain 1874 (docs.whitechain.io/learn/get-started/connect-wallet), eth_chainId 0x752,
+ * CORS allow-origin *. NOTE: https://rpc-testnet.whitechain.io (hyphen) returns chainId 2625, a different network.
  */
 export const PUBLIC_RPC_URL =
-  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_WHITECHAIN_RPC_URL) || "https://rpc-sepolia.whitechain.io";
+  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_WHITECHAIN_RPC_URL) || "https://rpc.testnet.whitechain.io";
 
 export const whitechainSepolia = defineChain({
   id: WHITECHAIN_SEPOLIA_ID,
