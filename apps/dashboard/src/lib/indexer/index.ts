@@ -15,7 +15,7 @@ import { newId } from "@/lib/ids";
 import { toPaymentObject, toRefundObject } from "@/lib/serializers";
 import { enqueueEvent } from "@/lib/webhooks";
 
-const STATE_KEY = "payment_router";
+const STATE_KEY = process.env.INDEXER_STATE_KEY || "payment_router"; // override only for tests
 const CHUNK = 2000n;
 const CONFIRMATIONS = 1n;
 /** Max chunks per pass so one tick stays bounded while catching up. */
@@ -37,6 +37,7 @@ const lc = (s: string | null | undefined) => (s ?? "").toLowerCase();
 const log = (...a: unknown[]) => console.log("[indexer]", ...a);
 const warn = (...a: unknown[]) => console.warn("[indexer]", ...a);
 
+let warnedZero = false;
 let chainIdCache: number | null = null;
 async function chainId(): Promise<number> {
   if (chainIdCache === null) chainIdCache = await publicClient().getChainId();
@@ -255,12 +256,18 @@ export async function runIndexerOnce(): Promise<{ fromBlock: string; toBlock: st
   const router = getRouterAddress();
   const latest = await ctx.client.getBlockNumber();
   const safeHead = latest - CONFIRMATIONS;
-  const last = await loadCursor(latest);
+  if (/^0x0{40}$/i.test(router)) {
+    // Don't advance the shared cursor past blocks a real router might later be deployed in.
+    if (!warnedZero) warn("PaymentRouter address is the zero address; set PAYMENT_ROUTER_ADDRESS. Skipping.");
+    warnedZero = true;
+    return { fromBlock: safeHead.toString(), toBlock: safeHead.toString(), processed: 0 };
+  }
+  let last = await loadCursor(latest);
+  // Jump straight to the deploy block if the cursor is behind it.
+  if (PAYMENT_ROUTER_DEPLOY_BLOCK > 0n && last < PAYMENT_ROUTER_DEPLOY_BLOCK - 1n) last = PAYMENT_ROUTER_DEPLOY_BLOCK - 1n;
   const fromBlock = last + 1n;
   let processed = 0;
   let cursor = last;
-
-  if (/^0x0{40}$/i.test(router)) warn("PaymentRouter address is the zero address; set PAYMENT_ROUTER_ADDRESS");
 
   for (let i = 0; i < MAX_CHUNKS_PER_RUN && cursor < safeHead; i++) {
     const from = cursor + 1n;
