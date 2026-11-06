@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { fromUnits, getRouterAddress } from "@whitechain-commerce/core";
 import { requireMerchant } from "@/lib/auth";
-import { getPaymentDetail } from "../../_lib/queries";
+import { getPaymentDetail, listPaymentDeliveries } from "../../_lib/queries";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { ExplorerLink } from "@/components/dashboard/explorer-link";
@@ -22,13 +22,13 @@ export const metadata: Metadata = { title: "Payment" };
 export default async function PaymentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const m = await requireMerchant();
-  const p = await getPaymentDetail(m.id, id);
+  const [p, deliveries] = await Promise.all([getPaymentDetail(m.id, id), listPaymentDeliveries(m.id, id)]);
   if (!p) notFound();
 
   const pendingRefunds = p.refunds.filter((r) => r.status === "pending");
   const payoutChanged = !!m.payoutAddress && m.payoutAddress.toLowerCase() !== p.payout.toLowerCase();
 
-  type Event = { key: string; icon: IconName; title: ReactNode; at: Date; detail?: ReactNode; tone: "done" | "pending" };
+  type Event = { key: string; icon: IconName; title: ReactNode; at: Date; detail?: ReactNode; tone: "done" | "pending" | "failed" };
   const base: Event[] = [
     { key: "created", icon: "card", title: "Checkout session created", at: p.sessionCreatedAt, detail: <span className="font-mono">{p.sessionId}</span>, tone: "done" },
     {
@@ -54,11 +54,34 @@ export default async function PaymentDetailPage({ params }: { params: Promise<{ 
       detail: r.txHash ? <ExplorerLink hash={r.txHash} /> : <span>Waiting for a signature from your payout wallet</span>,
       tone: r.status === "succeeded" ? "done" : "pending",
     })),
-  ].reverse();
+    ...deliveries.map<Event>((d) => ({
+      key: d.id,
+      icon: "webhook",
+      title:
+        d.status === "succeeded"
+          ? `Signed ${d.eventType} webhook delivered`
+          : d.status === "failed"
+            ? `${d.eventType} webhook failed`
+            : `${d.eventType} webhook ${d.attempts ? "retrying" : "queued"}`,
+      at: d.lastAttemptAt ?? d.createdAt,
+      detail: (
+        <span className="flex flex-wrap items-center gap-x-2">
+          {d.lastStatusCode !== null && <span className="font-mono">HTTP {d.lastStatusCode}</span>}
+          <span className="max-w-72 truncate" title={d.endpointUrl}>
+            {d.endpointUrl}
+          </span>
+          {d.attempts > 1 && <span>{d.attempts} attempts</span>}
+        </span>
+      ),
+      tone: d.status === "succeeded" ? "done" : d.status === "failed" ? "failed" : "pending",
+    })),
+  ]
+    .sort((a, b) => a.at.getTime() - b.at.getTime())
+    .reverse();
 
   return (
     <>
-      <AutoRefresh active={pendingRefunds.length > 0} />
+      <AutoRefresh active={pendingRefunds.length > 0 || deliveries.some((d) => d.status === "pending")} />
       <PageHeader
         eyebrow={
           <Link href="/dashboard/payments" className="mb-2 inline-flex w-fit items-center gap-1 rounded text-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring">
@@ -115,7 +138,11 @@ export default async function PaymentDetailPage({ params }: { params: Promise<{ 
                     aria-hidden
                     className={cn(
                       "relative z-[1] grid size-8 shrink-0 place-items-center rounded-full border bg-card",
-                      e.tone === "done" ? "border-primary/30 text-primary" : "border-warning/40 text-warning",
+                      e.tone === "done"
+                        ? "border-primary/30 text-primary"
+                        : e.tone === "failed"
+                          ? "border-destructive/40 text-destructive"
+                          : "border-warning/40 text-warning",
                     )}
                   >
                     <Icon name={e.icon} className="size-3.5" />

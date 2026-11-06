@@ -165,6 +165,49 @@ export async function getPaymentDetail(merchantId: string, paymentId: string): P
   };
 }
 
+export type PaymentDeliveryView = {
+  id: string;
+  eventId: string;
+  eventType: string;
+  refundId: string | null;
+  endpointUrl: string;
+  status: "pending" | "succeeded" | "failed";
+  attempts: number;
+  lastStatusCode: number | null;
+  lastAttemptAt: Date | null;
+  createdAt: Date;
+};
+
+/** Webhook deliveries of the events about one payment (payment.succeeded + refund.succeeded). */
+export async function listPaymentDeliveries(merchantId: string, paymentId: string): Promise<PaymentDeliveryView[]> {
+  const rows = await db
+    .select({ d: webhookDeliveries, e: webhookEvents, url: webhookEndpoints.url })
+    .from(webhookDeliveries)
+    .innerJoin(webhookEndpoints, eq(webhookEndpoints.id, webhookDeliveries.endpointId))
+    .innerJoin(webhookEvents, eq(webhookEvents.id, webhookDeliveries.eventId))
+    .where(
+      and(
+        eq(webhookEvents.merchantId, merchantId),
+        eq(webhookEndpoints.merchantId, merchantId),
+        sql`${webhookEvents.payload} -> 'data' -> 'payment' ->> 'id' = ${paymentId}`,
+      ),
+    )
+    .orderBy(asc(webhookDeliveries.createdAt))
+    .limit(50);
+  return rows.map(({ d, e, url }) => ({
+    id: d.id,
+    eventId: e.id,
+    eventType: e.type,
+    refundId: ((e.payload as { data?: { refund?: { id?: string } } }).data?.refund?.id as string | undefined) ?? null,
+    endpointUrl: url,
+    status: d.status,
+    attempts: d.attempts,
+    lastStatusCode: d.lastStatusCode,
+    lastAttemptAt: d.lastAttemptAt,
+    createdAt: d.createdAt,
+  }));
+}
+
 export async function listApiKeys(merchantId: string) {
   return db.select().from(apiKeys).where(eq(apiKeys.merchantId, merchantId)).orderBy(desc(apiKeys.createdAt));
 }
