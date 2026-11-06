@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getCurrentMerchant } from "@/lib/auth";
-import { Wordmark, LogoMark } from "@/components/brand";
+import { Wordmark } from "@/components/brand";
 import { Icon } from "@/components/icons";
 import { CodeBlock } from "@/components/code-block";
 import { clientSnippet, serverSnippet } from "@/components/snippets";
@@ -26,23 +26,22 @@ export default async function Landing() {
         <section className="landing-hero">
           <div className="landing-hero-copy">
             <div className="landing-kicker"><span /> Built for Whitechain</div>
-            <h1>Good business.<br /><em>Better payments.</em></h1>
-            <p>Accept USDT with a checkout that sends payments straight to your wallet. Simple for your customers, straightforward for you.</p>
+            <h1>Accept USDT.<br />Get paid directly.</h1>
+            <p>Give customers a checkout for USDT on Whitechain. Payments go straight to your wallet.</p>
             <div className="landing-hero-actions"><Link href={destination} className="landing-button">Start accepting payments <Icon name="arrowRight" /></Link><a href="#how" className="landing-text-link">See how it works <span>↗</span></a></div>
             <div className="landing-note"><span className="landing-note-icon"><Icon name="shield" /></span><span>Non-custodial by design<br /><small>Your funds go directly to your wallet.</small></span></div>
           </div>
-          <div className="hero-stage" aria-label="Illustration of a USDT checkout and a settled payment">
-            <div className="stage-orbit orbit-one" /><div className="stage-orbit orbit-two" />
-            <div className="stage-label">A smoother way to get paid <span>✳</span></div>
-            <div className="stage-checkout">
-              <div className="stage-top"><span className="stage-shop">✳</span><div><strong>Chai &amp; Co.</strong><small>Order #4821</small></div><span className="stage-network">Whitechain</span></div>
-              <div className="stage-amount"><small>Total due</small><strong>49.99 <span>USDT</span></strong></div>
-              <div className="stage-line"><span>Masala chai tin</span><span>24.00</span></div><div className="stage-line"><span>Ceramic cup set</span><span>25.99</span></div>
-              <div className="stage-wallet"><span className="stage-wallet-icon">◈</span><div><strong>Wallet connected</strong><small>0x7a3f…91c2</small></div><span>✓</span></div>
-              <div className="stage-pay">Pay 49.99 USDT</div><div className="stage-secure"><LogoMark className="size-4" /> Secured by Whitechain Commerce</div>
-            </div>
-            <div className="stage-receipt"><span>✓</span><div><strong>Payment received</strong><small>49.99 USDT settled</small></div></div>
-          </div>
+          <figure className="hero-stage">
+            <Image
+              src="/product/checkout-review.webp"
+              alt="Chai & Co. checkout showing a 49.99 USDT payment ready to confirm on Whitechain Sepolia"
+              width={880}
+              height={1334}
+              unoptimized
+              preload
+            />
+            <figcaption>Whitechain Commerce checkout · Sample order</figcaption>
+          </figure>
         </section>
         <section className="landing-strip"><span>Made for merchants, built onchain.</span><span>USDT payments</span><span>Direct settlement</span><span>Onchain refunds</span></section>
         <section id="benefits" className="landing-section benefits-section"><div className="section-intro"><p className="section-label">The better way to pay</p><h2>Less between you<br />and your money.</h2><p>A little less waiting, a lot more control. Everything you need to accept stablecoin payments, without giving up custody.</p></div><div className="benefits-list">{benefits.map(([number,title,body]) => <article key={number}><span>{number}</span><div><h3>{title}</h3><p>{body}</p></div><span className="benefit-plus">✳</span></article>)}</div></section>
