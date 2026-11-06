@@ -32,7 +32,7 @@ export function SettlementChart({ daily }: { daily: { date: string; count: numbe
         <svg
           viewBox={`0 0 ${width} ${height}`}
           preserveAspectRatio="none"
-          className="h-40 w-full sm:h-[240px] overflow-visible"
+          className="h-40 w-full sm:h-[var(--plot-height)] overflow-visible"
           role="img"
           aria-label={daily.map(({ date, count }) => `${date}: ${count}`).join(", ")}
         >
@@ -56,7 +56,7 @@ export function SettlementChart({ daily }: { daily: { date: string; count: numbe
             </g>
           ))}
         </svg>
-        <div aria-hidden className="flex h-40 -translate-y-2 sm:h-[240px] flex-col justify-between tabular">
+        <div aria-hidden className="flex h-40 -translate-y-2 sm:h-[var(--plot-height)] flex-col justify-between tabular">
           {ticks.map((tick) => <span key={tick} className="leading-none">{tick}</span>)}
         </div>
         <div aria-hidden className="relative h-7 border-t border-[var(--chart-border)] tabular">

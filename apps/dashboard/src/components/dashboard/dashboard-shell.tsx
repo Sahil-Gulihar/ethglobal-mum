@@ -90,7 +90,7 @@ export function DashboardShell({ account, network, children }: { account: ReactN
           </nav>
         </header>
         <main key={pathname} className="min-w-0 flex-1">
-          <div className="flex min-w-0 flex-col gap-7 px-4 pt-[18px] pb-6 min-[721px]:px-5">{children}</div>
+          <div className="flex min-w-0 flex-col gap-4 px-4 pt-4 pb-4 min-[721px]:px-5">{children}</div>
         </main>
       </div>
     </div>

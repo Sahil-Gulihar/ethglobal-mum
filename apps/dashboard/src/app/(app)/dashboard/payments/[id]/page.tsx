@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { fromUnits, getRouterAddress } from "@whitechain-commerce/core";
 import { requireMerchant } from "@/lib/auth";
 import { getPaymentDetail, listPaymentDeliveries } from "../../_lib/queries";
+import { DashboardPager, DashboardSections } from "@/components/dashboard/dashboard-pages";
+import { pageItems } from "@/lib/dashboard-pages";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { ExplorerLink } from "@/components/dashboard/explorer-link";
@@ -30,7 +31,14 @@ export default async function PaymentDetailPage({ params }: { params: Promise<{ 
 
   type Event = { key: string; icon: IconName; title: ReactNode; at: Date; detail?: ReactNode; tone: "done" | "pending" | "failed" };
   const base: Event[] = [
-    { key: "created", icon: "card", title: "Checkout session created", at: p.sessionCreatedAt, detail: <span className="font-mono">{p.sessionId}</span>, tone: "done" },
+    {
+      key: "created",
+      icon: "card",
+      title: "Checkout session created",
+      at: p.sessionCreatedAt,
+      detail: <span className="font-mono">{p.sessionId}</span>,
+      tone: "done",
+    },
     {
       key: "paid",
       icon: "check",
@@ -83,11 +91,6 @@ export default async function PaymentDetailPage({ params }: { params: Promise<{ 
     <>
       <AutoRefresh active={pendingRefunds.length > 0 || deliveries.some((d) => d.status === "pending")} />
       <PageHeader
-        eyebrow={
-          <Link href="/dashboard/payments" className="mb-2 inline-flex w-fit items-center gap-1 rounded text-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring">
-            <Icon name="arrowLeft" className="size-3.5" /> Payments
-          </Link>
-        }
         title={
           <span className="flex flex-wrap items-center gap-3">
             <span className="tabular">
@@ -97,8 +100,12 @@ export default async function PaymentDetailPage({ params }: { params: Promise<{ 
           </span>
         }
         description={
-          <span className="flex items-center gap-1">
-            Order <span className="font-mono text-foreground">{p.orderId}</span> · {formatDateTime(p.createdAt)}
+          <span className="flex min-w-0 flex-wrap items-center gap-1">
+            Order{" "}
+            <span className="max-w-full truncate font-mono text-foreground" title={p.orderId}>
+              {p.orderId}
+            </span>{" "}
+            · {formatDateTime(p.createdAt)}
           </span>
         }
         actions={
@@ -116,88 +123,135 @@ export default async function PaymentDetailPage({ params }: { params: Promise<{ 
 
       {payoutChanged && (
         <Alert tone="warning">
-          This payment settled to {shortAddr(p.payout)}, but your current payout wallet is {shortAddr(m.payoutAddress)}. Refunds are signed from the current payout wallet.
+          This payment settled to {shortAddr(p.payout)}, but your current payout wallet is {shortAddr(m.payoutAddress)}. Refunds are signed from the
+          current payout wallet.
         </Alert>
       )}
       {BigInt(p.pendingUnits) > 0n && (
         <Alert tone="info">
-          {formatAmount(fromUnits(p.pendingUnits, p.decimals))} USDT of refunds are pending. They complete once signed from your payout wallet and confirmed onchain.
+          {formatAmount(fromUnits(p.pendingUnits, p.decimals))} USDT of refunds are pending. They complete once signed from your payout wallet and
+          confirmed onchain.
         </Alert>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <Card>
-          <CardHeader>
-            <CardTitle>Timeline</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ol className="relative flex flex-col gap-6 before:absolute before:top-2 before:bottom-2 before:left-[15px] before:w-px before:bg-border">
-              {timeline.map((e) => (
-                <li key={e.key} className="relative flex gap-4">
-                  <span
-                    aria-hidden
-                    className={cn(
-                      "relative z-[1] grid size-8 shrink-0 place-items-center rounded-sm border-[0.5px] bg-card",
-                      e.tone === "done"
-                        ? "border-primary/30 text-primary"
-                        : e.tone === "failed"
-                          ? "border-destructive/40 text-destructive"
-                          : "border-warning/40 text-warning",
-                    )}
-                  >
-                    <Icon name={e.icon} className="size-3.5" />
-                  </span>
-                  <div className="flex min-w-0 flex-col gap-0.5 pt-1">
-                    <p className="text-sm font-medium">
-                      {e.title} {e.tone === "pending" && <Badge tone="warning">Pending</Badge>}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{formatDateTime(e.at)}</p>
-                    {e.detail && <div className="text-xs text-muted-foreground">{e.detail}</div>}
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <dl className="flex flex-col divide-y text-sm">
-              <Row label="Amount">{formatAmount(p.amount)} USDT</Row>
-              <Row label="Refunded">{formatAmount(p.refunded)} USDT</Row>
-              <Row label="Refundable">{formatAmount(fromUnits(p.refundableUnits, p.decimals))} USDT</Row>
-              <Row label="Payment ID" copy={p.id}>
-                <span className="font-mono text-xs">{p.id}</span>
-              </Row>
-              <Row label="Order ID" copy={p.orderId}>
-                <span className="font-mono text-xs">{p.orderId}</span>
-              </Row>
-              <Row label="Customer">
-                <ExplorerLink address={p.payer} />
-              </Row>
-              <Row label="Settled to">
-                <ExplorerLink address={p.payout} />
-              </Row>
-              <Row label="Transaction">
-                <ExplorerLink hash={p.txHash} />
-              </Row>
-              <Row label="Onchain ID" copy={p.chainPaymentId}>
-                <span className="font-mono text-xs">{shortHash(p.chainPaymentId)}</span>
-              </Row>
-              <Row label="Network">Whitechain Sepolia</Row>
-              {p.metadata &&
-                Object.entries(p.metadata).map(([k, v]) => (
-                  <Row key={k} label={k}>
-                    <span className="font-mono text-xs">{v}</span>
-                  </Row>
-                ))}
-            </dl>
-          </CardContent>
-        </Card>
-      </div>
+      <DashboardSections
+        sections={[
+          {
+            label: "Timeline",
+            content: (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Timeline</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <DashboardPager
+                    pages={pageItems(timeline, 2).map((page, index) => (
+                      <ol
+                        key={index}
+                        className="relative flex flex-col gap-3 before:absolute before:top-2 before:bottom-2 before:left-[15px] before:w-px before:bg-border"
+                      >
+                        {page.map((e) => (
+                          <li key={e.key} className="relative flex gap-4">
+                            <span
+                              aria-hidden
+                              className={cn(
+                                "relative z-[1] grid size-8 shrink-0 place-items-center rounded-sm border-[0.5px] bg-card",
+                                e.tone === "done"
+                                  ? "border-primary/30 text-primary"
+                                  : e.tone === "failed"
+                                    ? "border-destructive/40 text-destructive"
+                                    : "border-warning/40 text-warning",
+                              )}
+                            >
+                              <Icon name={e.icon} className="size-3.5" />
+                            </span>
+                            <div className="flex min-w-0 flex-col gap-0.5 pt-1">
+                              <p className="text-sm font-medium">
+                                {e.title} {e.tone === "pending" && <Badge tone="warning">Pending</Badge>}
+                              </p>
+                              <p className="text-xs text-muted-foreground">{formatDateTime(e.at)}</p>
+                              {e.detail && <div className="text-xs text-muted-foreground">{e.detail}</div>}
+                            </div>
+                          </li>
+                        ))}
+                      </ol>
+                    ))}
+                  />
+                </CardContent>
+              </Card>
+            ),
+          },
+          {
+            label: "Details",
+            content: (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Details</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <DashboardPager
+                    pages={pageItems(
+                      [
+                        <Row key="0" label="Amount">
+                          {formatAmount(p.amount)} USDT
+                        </Row>,
+                        <Row key="1" label="Refunded">
+                          {formatAmount(p.refunded)} USDT
+                        </Row>,
+                        <Row key="2" label="Refundable">
+                          {formatAmount(fromUnits(p.refundableUnits, p.decimals))} USDT
+                        </Row>,
+                        <Row key="3" label="Payment ID" copy={p.id}>
+                          {" "}
+                          <span className="font-mono text-xs">{p.id}</span>{" "}
+                        </Row>,
+                        <Row key="4" label="Order ID" copy={p.orderId}>
+                          {" "}
+                          <span className="truncate font-mono text-xs" title={p.orderId}>
+                            {p.orderId}
+                          </span>{" "}
+                        </Row>,
+                        <Row key="5" label="Customer">
+                          {" "}
+                          <ExplorerLink address={p.payer} />{" "}
+                        </Row>,
+                        <Row key="6" label="Settled to">
+                          {" "}
+                          <ExplorerLink address={p.payout} />{" "}
+                        </Row>,
+                        <Row key="7" label="Transaction">
+                          {" "}
+                          <ExplorerLink hash={p.txHash} />{" "}
+                        </Row>,
+                        <Row key="8" label="Onchain ID" copy={p.chainPaymentId}>
+                          {" "}
+                          <span className="font-mono text-xs">{shortHash(p.chainPaymentId)}</span>{" "}
+                        </Row>,
+                        <Row key="9" label="Network">
+                          Whitechain Sepolia
+                        </Row>,
+                        ...Object.entries(p.metadata ?? {}).map(([name, value]) => (
+                          <Row key={`metadata-${name}`} label={name}>
+                            <span className="truncate font-mono text-xs" title={value}>
+                              {value}
+                            </span>
+                            <CopyButton label={`Copy ${name}`} value={value} />
+                          </Row>
+                        )),
+                      ],
+                      4,
+                    ).map((page, index) => (
+                      <dl key={index} className="flex flex-col divide-y text-sm">
+                        {page}
+                      </dl>
+                    ))}
+                  />
+                </CardContent>
+              </Card>
+            ),
+          },
+        ]}
+      />
     </>
   );
 }

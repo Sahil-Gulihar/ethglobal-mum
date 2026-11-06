@@ -7,6 +7,7 @@ import { Icon } from "@/components/icons";
 import { PayoutWalletForm } from "@/components/dashboard/payout-wallet-form";
 import { CreateApiKeyButton } from "@/components/dashboard/create-api-key";
 import { AddWebhookForm } from "@/components/dashboard/add-webhook-form";
+import { DashboardPager } from "./dashboard-pages";
 import { cn } from "@/lib/utils";
 
 export type OnboardingProps = {
@@ -91,11 +92,11 @@ export function OnboardingChecklist(p: OnboardingProps) {
           </div>
         </div>
       </div>
-      <ol className="divide-y">
-        {steps.map((s, i) => {
+      <div className="p-3">
+        <DashboardPager label="Step" initial={Math.max(current, 0)} pages={steps.map((s, i) => {
           const isCurrent = i === current;
           return (
-            <li key={s.key} className={cn("flex gap-3 px-5 py-2.5", isCurrent && "bg-muted")}>
+            <div key={s.key} className={cn("flex gap-3 px-5 py-2.5", isCurrent && "bg-muted")}>
               <span
                 aria-hidden
                 className={cn(
@@ -116,10 +117,10 @@ export function OnboardingChecklist(p: OnboardingProps) {
                 </div>
                 {isCurrent && s.body}
               </div>
-            </li>
+            </div>
           );
-        })}
-      </ol>
+        })} />
+      </div>
     </Card>
   );
 }

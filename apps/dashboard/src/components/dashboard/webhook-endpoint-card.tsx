@@ -42,7 +42,7 @@ export function WebhookEndpointCard({ id, url, enabled, createdAt, secretHint }:
   }
 
   return (
-    <div className="flex flex-col gap-4 p-5">
+    <div className="flex flex-col gap-3 px-4 py-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -95,7 +95,7 @@ export function WebhookEndpointCard({ id, url, enabled, createdAt, secretHint }:
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/50 py-1.5 pr-1.5 pl-3">
+      <div className="flex flex-wrap items-center gap-2 rounded-sm border bg-muted/50 py-1.5 pr-1.5 pl-3">
         <span className="text-xs font-medium text-muted-foreground">Signing secret</span>
         <code className="min-w-0 flex-1 truncate font-mono text-xs">{secret ?? `${secretHint}`}</code>
         {secret ? (

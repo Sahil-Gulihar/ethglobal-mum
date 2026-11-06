@@ -9,6 +9,7 @@ import { WalletProvider } from "@/components/wallet/wallet-provider";
 import { useWallet, walletErrorMessage } from "@/components/wallet/use-wallet";
 import { ExplorerLink } from "@/components/dashboard/explorer-link";
 import { Button } from "@/components/ui/button";
+import { DashboardPager } from "./dashboard-pages";
 import { Dialog } from "@/components/ui/dialog";
 import { Alert } from "@/components/ui/alert";
 import { FieldError, Input, Label } from "@/components/ui/input";
@@ -213,7 +214,7 @@ function RefundPanelInner({ paymentId, chainPaymentId, payout, router: routerAdd
   return (
     <>
       <div className="flex flex-wrap items-center gap-2">
-        {unsigned.map((p) => (
+        {unsigned.length > 0 && <DashboardPager label="Pending refund" pages={unsigned.map((p) => (
           <span key={p.id} className="inline-flex items-center gap-1">
             <Button variant="outline" size="sm" onClick={() => openExisting(p)}>
               <Icon name="undo" /> Sign pending {formatAmount(fromUnits(p.amountUnits, decimals))} USDT refund
@@ -228,7 +229,7 @@ function RefundPanelInner({ paymentId, chainPaymentId, payout, router: routerAdd
               {discarding === p.id ? <Spinner /> : null} Discard
             </Button>
           </span>
-        ))}
+        ))} />}
         <Button variant="outline" onClick={openNew} disabled={remaining === 0n}>
           <Icon name="undo" /> {remaining === 0n ? "Fully refunded" : "Refund"}
         </Button>
