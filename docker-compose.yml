@@ -1,0 +1,13 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: wc
+      POSTGRES_PASSWORD: wc
+      POSTGRES_DB: whitechain_commerce
+    ports:
+      - "5433:5432"
+    volumes:
+      - wcdb:/var/lib/postgresql/data
+volumes:
+  wcdb:

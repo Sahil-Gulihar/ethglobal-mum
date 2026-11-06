@@ -1,0 +1,13 @@
+{
+  "name": "whitechain-commerce",
+  "private": true,
+  "packageManager": "pnpm@10.28.2",
+  "scripts": {
+    "dev": "pnpm --parallel --filter dashboard --filter demo-store dev",
+    "db:up": "docker compose up -d db",
+    "db:push": "pnpm --filter dashboard db:push",
+    "worker": "pnpm --filter dashboard worker",
+    "typecheck": "pnpm -r typecheck",
+    "test:contracts": "cd contracts && forge test"
+  }
+}

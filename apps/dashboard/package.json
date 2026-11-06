@@ -1,0 +1,43 @@
+{
+  "name": "dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "db:push": "node --env-file=../../.env ./node_modules/drizzle-kit/bin.cjs push --force",
+    "db:studio": "drizzle-kit studio",
+    "worker": "tsx --env-file=../../.env scripts/worker.ts"
+  },
+  "dependencies": {
+    "@next/env": "^16.4.5",
+    "@tanstack/react-query": "^5.106.1",
+    "@whitechain-commerce/core": "workspace:*",
+    "@whitechain-commerce/react": "workspace:*",
+    "drizzle-orm": "^0.45.4",
+    "next": "16.4.5",
+    "postgres": "^4.1.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
+    "viem": "^2.57.16",
+    "wagmi": "^3.7.11",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.11",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.5",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.15",
+    "typescript": "^5"
+  },
+  "packageManager": "pnpm@10.28.2"
+}
