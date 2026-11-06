@@ -30,7 +30,10 @@ export function WorldIdVerifyButton({ label = "Verify with World ID" }: { label?
     const r = await completeWorldIdVerification(result);
     if (!r.ok) {
       setError(r.error);
-      throw new Error(r.error); // tells the widget the host rejected the proof
+      // Close the widget so the specific reason shows on the page instead of IDKit's generic "Verification declined".
+      setOpen(false);
+      setRequest(null);
+      throw new Error(r.error);
     }
   }
 

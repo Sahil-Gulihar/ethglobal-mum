@@ -115,16 +115,27 @@ export async function completeWorldIdVerification(result: IDKitResult): Promise<
     return err("World ID returned an invalid nullifier.");
   }
 
+  const DUPLICATE = "This World ID is already linked to another merchant account. One person, one account.";
   const [taken] = await db.select({ id: merchants.id }).from(merchants).where(eq(merchants.worldNullifier, nullifier)).limit(1);
-  if (taken && taken.id !== m.id) return err("This World ID is already linked to another merchant account. One person, one account.");
+  // Staging (simulator) identities are shared by everyone, so one-account-per-human is only enforced in production.
+  // A reused staging identity stores a per-merchant marker (unique, so the column constraint holds; still truthy for the UI).
+  const sharedTestIdentity = taken && taken.id !== m.id && cfg.environment === "staging";
+  if (taken && taken.id !== m.id && !sharedTestIdentity) {
+    console.warn("World ID proof refused", { reason: "duplicate_nullifier", merchant: m.id, linkedTo: taken.id });
+    return err(DUPLICATE);
+  }
+  if (sharedTestIdentity) console.info("World ID staging identity reused", { merchant: m.id, linkedTo: taken.id });
 
   try {
     await db
       .update(merchants)
-      .set({ status: "active", worldNullifier: nullifier })
+      .set({ status: "active", worldNullifier: sharedTestIdentity ? `staging:${nullifier}:${m.id}` : nullifier })
       .where(eq(merchants.id, m.id));
   } catch (e) {
-    if (isUniqueViolation(e)) return err("This World ID is already linked to another merchant account. One person, one account.");
+    if (isUniqueViolation(e)) {
+      console.warn("World ID proof refused", { reason: "duplicate_nullifier_race", merchant: m.id });
+      return err(DUPLICATE);
+    }
     throw e;
   }
   revalidatePath("/dashboard", "layout");
