@@ -23,7 +23,7 @@ import {
   whitechainSepolia,
   type PublicCheckoutSession,
 } from "@whitechain-commerce/core";
-import { getSession, resolveApiBase, submitTx, WhitechainApiError } from "./api.js";
+import { getSession, resolveApiBase, submitTx, WhitechainApiError } from "./api.ts";
 import {
   amountUnits,
   canPay,
@@ -40,9 +40,9 @@ import {
   steps,
   WHITECHAIN_CHAIN_ID,
   type State,
-} from "./state.js";
-import { CSS } from "./styles.js";
-import { lastWallet, rememberWallet, watchWallets, type DetectedWallet, type Eip1193Provider } from "./wallets.js";
+} from "./state.ts";
+import { CSS } from "./styles.ts";
+import { lastWallet, rememberWallet, watchWallets, type DetectedWallet, type Eip1193Provider } from "./wallets.ts";
 
 export const FAUCET_URL = "https://faucet.testnet.whitechain.io";
 const METAMASK_URL = "https://metamask.io/download/";

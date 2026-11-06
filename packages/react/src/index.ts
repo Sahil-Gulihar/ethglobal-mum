@@ -1,7 +1,7 @@
-export { HostedCheckoutButton } from "./HostedCheckoutButton.js";
-export type { HostedCheckoutButtonProps } from "./HostedCheckoutButton.js";
-export { WhitechainCheckout, FAUCET_URL } from "./WhitechainCheckout.js";
-export type { WhitechainCheckoutProps, CheckoutSuccess } from "./WhitechainCheckout.js";
-export { WhitechainApiError } from "./api.js";
-export type { DetectedWallet, Eip1193Provider } from "./wallets.js";
+export { HostedCheckoutButton } from "./HostedCheckoutButton.tsx";
+export type { HostedCheckoutButtonProps } from "./HostedCheckoutButton.tsx";
+export { WhitechainCheckout, FAUCET_URL } from "./WhitechainCheckout.tsx";
+export type { WhitechainCheckoutProps, CheckoutSuccess } from "./WhitechainCheckout.tsx";
+export { WhitechainApiError } from "./api.ts";
+export type { DetectedWallet, Eip1193Provider } from "./wallets.ts";
 export type { PublicCheckoutSession } from "@whitechain-commerce/core";

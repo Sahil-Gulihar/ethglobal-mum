@@ -1,7 +1,7 @@
-export * from "./chain.js";
-export * from "./abi.js";
-export * from "./deployment.js";
-export * from "./ids.js";
-export * from "./money.js";
-export * from "./types.js";
-export type { WebhookEvent, WebhookEventType, PaymentObject, RefundObject } from "./webhooks.js";
+export * from "./chain.ts";
+export * from "./abi.ts";
+export * from "./deployment.ts";
+export * from "./ids.ts";
+export * from "./money.ts";
+export * from "./types.ts";
+export type { WebhookEvent, WebhookEventType, PaymentObject, RefundObject } from "./webhooks.ts";
