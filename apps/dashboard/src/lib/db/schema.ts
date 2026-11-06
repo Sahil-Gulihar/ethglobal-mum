@@ -13,6 +13,8 @@ export const merchants = pgTable("merchants", {
   payoutAddress: text("payout_address"),
   chainMerchantId: text("chain_merchant_id").notNull().unique(), // keccak256(id)
   registeredTxHash: text("registered_tx_hash"),
+  /** Last time the backend signer registered/changed the payout onchain (rate limit). */
+  payoutChangedAt: timestamp("payout_changed_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -70,12 +72,13 @@ export const payments = pgTable(
     refundedUnits: text("refunded_units").notNull().default("0"),
     decimals: integer("decimals").notNull(),
     status: text("status", { enum: ["succeeded", "partially_refunded", "refunded"] }).notNull().default("succeeded"),
-    txHash: text("tx_hash").notNull().unique(),
+    /** Not unique on its own: one tx (smart wallet / batch) may pay several sessions. */
+    txHash: text("tx_hash").notNull(),
     blockNumber: bigint("block_number", { mode: "bigint" }).notNull(),
     logIndex: integer("log_index").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("pay_merchant_idx").on(t.merchantId)],
+  (t) => [index("pay_merchant_idx").on(t.merchantId), uniqueIndex("pay_tx_log_idx").on(t.txHash, t.logIndex)],
 );
 
 export const refunds = pgTable(

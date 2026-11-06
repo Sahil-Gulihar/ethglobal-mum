@@ -17,7 +17,7 @@
  * map failures straight onto apiError(status, type, message) or show `message` in the UI.
  */
 import "server-only";
-import { and, desc, eq, inArray, lt } from "drizzle-orm";
+import { and, desc, eq, inArray, lt, sql } from "drizzle-orm";
 import { chainOrderId, fromUnits, toUnits } from "@whitechain-commerce/core";
 import type { CheckoutSession, PublicCheckoutSession } from "@whitechain-commerce/core";
 import { db, checkoutSessions, merchants, payments } from "./db";
@@ -63,47 +63,51 @@ export async function createCheckoutSessionForMerchant(
     return fail(400, "invalid_request", `Invalid amount: ${(e as Error).message}`);
   }
 
-  const existing = await db
-    .select({ s: checkoutSessions, p: payments })
-    .from(checkoutSessions)
-    .leftJoin(payments, eq(payments.sessionId, checkoutSessions.id))
-    .where(and(eq(checkoutSessions.merchantId, merchant.id), eq(checkoutSessions.orderId, input.orderId)))
-    .orderBy(desc(checkoutSessions.createdAt));
+  // Serialize concurrent/retried creates for the same (merchant, orderId) so only one payable session exists.
+  return db.transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`${merchant.id}:${input.orderId}`}, 0))`);
+    const existing = await tx
+      .select({ s: checkoutSessions, p: payments })
+      .from(checkoutSessions)
+      .leftJoin(payments, eq(payments.sessionId, checkoutSessions.id))
+      .where(and(eq(checkoutSessions.merchantId, merchant.id), eq(checkoutSessions.orderId, input.orderId)))
+      .orderBy(desc(checkoutSessions.createdAt));
 
-  if (existing.some((r) => r.p || r.s.status === "paid")) {
-    return fail(409, "conflict", `Order ${input.orderId} has already been paid.`);
-  }
-  const now = Date.now();
-  const sameAmount = existing.find(
-    (r) =>
-      r.s.amountUnits === units.toString() &&
-      (r.s.status === "processing" || (r.s.status === "open" && r.s.expiresAt.getTime() > now)),
-  );
-  if (sameAmount) return { ok: true, value: toCheckoutSession(sameAmount.s, merchant, null), created: false };
-  if (existing.some((r) => r.s.status === "processing")) {
-    return fail(409, "conflict", `A payment for order ${input.orderId} is already being processed.`);
-  }
+    if (existing.some((r) => r.p || r.s.status === "paid")) {
+      return fail(409, "conflict", `Order ${input.orderId} has already been paid.`);
+    }
+    const now = Date.now();
+    const sameAmount = existing.find(
+      (r) =>
+        r.s.amountUnits === units.toString() &&
+        (r.s.status === "processing" || (r.s.status === "open" && r.s.expiresAt.getTime() > now)),
+    );
+    if (sameAmount) return { ok: true as const, value: toCheckoutSession(sameAmount.s, merchant, null), created: false };
+    if (existing.some((r) => r.s.status === "processing")) {
+      return fail(409, "conflict", `A payment for order ${input.orderId} is already being processed.`);
+    }
 
-  const id = newId("cs");
-  const [row] = await db
-    .insert(checkoutSessions)
-    .values({
-      id,
-      merchantId: merchant.id,
-      orderId: input.orderId,
-      chainOrderId: chainOrderId(id),
-      amount: fromUnits(units, decimals), // normalized, e.g. "5" -> "5.00"
-      amountUnits: units.toString(),
-      decimals,
-      currency: "USDT",
-      status: "open",
-      successUrl: input.successUrl ?? null,
-      cancelUrl: input.cancelUrl ?? null,
-      metadata: input.metadata ?? null,
-      expiresAt: new Date(now + SESSION_TTL_MS),
-    })
-    .returning();
-  return { ok: true, value: toCheckoutSession(row, merchant, null), created: true };
+    const id = newId("cs");
+    const [row] = await tx
+      .insert(checkoutSessions)
+      .values({
+        id,
+        merchantId: merchant.id,
+        orderId: input.orderId,
+        chainOrderId: chainOrderId(id),
+        amount: fromUnits(units, decimals), // normalized, e.g. "5" -> "5.00"
+        amountUnits: units.toString(),
+        decimals,
+        currency: "USDT",
+        status: "open",
+        successUrl: input.successUrl ?? null,
+        cancelUrl: input.cancelUrl ?? null,
+        metadata: input.metadata ?? null,
+        expiresAt: new Date(now + SESSION_TTL_MS),
+      })
+      .returning();
+    return { ok: true as const, value: toCheckoutSession(row, merchant, null), created: true };
+  });
 }
 
 type SessionRow = typeof checkoutSessions.$inferSelect;
