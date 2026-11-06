@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 export const dashboardLinks: { href: string; label: string; icon: IconName }[] = [
   { href: "/dashboard", label: "Dashboard", icon: "home" },
   { href: "/dashboard/payments", label: "Payments", icon: "card" },
+  { href: "/dashboard/links", label: "Payment links", icon: "link" },
   { href: "/dashboard/developers", label: "Developers", icon: "code" },
   { href: "/dashboard/webhooks", label: "Webhooks", icon: "webhook" },
   { href: "/dashboard/analytics", label: "Analytics", icon: "analytics" },

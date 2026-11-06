@@ -148,3 +148,17 @@ export const indexerState = pgTable("indexer_state", {
   lastBlock: bigint("last_block", { mode: "bigint" }).notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/** A reusable link (/pay/pl_...) that opens a fresh hosted checkout for a fixed amount on every visit. */
+export const paymentLinks = pgTable(
+  "payment_links",
+  {
+    id: text("id").primaryKey(), // pl_...
+    merchantId: text("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    amount: text("amount").notNull(), // decimal string, e.g. "25.00"
+    active: boolean("active").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("pl_merchant_idx").on(t.merchantId)],
+);

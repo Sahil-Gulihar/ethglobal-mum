@@ -8,7 +8,7 @@ export function randomId(len = 20): string {
   return s;
 }
 
-export const newId = (prefix: "mer" | "key" | "cs" | "pay" | "re" | "we" | "evt" | "whd" | "wha") =>
+export const newId = (prefix: "mer" | "key" | "cs" | "pay" | "re" | "we" | "evt" | "whd" | "wha" | "pl") =>
   `${prefix}_${randomId(20)}`;
 
 export const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
