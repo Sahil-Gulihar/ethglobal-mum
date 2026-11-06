@@ -1,6 +1,6 @@
 import "server-only";
 import { and, asc, eq, isNotNull, sql } from "drizzle-orm";
-import { getAbiItem, parseEventLogs, TransactionReceiptNotFoundError, type Hex, type Log, type TransactionReceipt } from "viem";
+import { getAbiItem, parseEventLogs, TransactionNotFoundError, TransactionReceiptNotFoundError, type Hex, type Log, type TransactionReceipt } from "viem";
 import {
   chainPaymentId,
   getRouterAddress,
@@ -324,6 +324,16 @@ export async function validateTx(txHash: string, ctx = new Ctx()): Promise<Valid
   return results.every((r) => r.ok) ? { ok: true, results } : { ok: false, reason: "invalid", results };
 }
 
+/** True if the node knows the tx (mined or in its mempool). Errors count as known, to stay conservative. */
+async function txKnown(ctx: Ctx, hash: Hex): Promise<boolean> {
+  try {
+    await ctx.client.getTransaction({ hash });
+    return true;
+  } catch (e) {
+    return !(e instanceof TransactionNotFoundError || (e instanceof Error && e.name === "TransactionNotFoundError"));
+  }
+}
+
 /**
  * Sessions left in `processing` by /submit whose hinted tx turned out to be reverted or invalid go
  * back to `open` (or `expired`), so the buyer can retry. Valid payments are picked up by getLogs anyway.
@@ -342,6 +352,8 @@ async function sweepProcessing(ctx: Ctx) {
     let next: "open" | "expired" | null = null;
     if (r.ok || r.reason !== "pending") next = expired ? "expired" : "open";
     else if (expired) next = "expired"; // hinted tx never landed
+    else if (!(await txKnown(ctx, s.txHash as Hex))) next = "open"; // not mined and unknown to the node: bogus hint
+    // Releasing to `open` is always safe: a real payment is still picked up by getLogs and marks it paid.
     if (next) {
       const res = await db
         .update(checkoutSessions)

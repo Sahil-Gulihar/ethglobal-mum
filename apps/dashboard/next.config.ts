@@ -9,10 +9,12 @@ loadEnvConfig(path.resolve(__dirname, "../.."), process.env.NODE_ENV !== "produc
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@whitechain-commerce/core", "@whitechain-commerce/react"],
-  // Tailwind v4 via the Turbopack loader (no postcss config in this app).
+  // Tailwind v4 via the Turbopack loader (no postcss config in this app). CSS modules are
+  // excluded: `as: "*.css"` would turn them into global CSS and drop their class names.
   turbopack: {
     rules: {
       "*.css": {
+        condition: { not: { path: "*.module.css" } },
         loaders: ["@tailwindcss/turbopack"],
         as: "*.css",
       },

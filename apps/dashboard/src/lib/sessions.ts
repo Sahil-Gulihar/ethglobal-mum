@@ -18,7 +18,7 @@
  */
 import "server-only";
 import { and, desc, eq, inArray, lt } from "drizzle-orm";
-import { chainOrderId, toUnits } from "@whitechain-commerce/core";
+import { chainOrderId, fromUnits, toUnits } from "@whitechain-commerce/core";
 import type { CheckoutSession, PublicCheckoutSession } from "@whitechain-commerce/core";
 import { db, checkoutSessions, merchants, payments } from "./db";
 import type { Merchant } from "./auth";
@@ -92,7 +92,7 @@ export async function createCheckoutSessionForMerchant(
       merchantId: merchant.id,
       orderId: input.orderId,
       chainOrderId: chainOrderId(id),
-      amount: input.amount,
+      amount: fromUnits(units, decimals), // normalized, e.g. "5" -> "5.00"
       amountUnits: units.toString(),
       decimals,
       currency: "USDT",
