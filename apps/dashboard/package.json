@@ -20,6 +20,7 @@
     "@whitechain-commerce/core": "workspace:*",
     "@whitechain-commerce/react": "workspace:*",
     "drizzle-orm": "^0.45.4",
+    "geist": "^1.9.2",
     "next": "16.4.5",
     "postgres": "^4.1.0",
     "react": "19.3.0",
