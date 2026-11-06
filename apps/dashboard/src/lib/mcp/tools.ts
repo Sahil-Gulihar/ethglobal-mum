@@ -5,7 +5,7 @@
  */
 import "server-only";
 import { z } from "zod";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { getRouterAddress, USDT_ADDRESS } from "@whitechain-commerce/core";
 import type { Merchant } from "@/lib/auth";
 import { db, checkoutSessions, merchants, paymentLinks, payments } from "@/lib/db";
@@ -161,7 +161,7 @@ export const tools: ToolDef[] = [
   tool({
     name: "get_checkout_session",
     title: "Get checkout session",
-    description: "Looks up a checkout session by id (cs_...). Use it to check whether the customer has paid: status is open, processing, complete or expired.",
+    description: "Looks up a checkout session by id (cs_...). Use it to check whether the customer has paid: status is open, processing (a transaction was reported and is being checked), paid or expired. Use wait_for_payment to wait for it.",
     input: z.object({ sessionId: z.string().trim().min(1).max(100).describe("The checkout session id, cs_...") }),
     annotations: { readOnlyHint: true, openWorldHint: false },
     run: async (m, a) => {
@@ -288,6 +288,88 @@ export const tools: ToolDef[] = [
   }),
 
   tool({
+    name: "get_payment_link",
+    title: "Get payment link",
+    description: "Returns one payment link with its url and the most recent checkouts opened from it, including which were paid.",
+    input: z.object({ linkId: z.string().trim().min(1).max(100).describe("The payment link id, pl_...") }),
+    annotations: { readOnlyHint: true, openWorldHint: false },
+    run: async (m, a) => {
+      const link = (await listPaymentLinks(m.id)).find((l) => l.id === a.linkId);
+      if (!link) throw new ToolError(`No payment link ${a.linkId}.`);
+      const sessions = await linkSessions(m.id, a.linkId, 10);
+      return {
+        id: link.id,
+        name: link.name,
+        amount: link.amount,
+        currency: "USDT",
+        active: link.active,
+        url: `${base()}/pay/${link.id}`,
+        paidCount: link.paidCount,
+        paidTotal: link.paidTotal,
+        recentCheckouts: sessions.map(({ s, p }) => ({
+          sessionId: s.id,
+          status: s.status,
+          createdAt: s.createdAt.toISOString(),
+          payment: p ? toPaymentObject(p, s) : null,
+        })),
+      };
+    },
+  }),
+
+  tool({
+    name: "wait_for_payment",
+    title: "Wait for a payment",
+    description:
+      "Waits until a checkout session (sessionId) or any checkout of a payment link (paymentLinkId) is paid, and returns the confirmed payment with its explorer link. While waiting it checks the chain itself (reported transactions first, then a scan of new PaymentRouter events), so it confirms payments even when no background worker runs and the customer closed the page before the checkout reported the transaction. For a payment link, only checkouts opened after `since` count (default: the last 30 minutes). Returns paid: false after timeoutSeconds; call it again to keep waiting.",
+    input: z
+      .object({
+        sessionId: z.string().trim().min(1).max(100).optional().describe("Checkout session id, cs_..."),
+        paymentLinkId: z.string().trim().min(1).max(100).optional().describe("Payment link id, pl_..."),
+        since: z.iso.datetime({ offset: true }).optional().describe("ISO time; for payment links, ignore checkouts opened before this."),
+        timeoutSeconds: z.number().int().min(0).max(50).optional().describe("How long to wait, 0 to 50 seconds. Default 30."),
+      })
+      .refine((v) => Boolean(v.sessionId) !== Boolean(v.paymentLinkId), "pass exactly one of sessionId or paymentLinkId"),
+    annotations: { readOnlyHint: true, openWorldHint: true },
+    run: async (m, a) => {
+      const deadline = Date.now() + (a.timeoutSeconds ?? 30) * 1000;
+      const since = a.since ? new Date(a.since) : new Date(Date.now() - 30 * 60_000);
+      const { validateTx, runIndexerOnce } = await import("@/lib/indexer");
+      const checked = new Set<string>();
+      let lastScan = 0;
+      for (;;) {
+        const rows = a.sessionId ? await sessionWithPayment(m.id, a.sessionId) : await linkSessions(m.id, a.paymentLinkId!, 20, since);
+        if (a.sessionId && !rows.length) throw new ToolError(`No checkout session ${a.sessionId}.`);
+        const paid = rows.find(({ p }) => p);
+        if (paid?.p) {
+          return { paid: true, sessionId: paid.s.id, payment: toPaymentObject(paid.p, paid.s) };
+        }
+        // Re-check reported transactions onchain (the widget's submit hint), once per hash per call.
+        const hints = rows.map(({ s }) => s.submittedTxHash).filter((h): h is string => Boolean(h) && !checked.has(h!));
+        for (const h of hints) {
+          checked.add(h);
+          await validateTx(h).catch(() => null);
+        }
+        if (hints.length) continue;
+        // No usable hint: scan new router events ourselves (idempotent, shares the worker's cursor).
+        if (Date.now() - lastScan >= 6000) {
+          lastScan = Date.now();
+          const r = await runIndexerOnce().catch((e: unknown) => (console.warn("[mcp] wait_for_payment scan", e), null));
+          if (r?.processed) continue;
+        }
+        if (Date.now() >= deadline) {
+          return {
+            paid: false,
+            checkouts: rows.map(({ s }) => ({ sessionId: s.id, status: s.status, reportedTxHash: s.submittedTxHash })),
+            hint: "Not paid yet. Call wait_for_payment again to keep waiting.",
+          };
+        }
+        await new Promise((r) => setTimeout(r, Math.min(2000, Math.max(0, deadline - Date.now()))));
+        checked.clear();
+      }
+    },
+  }),
+
+  tool({
     name: "set_payment_link_active",
     title: "Turn a payment link on or off",
     description: "Turns a payment link on or off. A link that is off shows an error page instead of a checkout.",
@@ -397,6 +479,32 @@ export const tools: ToolDef[] = [
     run: async (m, a) => unwrap(await redeliverForMerchant(m.id, a.deliveryId)),
   }),
 ];
+
+async function sessionWithPayment(merchantId: string, sessionId: string) {
+  return db
+    .select({ s: checkoutSessions, p: payments })
+    .from(checkoutSessions)
+    .leftJoin(payments, eq(payments.sessionId, checkoutSessions.id))
+    .where(and(eq(checkoutSessions.id, sessionId), eq(checkoutSessions.merchantId, merchantId)))
+    .limit(1);
+}
+
+/** Checkouts opened from a payment link, newest first, optionally only those created since a time. */
+async function linkSessions(merchantId: string, linkId: string, limit: number, since?: Date) {
+  return db
+    .select({ s: checkoutSessions, p: payments })
+    .from(checkoutSessions)
+    .leftJoin(payments, eq(payments.sessionId, checkoutSessions.id))
+    .where(
+      and(
+        eq(checkoutSessions.merchantId, merchantId),
+        sql`${checkoutSessions.metadata}->>'payment_link' = ${linkId}`,
+        since ? gte(checkoutSessions.createdAt, since) : undefined,
+      ),
+    )
+    .orderBy(desc(checkoutSessions.createdAt))
+    .limit(limit);
+}
 
 export const toolsByName = new Map(tools.map((t) => [t.name, t]));
 
