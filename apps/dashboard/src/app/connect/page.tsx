@@ -49,7 +49,7 @@ export default async function ConnectPage({ searchParams }: { searchParams: Prom
             <h1 className="text-xl font-semibold tracking-tight">This link doesn&apos;t work</h1>
             <p className="mt-2 text-sm text-muted-foreground">
               The connect link is incomplete or was changed. Ask your agent to start again, for example with{" "}
-              <code className="font-mono text-foreground">npx @whitechain-commerce/mcp login</code>.
+              <code className="font-mono text-foreground">npx whitechain-mcp login</code>.
             </p>
             <Link href="/dashboard" className={buttonVariants({ variant: "outline", className: "mt-6" })}>Go to dashboard</Link>
           </Card>

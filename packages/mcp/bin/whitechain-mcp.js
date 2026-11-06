@@ -37,13 +37,13 @@ function help() {
   console.log(`whitechain-mcp: Whitechain Commerce for AI agents
 
 Usage
-  npx @whitechain-commerce/mcp               Run the MCP server over stdio (set WC_SECRET_KEY)
-  npx @whitechain-commerce/mcp init          Add Whitechain Commerce to this repo's agent configs
+  npx whitechain-mcp               Run the MCP server over stdio (set WC_SECRET_KEY)
+  npx whitechain-mcp init          Add Whitechain Commerce to this repo's agent configs
       --clients=claude,cursor,vscode,agents  Which files to write (default: all)
       --base-url=URL                         Dashboard URL (default: $WC_API_BASE or ${DEFAULT_BASE_URL})
       --dry-run                              Print what would change
-  npx @whitechain-commerce/mcp tools         List the tools for your key
-  npx @whitechain-commerce/mcp login         Get a key by approving this agent in the browser (no copy-paste)
+  npx whitechain-mcp tools         List the tools for your key
+  npx whitechain-mcp login         Get a key by approving this agent in the browser (no copy-paste)
       --name="My agent"                      Name shown on the approval page and under Developers
       --base-url=URL                         Dashboard URL (default: $WC_API_BASE or ${DEFAULT_BASE_URL})
       --save=.env.local                      Write WC_SECRET_KEY=... to this file once approved
@@ -187,7 +187,7 @@ Next: put your secret key in the environment (Dashboard > Developers > Create ke
   export WC_SECRET_KEY=sk_test_...
 Keep the key out of git; the config files only reference the variable.
 
-No key yet? Run npx @whitechain-commerce/mcp login`);
+No key yet? Run npx whitechain-mcp login`);
 }
 
 /** Replaces or appends KEY=value in a dotenv file, keeping every other line. */

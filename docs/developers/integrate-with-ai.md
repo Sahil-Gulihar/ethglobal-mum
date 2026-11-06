@@ -58,7 +58,7 @@ If the agent is connected to the [Whitechain Commerce MCP server](./agents.md), 
 To set that up in a repository, run this in its root:
 
 ```bash
-npx @whitechain-commerce/mcp init
+npx whitechain-mcp init
 export WC_SECRET_KEY=sk_test_...
 ```
 

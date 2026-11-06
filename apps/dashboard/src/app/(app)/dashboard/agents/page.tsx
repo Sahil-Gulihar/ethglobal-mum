@@ -52,7 +52,7 @@ export default async function AgentsPage() {
       <section className="grid gap-4 sm:grid-cols-3" aria-label="MCP server">
         <InfoCard label="MCP server URL" value={`${base}/api/mcp`} />
         <InfoCard label="Transport" value="Streamable HTTP, Bearer key" copy={false} />
-        <InfoCard label="npm package" value="@whitechain-commerce/mcp" />
+        <InfoCard label="npm package" value="whitechain-mcp" />
       </section>
 
       <DashboardSections
@@ -134,7 +134,7 @@ export default async function AgentsPage() {
             content: (
               <div className="flex flex-col gap-4">
                 <p className="text-sm text-muted-foreground">
-                  Install <span className="font-mono text-xs text-foreground">@whitechain-commerce/mcp</span> in any Node project to give your own agent the same
+                  Install <span className="font-mono text-xs text-foreground">whitechain-mcp</span> in any Node project to give your own agent the same
                   tools. It has no dependencies and formats the tools for each SDK.
                 </p>
                 <div className="grid gap-4 lg:grid-cols-2">

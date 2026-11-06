@@ -12,14 +12,14 @@ export function agentClients(base: string): AgentClient[] {
       name: "Any repository",
       where: "Run in the repo root. Writes .mcp.json, .cursor/mcp.json, .vscode/mcp.json and an AGENTS.md section that read your key from WC_SECRET_KEY.",
       filename: "terminal",
-      code: `npx @whitechain-commerce/mcp init${base === DEFAULT_BASE ? "" : ` --base-url=${base}`}\nexport WC_SECRET_KEY=${KEY_PLACEHOLDER}`,
+      code: `npx whitechain-mcp init${base === DEFAULT_BASE ? "" : ` --base-url=${base}`}\nexport WC_SECRET_KEY=${KEY_PLACEHOLDER}`,
     },
     {
       id: "login",
       name: "Connect with approval",
       where: "No key to copy: the agent makes its own key, you approve it on a /connect page after matching a code, and it can save WC_SECRET_KEY for you.",
       filename: "terminal",
-      code: `npx @whitechain-commerce/mcp login --name="My agent" --save=.env.local${base === DEFAULT_BASE ? "" : ` \\\n  --base-url=${base}`}`,
+      code: `npx whitechain-mcp login --name="My agent" --save=.env.local${base === DEFAULT_BASE ? "" : ` \\\n  --base-url=${base}`}`,
     },
     {
       id: "claude-code",
@@ -66,7 +66,7 @@ export function agentClients(base: string): AgentClient[] {
           mcpServers: {
             whitechain: {
               command: "npx",
-              args: ["-y", "@whitechain-commerce/mcp"],
+              args: ["-y", "whitechain-mcp"],
               env: { WC_SECRET_KEY: KEY_PLACEHOLDER, ...(base === DEFAULT_BASE ? {} : { WC_API_BASE: base }) },
             },
           },
@@ -86,7 +86,7 @@ export const sdkSnippets = (base: string): { id: string; name: string; filename:
     name: "Claude Messages API",
     filename: "agent.ts",
     code: `import Anthropic from "@anthropic-ai/sdk";
-import { WhitechainAgentToolkit } from "@whitechain-commerce/mcp";
+import { WhitechainAgentToolkit } from "whitechain-mcp";
 
 const client = new Anthropic();
 const whitechain = new WhitechainAgentToolkit(); // reads WC_SECRET_KEY
@@ -111,7 +111,7 @@ while (true) {
     name: "Vercel AI SDK",
     filename: "agent.ts",
     code: `import { generateText, jsonSchema, stepCountIs } from "ai";
-import { WhitechainAgentToolkit } from "@whitechain-commerce/mcp";
+import { WhitechainAgentToolkit } from "whitechain-mcp";
 
 const whitechain = new WhitechainAgentToolkit();
 
@@ -127,7 +127,7 @@ const { text } = await generateText({
     name: "OpenAI",
     filename: "agent.ts",
     code: `import OpenAI from "openai";
-import { WhitechainAgentToolkit } from "@whitechain-commerce/mcp";
+import { WhitechainAgentToolkit } from "whitechain-mcp";
 
 const openai = new OpenAI();
 const whitechain = new WhitechainAgentToolkit();

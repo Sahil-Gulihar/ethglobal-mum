@@ -1,8 +1,12 @@
 {
-  "name": "@whitechain-commerce/mcp",
+  "name": "whitechain-mcp",
   "version": "0.1.0",
   "description": "Whitechain Commerce for AI agents: an MCP server (stdio) and an agent toolkit for Claude, OpenAI and the Vercel AI SDK.",
   "license": "MIT",
+  "homepage": "https://whitechain-dashboard.vercel.app/docs/agents",
+  "bugs": {
+    "url": "https://github.com/Sahil-Gulihar/ethglobal-mum/issues"
+  },
   "type": "module",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
@@ -13,7 +17,7 @@
     }
   },
   "bin": {
-    "whitechain-mcp": "./bin/whitechain-mcp.js"
+    "whitechain-mcp": "bin/whitechain-mcp.js"
   },
   "files": [
     "src/index.js",
@@ -34,7 +38,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Sahil-Gulihar/ethglobal-mum.git",
+    "url": "git+https://github.com/Sahil-Gulihar/ethglobal-mum.git",
     "directory": "packages/mcp"
   },
   "scripts": {

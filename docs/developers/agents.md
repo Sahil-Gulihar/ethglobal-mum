@@ -3,7 +3,7 @@ title: "Agents and MCP"
 description: "Connect Claude, ChatGPT, Cursor, VS Code or your own agent to Whitechain Commerce over the Model Context Protocol."
 ---
 
-Whitechain Commerce has a hosted [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server. Any MCP client can use it to create checkouts, share payment links, look up payments and start refunds for your account. You can also add it to any repository, or give your own agent the same tools with the `@whitechain-commerce/mcp` package.
+Whitechain Commerce has a hosted [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server. Any MCP client can use it to create checkouts, share payment links, look up payments and start refunds for your account. You can also add it to any repository, or give your own agent the same tools with the `whitechain-mcp` package.
 
 Agents can't move funds. Payments go straight from the customer's wallet to yours, and a refund an agent creates stays `pending` until you sign it with your payout wallet in the dashboard.
 
@@ -35,7 +35,7 @@ Your account must be verified before you can approve an agent. The key shows up 
 ### From the command line
 
 ```bash
-npx @whitechain-commerce/mcp login --name="Release bot" --save=.env.local
+npx whitechain-mcp login --name="Release bot" --save=.env.local
 ```
 
 It prints the link and the confirmation code, waits up to 10 minutes, then prints `Connected as {business name}` and writes `WC_SECRET_KEY=...` to the file given with `--save` (replacing an existing `WC_SECRET_KEY` line). It never prints the full key unless you pass `--print-key`. Use `--base-url=URL` (or `WC_API_BASE`) if you self-host, and `--timeout=SECONDS` to wait longer or shorter.
@@ -43,7 +43,7 @@ It prints the link and the confirmation code, waits up to 10 minutes, then print
 ### From code
 
 ```ts
-import { startConnect, WhitechainAgentToolkit } from "@whitechain-commerce/mcp";
+import { startConnect, WhitechainAgentToolkit } from "whitechain-mcp";
 
 const connect = await startConnect({ clientName: "Support agent" }); // baseUrl defaults to WC_API_BASE
 console.log(`Approve at ${connect.approveUrl} (code ${connect.code})`);
@@ -69,7 +69,7 @@ const whitechain = new WhitechainAgentToolkit({ secretKey: connect.secretKey });
 Run this in the root of the repository you want agents to work in:
 
 ```bash
-npx @whitechain-commerce/mcp init
+npx whitechain-mcp init
 export WC_SECRET_KEY=sk_test_...
 ```
 
@@ -145,7 +145,7 @@ Clients that can only start a local command can run the package, which passes me
   "mcpServers": {
     "whitechain": {
       "command": "npx",
-      "args": ["-y", "@whitechain-commerce/mcp"],
+      "args": ["-y", "whitechain-mcp"],
       "env": { "WC_SECRET_KEY": "sk_test_..." }
     }
   }
@@ -219,17 +219,17 @@ The server also offers ready-made prompts. Clients that support MCP prompts show
 
 ## Build your own agent
 
-`@whitechain-commerce/mcp` also exports `WhitechainAgentToolkit`, which turns the same tools into definitions for the Claude Messages API, OpenAI and the Vercel AI SDK. It has no dependencies and reads `WC_SECRET_KEY` and `WC_API_BASE` from the environment.
+`whitechain-mcp` also exports `WhitechainAgentToolkit`, which turns the same tools into definitions for the Claude Messages API, OpenAI and the Vercel AI SDK. It has no dependencies and reads `WC_SECRET_KEY` and `WC_API_BASE` from the environment.
 
 ```bash
-npm install @whitechain-commerce/mcp
+npm install whitechain-mcp
 ```
 
 ### Claude Messages API
 
 ```ts
 import Anthropic from "@anthropic-ai/sdk";
-import { WhitechainAgentToolkit } from "@whitechain-commerce/mcp";
+import { WhitechainAgentToolkit } from "whitechain-mcp";
 
 const client = new Anthropic();
 const whitechain = new WhitechainAgentToolkit();
@@ -254,7 +254,7 @@ while (true) {
 
 ```ts
 import { generateText, jsonSchema, stepCountIs } from "ai";
-import { WhitechainAgentToolkit } from "@whitechain-commerce/mcp";
+import { WhitechainAgentToolkit } from "whitechain-mcp";
 
 const whitechain = new WhitechainAgentToolkit();
 
@@ -270,7 +270,7 @@ const { text } = await generateText({
 
 ```ts
 import OpenAI from "openai";
-import { WhitechainAgentToolkit } from "@whitechain-commerce/mcp";
+import { WhitechainAgentToolkit } from "whitechain-mcp";
 
 const openai = new OpenAI();
 const whitechain = new WhitechainAgentToolkit();

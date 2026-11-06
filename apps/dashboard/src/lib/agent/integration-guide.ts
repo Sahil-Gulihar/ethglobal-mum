@@ -92,7 +92,7 @@ Check your tool list for the \`whitechain\` MCP server (hosted at \`${base}/api/
 | \`create_checkout_session\` / \`get_checkout_session\` | Create a test session (returns the hosted \`url\`) and check its status after a test payment. |
 | \`list_payments\` | Confirm a test payment was recorded. |
 
-If the MCP server is not connected, the human can add it with \`npx @whitechain-commerce/mcp init\` in the repo root (see ${base}/docs/agents), or do the same steps in the dashboard. Do not block on it.`;
+If the MCP server is not connected, the human can add it with \`npx whitechain-mcp init\` in the repo root (see ${base}/docs/agents), or do the same steps in the dashboard. Do not block on it.`;
 }
 
 function inspectSection() {
