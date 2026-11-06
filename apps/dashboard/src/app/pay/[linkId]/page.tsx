@@ -15,11 +15,11 @@ export default async function PayLinkPage({ params }: { params: Promise<{ linkId
   if (r.ok) redirect(`/checkout/${r.value.sessionId}`);
 
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-background p-6">
-      <div className="flex max-w-sm flex-col gap-3 text-center">
-        <h1 className="text-lg font-semibold tracking-tight">Payment link unavailable</h1>
+    <main className="flex min-h-dvh items-center justify-center bg-muted p-6">
+      <div className="flex w-full max-w-md flex-col gap-3 rounded-xl border border-border bg-card p-8 text-center">
+        <h1 className="text-2xl font-semibold tracking-tight">Payment link unavailable</h1>
         <p className="text-sm text-muted-foreground">{r.message}</p>
-        <Link href="/" className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground">
+        <Link href="/" className="text-sm font-medium text-primary underline underline-offset-4 hover:text-foreground">
           Whitechain Commerce
         </Link>
       </div>

@@ -39,7 +39,6 @@ export function ConnectForm({ h, p, n }: { h: string; p: string; n: string }) {
     <div className="flex flex-col gap-3">
       {error && <Alert tone="danger">{error}</Alert>}
       <Button
-        variant="ink"
         size="lg"
         className="w-full"
         disabled={pending}

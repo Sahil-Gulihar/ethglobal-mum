@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import { CartProvider } from "@/components/cart";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
@@ -10,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className={`h-full ${GeistSans.variable} ${GeistMono.variable}`}>
       <body className="flex min-h-full flex-col">
         <CartProvider>
           <SiteHeader />

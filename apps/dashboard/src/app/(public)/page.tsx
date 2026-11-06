@@ -23,10 +23,11 @@ export default async function Landing() {
 
   return (
     <>
-      <main className="public-frame landing-main">
+      <link rel="stylesheet" href="https://vercel.com/geist/vercel-brand.css" precedence="vbg" />
+      <main className="public-frame landing-main vbg-report">
         <section className="landing-hero" aria-labelledby="landing-title">
           <div className="landing-intro">
-            <h1 id="landing-title">Accept on-chain payments on Whitechain</h1>
+            <h1 className="vbg-display" id="landing-title">Accept on-chain payments on Whitechain</h1>
             <p className="landing-lede">Let customers pay in USDT on Whitechain. Payments settle directly to your wallet, and signed webhooks tell your store when to fulfil an order.</p>
             <div className="public-actions">
               <Link href={destination} className="public-primary">{cta} <Icon name="arrowRight" /></Link>
@@ -53,15 +54,15 @@ export default async function Landing() {
 
         <section id="payments" className="landing-section landing-payments" aria-labelledby="payments-title">
           <div>
-            <h2 id="payments-title">See what settled</h2>
+            <h2 className="vbg-heading-24" id="payments-title">See what settled</h2>
             <p>Track USDT payments in the dashboard and issue full or partial refunds.</p>
           </div>
           <figure className="landing-preview">
             <Image
               src="/product/dashboard-sample.webp"
-              alt="Chai House dashboard showing three sample payments, 91.99 USDT in gross volume, and an 18.00 USDT refund"
+              alt="Chai House dashboard showing 73.99 USDT received after refunds and three sample payments"
               width={1120}
-              height={480}
+              height={600}
               unoptimized
             />
             <figcaption>Chai House dashboard · Synthetic payments</figcaption>
@@ -69,7 +70,7 @@ export default async function Landing() {
         </section>
 
         <section id="how" className="landing-section">
-          <h2>From setup to settlement</h2>
+          <h2 className="vbg-heading-24">From setup to settlement</h2>
           <ol className="landing-steps">
             {steps.map(([title, description], index) => (
               <li key={title}>
@@ -83,7 +84,7 @@ export default async function Landing() {
 
         <section id="developers" className="landing-section landing-developers">
           <div>
-            <h2>Integrate with your store</h2>
+            <h2 className="vbg-heading-24">Integrate with your store</h2>
             <p>Create a checkout session on your server and send customers to the hosted checkout URL in the response. Verify the signed webhook before fulfilling the order.</p>
             <Link href="/docs/quickstart" className="public-secondary">Integration quickstart <Icon name="arrowRight" /></Link>
           </div>

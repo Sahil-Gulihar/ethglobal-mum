@@ -11,13 +11,13 @@ export function SiteHeader() {
   const { count, setOpen } = useCart();
   return (
     <>
-      <div className="bg-[#202621] text-center text-[13px] text-muted">
+      <div className="bg-paper text-center text-[13px] text-muted">
         <p className="mx-auto max-w-6xl px-6 py-2">
           Now accepting <span className="font-semibold text-ink">USDT on Whitechain</span>: pay straight from
           your wallet, settled to us in seconds.
         </p>
       </div>
-      <header className="sticky top-0 z-30 border-b border-line bg-paper/95 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-line bg-cream">
         <div className="mx-auto flex h-18 max-w-6xl items-center justify-between px-6">
           <Link href="/" aria-label="Chai & Co. home">
             <Logo />

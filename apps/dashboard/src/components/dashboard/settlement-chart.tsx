@@ -22,7 +22,7 @@ export function SettlementChart({ daily }: { daily: { date: string; count: numbe
     <section aria-labelledby="settlement-heading" className="settlement-chart flex min-w-0 flex-col gap-4 sm:gap-6">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <h2 id="settlement-heading" className="text-[18px] font-medium tracking-tight">Payment activity</h2>
-        <span className="flex min-h-7 items-center bg-[#18191b] px-3 text-sm text-[#8a9099]">Last 14 days</span>
+        <span className="text-sm text-muted-foreground">Last 14 days</span>
       </div>
       <div>
         <p className="mb-3 text-[13px] text-muted-foreground">Settled payments</p>
@@ -36,16 +36,9 @@ export function SettlementChart({ daily }: { daily: { date: string; count: numbe
           role="img"
           aria-label={daily.map(({ date, count }) => `${date}: ${count}`).join(", ")}
         >
-          <defs>
-            <linearGradient id="settlement-fill" x2="0" y2="1">
-              <stop stopColor="var(--chart-line)" stopOpacity=".15" />
-              <stop offset="1" stopColor="var(--chart-line)" stopOpacity="0" />
-            </linearGradient>
-          </defs>
           {ticks.map((tick, i) => (
             <path key={tick} d={`M0 ${i * height / 4}H${width}`} stroke="var(--chart-grid)" vectorEffect="non-scaling-stroke" />
           ))}
-          <path d={`${line} L${width},${height} H0 Z`} fill="url(#settlement-fill)" />
           <path d={line} fill="none" stroke="var(--chart-line)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
           {points.map(({ date, count, x, y }) => (
             <g key={date} className="group">

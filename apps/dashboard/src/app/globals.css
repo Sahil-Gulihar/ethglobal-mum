@@ -2,64 +2,38 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Light storefront surfaces and dark workspace surfaces. */
 :root {
-  --radius: 0.5rem;
-  --ink: #101010;
-  --background: #ffffff;
-  --foreground: #0b0b0c;
-  --card: #ffffff;
+  color-scheme: light dark;
+  --radius: var(--vbg-radius, 8px);
+  --ink: #171717;
+  --background: var(--vbg-surface-primary, light-dark(#fff, #000));
+  --foreground: var(--vbg-text-primary, light-dark(#171717, #ededed));
+  --card: var(--vbg-surface-secondary, light-dark(#fafafa, #111));
   --card-foreground: var(--foreground);
   --popover: var(--card);
   --popover-foreground: var(--foreground);
-  --primary: #0b0b0c;
-  --primary-foreground: #ffffff;
-  --secondary: #f3f3f3;
+  --primary: var(--foreground);
+  --primary-foreground: var(--background);
+  --secondary: light-dark(#f2f2f2, #222);
   --secondary-foreground: var(--foreground);
-  --muted: #f3f3f3;
-  --muted-foreground: #5c6068;
-  --accent: #f0f0f0;
-  --accent-foreground: #0b0b0c;
-  --destructive: #be2343;
-  --destructive-foreground: #ffffff;
-  --success: #087651;
-  --success-soft: #e6f6ef;
-  --warning: #875000;
-  --warning-soft: #fdf3e2;
-  --border: #e5e6ea;
-  --input: #e5e6ea;
-  --ring: #747474;
-  --sidebar: var(--background);
+  --muted: var(--card);
+  --muted-foreground: var(--vbg-text-secondary, light-dark(#525252, #a1a1a1));
+  --accent: var(--secondary);
+  --accent-foreground: var(--foreground);
+  --destructive: light-dark(#be2343, #ff8094);
+  --destructive-foreground: light-dark(#fff, #220b11);
+  --success: light-dark(#087651, #73d6aa);
+  --success-soft: light-dark(#e6f6ef, #162c24);
+  --warning: light-dark(#875000, #f2be67);
+  --warning-soft: light-dark(#fdf3e2, #2b2110);
+  --border: var(--vbg-border-default, light-dark(#e5e5e5, #333));
+  --input: var(--vbg-border-strong, light-dark(#bdbdbd, #555));
+  --ring: var(--foreground);
+  --sidebar: var(--card);
 }
 
-.dark {
-  color-scheme: dark;
-  --background: #101010;
-  --foreground: #fff;
-  --card: rgb(255 255 255 / .02);
-  --card-foreground: var(--foreground);
-  --popover: #101010;
-  --popover-foreground: #c8c8c8;
-  --secondary-foreground: var(--foreground);
-  --sidebar: var(--background);
-  --workspace-chrome: #121212;
-  --primary: #fff;
-  --primary-foreground: #101010;
-  --secondary: rgb(255 255 255 / .05);
-  --muted: rgb(255 255 255 / .05);
-  --muted-foreground: #898989;
-  --accent: rgb(255 255 255 / .05);
-  --accent-foreground: #fff;
-  --destructive: #ff8094;
-  --destructive-foreground: #220b11;
-  --success: #73d6aa;
-  --success-soft: #162c24;
-  --warning: #f2be67;
-  --warning-soft: #2b2110;
-  --border: #343434;
-  --input: #343434;
-  --ring: #aaa;
-}
+.checkout-light { color-scheme: light; }
+.checkout-dark { color-scheme: dark; }
 
 @theme inline {
   --color-ink: var(--ink);
@@ -91,8 +65,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: "Helvetica Neue", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, Menlo, monospace;
 }
 
 @layer base {
@@ -109,8 +83,7 @@
     font-variant-numeric: tabular-nums;
   }
   dialog::backdrop {
-    background: rgb(11 11 18 / 0.55);
-    backdrop-filter: blur(2px);
+    background: rgb(0 0 0 / 0.55);
   }
 }
 
@@ -145,18 +118,11 @@
   }
 }
 
-html:has(.dashboard-shell),
-body:has(.dashboard-shell) {
-  background: #121212;
-}
-
 .dashboard-shell {
-  --dashboard-chrome: var(--workspace-chrome);
-  --dashboard-frame: var(--border);
   display: grid;
-  grid-template-columns: 184px minmax(0, 1fr);
+  grid-template-columns: 212px minmax(0, 1fr);
   min-height: 100dvh;
-  background: var(--dashboard-chrome);
+  background: var(--sidebar);
 }
 
 .dashboard-shell[data-compact="true"] {
@@ -169,7 +135,7 @@ body:has(.dashboard-shell) {
   align-self: start;
   display: flex;
   height: 100dvh;
-  padding: 18px 0 18px 10px;
+  padding: 20px 12px;
 }
 
 .dashboard-rail > :first-child {
@@ -177,8 +143,7 @@ body:has(.dashboard-shell) {
 }
 
 .dashboard-inset {
-  margin: 18px 14px 18px 10px;
-  box-shadow: 0 0 0 .5px rgb(255 255 255 / .025), 0 1px 3px rgb(0 0 0 / .06);
+  border-inline-start: 1px solid var(--border);
 }
 
 .dashboard-mobile-header,
@@ -192,7 +157,6 @@ body:has(.dashboard-shell) {
 
 .dashboard-shell[data-compact="true"] .dashboard-rail > :first-child {
   padding-inline-start: 0;
-  padding-inline-end: 7px;
 }
 
 @media (721px <= width <= 900px) {
@@ -232,16 +196,20 @@ body:has(.dashboard-shell) {
     padding-block: 8px;
   }
 
-  .dashboard-inset {
-    margin: 0 8px 8px;
-  }
+  .dashboard-inset { border-inline-start: 0; }
 }
 
-/* Ornn Data plot chrome. The console's button and status tokens stay separate. */
+/* Use the workspace palette for chart axes, grid, and series. */
 .settlement-chart {
-  --chart-line: #fff;
-  --chart-text: rgb(255 255 255 / .6);
-  --chart-grid: rgb(255 255 255 / .05);
-  --chart-crosshair: rgb(255 255 255 / .3);
-  --chart-border: rgb(255 255 255 / .1);
+  --chart-line: var(--primary);
+  --chart-text: var(--muted-foreground);
+  --chart-grid: var(--border);
+  --chart-crosshair: var(--muted-foreground);
+  --chart-border: var(--border);
+}
+
+.dashboard-rail .shell-nav-link[aria-current="page"],
+.dashboard-shell dialog .shell-nav-link[aria-current="page"] {
+  background: var(--accent);
+  color: var(--accent-foreground);
 }

@@ -1,5 +1,5 @@
 .page {
-  --checkout-bg: var(--muted);
+  --checkout-bg: var(--card);
   --checkout-ink: var(--foreground);
   --checkout-muted: var(--muted-foreground);
   --checkout-border: var(--border);
@@ -20,7 +20,8 @@
   justify-content: space-between;
   gap: 16px;
   min-height: 60px;
-  padding: 14px 24px;
+  padding: 14px clamp(20px, 4vw, 48px);
+  background: var(--card);
   border-bottom: 0.5px solid var(--checkout-border);
 }
 .brand {
