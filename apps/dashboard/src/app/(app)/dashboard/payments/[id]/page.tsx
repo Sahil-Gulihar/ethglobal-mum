@@ -16,6 +16,8 @@ import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { CopyButton } from "@/components/ui/copy-button";
 import { Icon, type IconName } from "@/components/icons";
+import { VerifiedBuyerBadge } from "@/components/verified-buyer-badge";
+import { getHumanCheck } from "@/lib/zg/human-check";
 import { cn, formatAmount, formatDateTime, shortAddr, shortHash } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Payment" };
@@ -25,6 +27,7 @@ export default async function PaymentDetailPage({ params }: { params: Promise<{ 
   const m = await requireMerchant();
   const [p, deliveries] = await Promise.all([getPaymentDetail(m.id, id), listPaymentDeliveries(m.id, id)]);
   if (!p) notFound();
+  const check = p.humanCheckId ? await getHumanCheck(p.humanCheckId) : null;
 
   const pendingRefunds = p.refunds.filter((r) => r.status === "pending");
   const payoutChanged = !!m.payoutAddress && m.payoutAddress.toLowerCase() !== p.payout.toLowerCase();
@@ -100,6 +103,7 @@ export default async function PaymentDetailPage({ params }: { params: Promise<{ 
               {formatAmount(p.amount)} <span className="text-lg font-medium text-muted-foreground">USDT</span>
             </span>
             <StatusBadge status={p.status} />
+            {p.buyerVerified && <VerifiedBuyerBadge />}
           </span>
         }
         description={
@@ -217,6 +221,22 @@ export default async function PaymentDetailPage({ params }: { params: Promise<{ 
                         <Row key="5" label="Customer">
                           {" "}
                           <ExplorerLink address={p.payer} />{" "}
+                        </Row>,
+                        <Row key="5b" label="Buyer check">
+                          {p.buyerVerified ? (
+                            <span className="flex flex-col items-end gap-1">
+                              <VerifiedBuyerBadge />
+                              {check ? (
+                                <span className="text-right font-mono text-[11px] text-muted-foreground">
+                                  {check.calls.map((c) => `${c.kind}: ${c.requestId ?? "n/a"}`).join(" · ")}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">Returning verified buyer (0G account)</span>
+                              )}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">Not verified</span>
+                          )}
                         </Row>,
                         <Row key="6" label="Settled to">
                           {" "}

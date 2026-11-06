@@ -11,12 +11,15 @@ import { CopyButton } from "@/components/ui/copy-button";
 import { formatDate, shortHash } from "@/lib/utils";
 
 import { DashboardSections } from "@/components/dashboard/dashboard-pages";
+import { VerifiedBuyersToggle } from "@/components/dashboard/verified-buyers-toggle";
+import { humanCheckStats } from "../_lib/queries";
 
 export const metadata: Metadata = { title: "Settings" };
 
 export default async function SettingsPage() {
   const m = await requireMerchant();
   const active = m.status === "active";
+  const checks = await humanCheckStats(m.id);
   return (
     <>
       <PageHeader title="Settings" description="Your business profile and where payments settle." />
@@ -57,6 +60,29 @@ export default async function SettingsPage() {
                   ) : (
                     <Alert tone="warning">Verify your account to add a payout wallet.</Alert>
                   )}
+                </CardContent>
+              </Card>
+            ),
+          },
+          {
+            label: "Verified buyers",
+            content: (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Verified buyers</CardTitle>
+                  <CardDescription>
+                    Stop bots from spamming your checkout. Buyers name what they see in a fresh picture drawn by 0G Private Computer; 0G checks the
+                    answer in a TEE. Buyers who sign in with their 0G account pay for the check with their own credits and keep a Verified buyer badge
+                    for 30 days across every Whitechain store. Payments show the badge, and webhooks carry <code>buyerVerified</code>.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-4">
+                  <VerifiedBuyersToggle initial={m.requireVerifiedBuyers} />
+                  <dl className="grid grid-cols-3 gap-3 text-sm">
+                    <Stat label="Checks run on 0G" value={checks.total} />
+                    <Stat label="Passed" value={checks.passed} />
+                    <Stat label="Paid by buyers' 0G credits" value={checks.buyerPaid} />
+                  </dl>
                 </CardContent>
               </Card>
             ),
@@ -104,6 +130,15 @@ function Row({ label, children, copy }: { label: string; children: ReactNode; co
         {children}
         {copy && <CopyButton value={copy} label={`Copy ${label}`} className="-my-1 h-7 min-w-7" />}
       </dd>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-md border px-3 py-2.5">
+      <dt className="text-xs text-muted-foreground">{label}</dt>
+      <dd className="mt-0.5 text-lg font-semibold tabular">{value}</dd>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/dashboard/status-badge";
+import { VerifiedBuyerBadge } from "@/components/verified-buyer-badge";
 import { ExplorerLink } from "@/components/dashboard/explorer-link";
 import { formatAmount, formatDateTime, shortAddr } from "@/lib/utils";
 
@@ -14,6 +15,7 @@ export type PaymentRowView = {
   payer: string;
   txHash: string;
   createdAt: Date;
+  buyerVerified?: boolean;
 };
 
 export function PaymentsTable({ rows, emptyAction }: { rows: PaymentRowView[]; emptyAction?: React.ReactNode }) {
@@ -54,7 +56,10 @@ export function PaymentsTable({ rows, emptyAction }: { rows: PaymentRowView[]; e
               )}
             </TableCell>
             <TableCell>
-              <StatusBadge status={p.status} />
+              <span className="flex flex-wrap items-center gap-1.5">
+                <StatusBadge status={p.status} />
+                {p.buyerVerified && <VerifiedBuyerBadge className="py-0.5" />}
+              </span>
             </TableCell>
             <TableCell className="max-w-40 truncate font-mono text-xs">{p.orderId}</TableCell>
             <TableCell className="hidden font-mono text-xs text-muted-foreground xl:table-cell">{shortAddr(p.payer)}</TableCell>

@@ -73,3 +73,11 @@ export async function updateBusinessName(_prev: NameFormState, formData: FormDat
   revalidatePath("/dashboard", "layout");
   return { saved: true };
 }
+
+/** Settings toggle: require the 0G human check (Verified buyers only) before the hosted checkout shows the pay button. */
+export async function setRequireVerifiedBuyers(on: boolean): Promise<ActionResult<{ on: boolean }>> {
+  const m = await requireMerchant();
+  await db.update(merchants).set({ requireVerifiedBuyers: !!on }).where(eq(merchants.id, m.id));
+  revalidatePath("/dashboard/settings");
+  return ok({ on: !!on });
+}

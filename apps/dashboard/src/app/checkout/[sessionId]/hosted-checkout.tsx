@@ -3,11 +3,24 @@
 import { useEffect, useState } from "react";
 import { WhitechainCheckout, type CheckoutSuccess } from "@whitechain-commerce/react";
 import styles from "./checkout.module.css";
+import { HumanCheck } from "./human-check";
+import { VerifiedBuyerBadge } from "@/components/verified-buyer-badge";
 
 const REDIRECT_MS = 2000;
 
-export function HostedCheckout({ sessionId, theme }: { sessionId: string; theme: "light" | "dark" }) {
+export function HostedCheckout({
+  sessionId,
+  theme,
+  buyerCheck,
+}: {
+  sessionId: string;
+  theme: "light" | "dark";
+  buyerCheck: { required: boolean; verified: boolean } | null;
+}) {
   const [redirectTo, setRedirectTo] = useState<string | null>(null);
+  const [verified, setVerified] = useState(!!buyerCheck?.verified);
+  // Merchants who turn on "Verified buyers only" get the pay button only after the 0G human check passes.
+  const gated = !!buyerCheck?.required && !verified;
 
   useEffect(() => {
     if (!redirectTo) return;
@@ -17,7 +30,14 @@ export function HostedCheckout({ sessionId, theme }: { sessionId: string; theme:
 
   return (
     <div className={styles.cardWrap}>
-      <WhitechainCheckout
+      {buyerCheck && !verified && <HumanCheck sessionId={sessionId} required={buyerCheck.required} onVerified={() => setVerified(true)} />}
+      {buyerCheck && verified && (
+        <div className="mb-3 flex items-center justify-between gap-3 rounded-lg border bg-card px-4 py-3">
+          <VerifiedBuyerBadge />
+          <span className="text-xs text-muted-foreground">Checked on 0G Private Computer</span>
+        </div>
+      )}
+      {!gated && <WhitechainCheckout
         sessionId={sessionId}
         apiBase=""
         theme={theme}
@@ -26,7 +46,7 @@ export function HostedCheckout({ sessionId, theme }: { sessionId: string; theme:
           if (r.successUrl && !r.alreadyPaid) setRedirectTo(r.successUrl);
         }}
         onError={(e) => console.error("[whitechain-checkout]", e)}
-      />
+      />}
       <p className={styles.redirect} data-show={redirectTo ? "true" : "false"} aria-live="polite">
         {redirectTo ? "Payment confirmed. Taking you back to the store…" : " "}
       </p>

@@ -47,6 +47,8 @@ export interface PaymentObject {
   explorerUrl: string;
   chainId: 1874;
   chainPaymentId: `0x${string}`;
+  /** True when the buyer passed the 0G human check (or carried a verified-buyer badge) before paying. */
+  buyerVerified?: boolean;
   createdAt: string; // ISO
 }
 

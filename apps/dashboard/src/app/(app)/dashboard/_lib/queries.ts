@@ -1,7 +1,7 @@
 import "server-only";
 import { and, asc, count, desc, eq, gte, inArray, isNull, lt, sql, type SQL } from "drizzle-orm";
 import { fromUnits } from "@whitechain-commerce/core";
-import { apiKeys, checkoutSessions, db, payments, refunds, webhookAttempts, webhookDeliveries, webhookEndpoints, webhookEvents } from "@/lib/db";
+import { apiKeys, checkoutSessions, db, humanChecks, payments, refunds, webhookAttempts, webhookDeliveries, webhookEndpoints, webhookEvents } from "@/lib/db";
 import type { Merchant } from "@/lib/auth";
 import { isTestEvent } from "@/lib/webhooks";
 import { sortLedger, type LedgerEntry, type LedgerRange } from "@/lib/csv-export";
@@ -15,17 +15,19 @@ export type PaymentListItem = {
   payer: string;
   txHash: string;
   createdAt: Date;
+  buyerVerified: boolean;
 };
 
 export async function listPayments(merchantId: string, limit = 50): Promise<PaymentListItem[]> {
   const rows = await db
-    .select({ p: payments, orderId: checkoutSessions.orderId })
+    .select({ p: payments, orderId: checkoutSessions.orderId, verifiedAt: checkoutSessions.humanVerifiedAt })
     .from(payments)
     .innerJoin(checkoutSessions, eq(checkoutSessions.id, payments.sessionId))
     .where(eq(payments.merchantId, merchantId))
     .orderBy(desc(payments.createdAt))
     .limit(limit);
-  return rows.map(({ p, orderId }) => ({
+  return rows.map(({ p, orderId, verifiedAt }) => ({
+    buyerVerified: !!verifiedAt,
     id: p.id,
     orderId,
     amount: fromUnits(p.amountUnits, p.decimals),
@@ -198,6 +200,8 @@ export type PaymentDetail = {
   createdAt: Date;
   metadata: Record<string, string> | null;
   refunds: RefundView[];
+  buyerVerified: boolean;
+  humanCheckId: string | null;
 };
 
 export async function getPaymentDetail(merchantId: string, paymentId: string): Promise<PaymentDetail | null> {
@@ -236,6 +240,8 @@ export async function getPaymentDetail(merchantId: string, paymentId: string): P
     sessionCreatedAt: s.createdAt,
     createdAt: p.createdAt,
     metadata: s.metadata ?? null,
+    buyerVerified: !!s.humanVerifiedAt,
+    humanCheckId: s.humanCheckId,
     refunds: rs.map((r) => ({
       id: r.id,
       amount: fromUnits(r.amountUnits, p.decimals),
@@ -354,4 +360,21 @@ export async function listDeliveries(merchantId: string, limit = 50): Promise<De
     createdAt: d.createdAt,
     attemptLog: byDelivery.get(d.id) ?? [],
   }));
+}
+
+/** Verified-buyer stats for the settings card: 0G human checks run on this merchant's checkouts. */
+export async function humanCheckStats(merchantId: string) {
+  const rows = await db
+    .select({ status: humanChecks.status, payer: humanChecks.payer, n: count() })
+    .from(humanChecks)
+    .innerJoin(checkoutSessions, eq(checkoutSessions.id, humanChecks.sessionId))
+    .where(eq(checkoutSessions.merchantId, merchantId))
+    .groupBy(humanChecks.status, humanChecks.payer);
+  const sum = (f: (r: (typeof rows)[number]) => boolean) => rows.filter(f).reduce((a, r) => a + r.n, 0);
+  return {
+    total: sum(() => true),
+    passed: sum((r) => r.status === "passed"),
+    failed: sum((r) => r.status === "failed"),
+    buyerPaid: sum((r) => r.payer === "buyer"),
+  };
 }

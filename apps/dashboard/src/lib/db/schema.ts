@@ -15,6 +15,8 @@ export const merchants = pgTable("merchants", {
   registeredTxHash: text("registered_tx_hash"),
   /** Last time the backend signer registered/changed the payout onchain (rate limit). */
   payoutChangedAt: timestamp("payout_changed_at", { withTimezone: true }),
+  /** Settings toggle: buyers must pass the 0G human check before the hosted checkout shows the pay button. */
+  requireVerifiedBuyers: boolean("require_verified_buyers").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -53,6 +55,10 @@ export const checkoutSessions = pgTable(
     successUrl: text("success_url"),
     cancelUrl: text("cancel_url"),
     metadata: jsonb("metadata").$type<Record<string, string>>(),
+    /** Set when the buyer passed the 0G human check (or is a signed-in verified buyer). */
+    humanVerifiedAt: timestamp("human_verified_at", { withTimezone: true }),
+    humanCheckId: text("human_check_id"),
+    buyerId: text("buyer_id"),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
@@ -161,4 +167,43 @@ export const paymentLinks = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("pl_merchant_idx").on(t.merchantId)],
+);
+
+/**
+ * A buyer who signed in with their 0G Private Computer account. We keep a management key (read balance,
+ * mint keys) and a capped, daily-reset inference key minted for this app, both AES-GCM encrypted.
+ */
+export const buyers = pgTable("buyers", {
+  id: text("id").primaryKey(), // byr_...
+  zgAddress: text("zg_address").notNull().unique(), // the 0G account (wallet) address, lowercased
+  mgmtKeyEnc: text("mgmt_key_enc").notNull(),
+  inferenceKeyEnc: text("inference_key_enc").notNull(),
+  inferenceKeyId: text("inference_key_id").notNull(),
+  sessionHash: text("session_hash").unique(), // sha256 of the wc_buyer cookie
+  verifiedAt: timestamp("verified_at", { withTimezone: true }),
+  checksPassed: integer("checks_passed").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** One human check (0G image challenge + answer judging) for a checkout session. Every 0G call's request ID is kept. */
+export const humanChecks = pgTable(
+  "human_checks",
+  {
+    id: text("id").primaryKey(), // hc_...
+    sessionId: text("session_id").notNull().references(() => checkoutSessions.id),
+    buyerId: text("buyer_id").references(() => buyers.id, { onDelete: "set null" }),
+    /** Whose 0G credits paid: the signed-in buyer's own account, or the platform's. */
+    payer: text("payer", { enum: ["buyer", "platform"] }).notNull(),
+    subject: jsonb("subject").$type<{ object: string; colour: string; scene: string }>().notNull(),
+    status: text("status", { enum: ["pending", "passed", "failed"] }).notNull().default("pending"),
+    attempts: integer("attempts").notNull().default(0),
+    /** [{ kind: "image" | "transcribe" | "judge", model, requestId, at }] */
+    calls: jsonb("calls").$type<{ kind: "image" | "transcribe" | "judge"; model: string; requestId: string | null; at: string }[]>().notNull(),
+    lastAnswer: text("last_answer"),
+    balanceBefore: text("balance_before"),
+    balanceAfter: text("balance_after"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("hc_session_idx").on(t.sessionId), index("hc_buyer_idx").on(t.buyerId)],
 );

@@ -3,6 +3,7 @@ import { HostedCheckout } from "./hosted-checkout";
 import styles from "./checkout.module.css";
 import { LogoMark } from "@/components/brand";
 import { Icon } from "@/components/icons";
+import { getPublicCheckoutSession } from "@/lib/sessions";
 
 export const metadata: Metadata = {
   title: "Checkout",
@@ -19,6 +20,8 @@ export default async function CheckoutPage({
 }) {
   const { sessionId } = await params;
   const { theme } = await searchParams;
+  const session = await getPublicCheckoutSession(sessionId).catch(() => null);
+  const buyerCheck = session && session.status === "open" ? (session.buyerCheck ?? null) : null;
 
   return (
     <main className={`${theme === "dark" ? "checkout-dark" : "checkout-light"} ${styles.page}`} data-theme={theme === "dark" ? "dark" : "light"}>
@@ -35,7 +38,7 @@ export default async function CheckoutPage({
       </header>
 
       <section className={styles.center}>
-        <HostedCheckout sessionId={sessionId} theme={theme === "dark" ? "dark" : "light"} />
+        <HostedCheckout sessionId={sessionId} theme={theme === "dark" ? "dark" : "light"} buyerCheck={buyerCheck} />
       </section>
 
       <footer className={styles.bottom}>
