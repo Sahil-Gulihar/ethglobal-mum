@@ -52,6 +52,12 @@ border:1px solid var(--wcc-border);background:var(--wcc-bg);text-align:left;tran
 .wcc-row-v{font-weight:500;display:inline-flex;align-items:center;gap:8px;min-width:0;text-align:right;font-variant-numeric:tabular-nums}
 .wcc-row-v[data-bad=true]{color:var(--wcc-danger)}
 .wcc-link-btn{background:none;border:0;padding:0;cursor:pointer;color:var(--wcc-accent)!important;font-size:12px;font-weight:500}
+.wcc-funding{display:grid;gap:8px;margin:12px 0;padding:12px;border:1px solid var(--wcc-border);border-radius:4px}
+.wcc-funding .wcc-title,.wcc-funding .wcc-text{margin:0}
+.wcc-funding-actions,.wcc-funding-form{display:grid;justify-items:start;gap:8px}
+.wcc-funding-form label{display:grid;gap:4px;width:100%;font-size:13px}
+.wcc-funding-form input{box-sizing:border-box;width:100%;padding:8px;border:1px solid var(--wcc-border);border-radius:4px;background:var(--wcc-soft);color:inherit;font:inherit}
+.wcc-funding button:disabled{cursor:default;opacity:.55}
 .wcc-link-btn:hover{text-decoration:underline}
 .wcc-mono{font-family:var(--font-geist-mono,ui-monospace),Menlo,monospace;font-size:12.5px}
 .wcc-steps{list-style:none;margin:0 0 16px;padding:0;display:flex;flex-direction:column;gap:2px}
