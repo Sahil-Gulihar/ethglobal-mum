@@ -13,7 +13,7 @@ export function Pay({ orderId, sessionId }: { orderId: string; sessionId: string
       apiBase={process.env.NEXT_PUBLIC_WC_API_BASE ?? "http://localhost:3000"}
       // UX only: send the shopper to their order page. Fulfilment happens
       // server-side when the signed payment.succeeded webhook arrives.
-      onSuccess={() => router.push(`/orders/${orderId}`)}
+      onSuccess={() => router.push(`/orders/${orderId}?paid=1`)}
       onError={(e) => console.error("Checkout error", e)}
     />
   );

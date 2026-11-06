@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatUsdt } from "@/lib/catalog";
 import { useCart } from "./cart";
 import { ProductArt } from "./product-art";
@@ -12,11 +12,39 @@ export function CartDrawer() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const panelRef = useRef<HTMLElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+
+  // Modal behaviour: move focus in, trap Tab, close on Escape, lock page scroll, restore focus on close.
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const previous = document.activeElement as HTMLElement | null;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    closeRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") return setOpen(false);
+      if (e.key !== "Tab" || !panelRef.current) return;
+      const focusable = panelRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && (document.activeElement === first || !panelRef.current.contains(document.activeElement))) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+      previous?.focus?.();
+    };
   }, [open, setOpen]);
 
   async function checkout() {
@@ -45,11 +73,12 @@ export function CartDrawer() {
 
   return (
     <div className="fixed inset-0 z-50" role="dialog" aria-modal aria-label="Your cart">
-      <button aria-label="Close cart" className="animate-fade absolute inset-0 bg-ink/40" onClick={() => setOpen(false)} />
-      <aside className="animate-drawer absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-paper shadow-2xl">
+      <button aria-label="Close cart" tabIndex={-1} className="animate-fade absolute inset-0 bg-ink/40" onClick={() => setOpen(false)} />
+      <aside ref={panelRef} className="animate-drawer absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-paper shadow-2xl">
         <div className="flex items-center justify-between border-b border-line px-6 py-5">
           <h2 className="font-display text-2xl font-semibold">Your cart</h2>
           <button
+            ref={closeRef}
             onClick={() => setOpen(false)}
             className="grid size-9 place-items-center rounded-full text-muted transition hover:bg-cream hover:text-ink"
             aria-label="Close"

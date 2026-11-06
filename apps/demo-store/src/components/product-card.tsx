@@ -29,6 +29,7 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
           </p>
           <button
             onClick={() => add(product.id)}
+            aria-label={`Add ${product.name} to cart`}
             className="rounded-full border border-ink/15 bg-paper px-4 py-2 text-sm font-medium transition hover:border-ink hover:bg-ink hover:text-cream active:scale-[0.97]"
           >
             Add to cart

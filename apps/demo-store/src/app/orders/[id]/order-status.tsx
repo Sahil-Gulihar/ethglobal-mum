@@ -7,7 +7,7 @@ import { shortHash, timeAgo, usePoll } from "@/components/use-poll";
 
 type Payload = { order: Order; events: WebhookLogEntry[] };
 
-export function OrderStatusView({ orderId }: { orderId: string }) {
+export function OrderStatusView({ orderId, justPaid = false }: { orderId: string; justPaid?: boolean }) {
   const { data, error } = usePoll<Payload>(`/api/orders/${orderId}`, (d) =>
     !d || d.order.status === "pending" ? 1500 : 5000,
   );
@@ -34,6 +34,8 @@ export function OrderStatusView({ orderId }: { orderId: string }) {
   const { order, events } = data;
   const paid = order.status !== "pending";
   const fulfilEvent = events.find((e) => e.eventId === order.fulfilledByEventId);
+  const refunded = order.status === "refunded";
+  const partlyRefunded = order.status === "partially_refunded";
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-12">
@@ -50,11 +52,27 @@ export function OrderStatusView({ orderId }: { orderId: string }) {
               </svg>
             </span>
             <div>
-              <h1 className="font-display text-3xl font-semibold tracking-tight">Fulfilled via verified webhook ✓</h1>
+              <h1 className="font-display text-3xl font-semibold tracking-tight">
+                {refunded ? "Order refunded" : partlyRefunded ? "Partially refunded" : "Fulfilled via verified webhook ✓"}
+              </h1>
               <p className="mt-1 text-ink/70">
-                Thank you! Your chai is being packed. Our server marked this order paid only after receiving a{" "}
-                <span className="font-medium">signature-verified</span> <code className="font-mono text-sm">payment.succeeded</code>{" "}
-                webhook from Whitechain Commerce.
+                {refunded ? (
+                  <>
+                    The full amount was returned to your wallet. We recorded it from a signature-verified{" "}
+                    <code className="font-mono text-sm">refund.succeeded</code> webhook.
+                  </>
+                ) : partlyRefunded ? (
+                  <>
+                    Part of your payment was returned to your wallet ({order.amountRefunded} USDT). The rest of your order is
+                    still on its way.
+                  </>
+                ) : (
+                  <>
+                    Thank you! Your chai is being packed. Our server marked this order paid only after receiving a{" "}
+                    <span className="font-medium">signature-verified</span> <code className="font-mono text-sm">payment.succeeded</code>{" "}
+                    webhook from Whitechain Commerce.
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -94,17 +112,21 @@ export function OrderStatusView({ orderId }: { orderId: string }) {
               <span className="size-4 rounded-full bg-saffron" />
             </span>
             <div>
-              <h1 className="font-display text-3xl font-semibold tracking-tight">Waiting for payment confirmation</h1>
+              <h1 className="font-display text-3xl font-semibold tracking-tight">
+                {justPaid ? "Payment received, confirming…" : "Waiting for payment confirmation"}
+              </h1>
               <p className="mt-1 text-ink/70">
                 We fulfil orders only when our server receives a signed <code className="font-mono text-sm">payment.succeeded</code>{" "}
                 webhook, never from the browser. This page updates automatically.
               </p>
-              <Link
-                href={`/checkout/${order.id}`}
-                className="mt-4 inline-flex rounded-full bg-masala px-4 py-2 text-sm font-semibold text-cream hover:bg-masala-dark"
-              >
-                Go to payment
-              </Link>
+              {!justPaid && (
+                <Link
+                  href={`/checkout/${order.id}`}
+                  className="mt-4 inline-flex rounded-full bg-masala px-4 py-2 text-sm font-semibold text-cream hover:bg-masala-dark"
+                >
+                  Go to payment
+                </Link>
+              )}
             </div>
           </div>
         </div>
