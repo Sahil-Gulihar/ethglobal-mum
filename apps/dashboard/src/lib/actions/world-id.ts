@@ -58,16 +58,29 @@ export async function completeWorldIdVerification(result: IDKitResult): Promise<
   const cfg = env.worldId();
 
   if (!result || typeof result !== "object" || !Array.isArray(result.responses) || result.responses.length === 0) {
-    return err("World ID returned an empty proof. Try again.");
+    return reject("empty_proof", result, "World ID returned an empty proof. Try again.");
   }
-  if (!("action" in result) || result.action !== cfg.action) return err("This proof is for a different action.");
+  // Legacy (v3) results may omit `action`; the signed RP request and the Developer Portal still bind it.
+  if ("action" in result && result.action && result.action !== cfg.action) {
+    return reject("action_mismatch", result, "This proof is for a different action.");
+  }
   if (result.environment && result.environment !== cfg.environment) {
-    return err(`This proof came from World ID ${result.environment}, but the server expects ${cfg.environment}.`);
+    return reject(
+      "environment_mismatch",
+      result,
+      `This proof came from World ID ${result.environment}, but the server expects ${cfg.environment}.`,
+    );
   }
-  const expectedSignal = hashSignal(m.id).toLowerCase();
+  // Compare as field elements: hex padding and case differ between proof versions.
+  const expectedSignal = toBigInt(hashSignal(m.id));
   for (const r of result.responses) {
-    const sh = "signal_hash" in r ? r.signal_hash : undefined;
-    if (!sh || sh.toLowerCase() !== expectedSignal) return err("This proof was made for a different account.");
+    const sh = "signal_hash" in r ? toBigInt(r.signal_hash) : null;
+    if (sh === null || sh !== expectedSignal) {
+      return reject("signal_mismatch", result, "This proof was made for a different account.", {
+        expected: hashSignal(m.id),
+        got: "signal_hash" in r ? r.signal_hash : undefined,
+      });
+    }
   }
 
   let body: VerifyResponse;
@@ -92,7 +105,7 @@ export async function completeWorldIdVerification(result: IDKitResult): Promise<
   const raw =
     body.results?.find((r) => r.success && r.nullifier)?.nullifier ??
     body.nullifier ??
-    result.responses.find((r) => "nullifier" in r && r.nullifier)?.nullifier;
+    (result.responses as { nullifier?: string }[]).find((r) => r.nullifier)?.nullifier;
   if (!raw) return err("World ID didn't return a nullifier. Try again.");
   let nullifier: string;
   try {
@@ -116,6 +129,29 @@ export async function completeWorldIdVerification(result: IDKitResult): Promise<
   }
   revalidatePath("/dashboard", "layout");
   return ok({ status: "active" });
+}
+
+function toBigInt(v: unknown): bigint | null {
+  if (typeof v !== "string" || v === "") return null;
+  try {
+    return BigInt(v);
+  } catch {
+    return null;
+  }
+}
+
+/** Logs why a proof was refused (Vercel logs), then returns the user-facing error. */
+function reject(reason: string, result: IDKitResult | null | undefined, message: string, extra?: Record<string, unknown>) {
+  const r = (result ?? {}) as Partial<IDKitResult> & { protocol_version?: string; action?: string; environment?: string };
+  console.warn("World ID proof refused", {
+    reason,
+    protocol_version: r.protocol_version,
+    action: r.action,
+    environment: r.environment,
+    identifiers: Array.isArray(r.responses) ? r.responses.map((x) => x.identifier) : undefined,
+    ...extra,
+  });
+  return err(message);
 }
 
 function isUniqueViolation(e: unknown): boolean {
