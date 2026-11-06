@@ -8,12 +8,17 @@ import type { Merchant } from "./auth";
 export async function merchantFromApiKey(req: Request): Promise<Merchant | null> {
   const h = req.headers.get("authorization") ?? "";
   const m = /^Bearer\s+(sk_test_[A-Za-z0-9]+)$/.exec(h.trim());
-  if (!m) return null;
+  return m ? merchantFromSecretKey(m[1]) : null;
+}
+
+/** Resolves a raw `sk_test_...` secret key to an active merchant, or null. */
+export async function merchantFromSecretKey(key: string): Promise<Merchant | null> {
+  if (!/^sk_test_[A-Za-z0-9]+$/.test(key)) return null;
   const rows = await db
     .select({ merchant: merchants, keyId: apiKeys.id })
     .from(apiKeys)
     .innerJoin(merchants, eq(apiKeys.merchantId, merchants.id))
-    .where(and(eq(apiKeys.keyHash, sha256(m[1])), isNull(apiKeys.revokedAt)))
+    .where(and(eq(apiKeys.keyHash, sha256(key)), isNull(apiKeys.revokedAt)))
     .limit(1);
   const row = rows[0];
   if (!row || row.merchant.status !== "active") return null;

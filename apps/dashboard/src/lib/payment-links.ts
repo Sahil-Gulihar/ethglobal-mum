@@ -4,8 +4,11 @@
  */
 import "server-only";
 import { and, desc, eq, sql } from "drizzle-orm";
+import { fromUnits, toUnits } from "@whitechain-commerce/core";
+import type { Merchant } from "./auth";
+import { usdtDecimals } from "./chain";
 import { checkoutSessions, db, merchants, paymentLinks, payments } from "./db";
-import { randomId } from "./ids";
+import { newId, randomId } from "./ids";
 import { createCheckoutSessionForMerchant, type SessionResult } from "./sessions";
 
 export type PaymentLinkView = typeof paymentLinks.$inferSelect & { paidCount: number; paidTotal: string };
@@ -51,4 +54,30 @@ export async function openPaymentLink(linkId: string): Promise<SessionResult<{ s
   });
   if (!r.ok) return r;
   return { ok: true, value: { sessionId: r.value.id, name: row.l.name } };
+}
+
+/** Validates and stores a new payment link. Shared by the dashboard action and the MCP server. */
+export async function createPaymentLinkForMerchant(
+  m: Merchant,
+  input: { name: string; amount: string },
+): Promise<SessionResult<typeof paymentLinks.$inferSelect>> {
+  const fail = (status: number, type: "invalid_request" | "conflict", message: string) =>
+    ({ ok: false, status, type, message }) as const;
+  if (m.status !== "active") return fail(409, "conflict", "Verify your account before creating payment links.");
+  if (!m.payoutAddress || !m.registeredTxHash) return fail(409, "conflict", "Set your payout wallet in Settings first.");
+  const name = input.name.trim().slice(0, 80);
+  if (!name) return fail(400, "invalid_request", 'Give the link a name, like "Consulting call".');
+  const raw = input.amount.trim();
+  if (!/^\d+(\.\d+)?$/.test(raw)) return fail(400, "invalid_request", "Enter an amount like 25 or 25.50.");
+  let amount: string;
+  try {
+    const decimals = await usdtDecimals();
+    const units = toUnits(raw, decimals);
+    if (units <= 0n) return fail(400, "invalid_request", "The amount must be more than 0.");
+    amount = fromUnits(units, decimals);
+  } catch (e) {
+    return fail(400, "invalid_request", e instanceof Error ? e.message : "Invalid amount.");
+  }
+  const [row] = await db.insert(paymentLinks).values({ id: newId("pl"), merchantId: m.id, name, amount }).returning();
+  return { ok: true, value: row };
 }

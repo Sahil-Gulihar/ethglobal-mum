@@ -240,6 +240,15 @@ importers:
         specifier: ^5
         version: 5.9.3
 
+  packages/mcp:
+    devDependencies:
+      '@types/node':
+        specifier: ^20
+        version: 20.19.43
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+
   packages/react:
     dependencies:
       '@hugeicons/core-free-icons':
