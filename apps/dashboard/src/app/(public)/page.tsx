@@ -5,10 +5,16 @@ import { Wordmark } from "@/components/brand";
 import { Icon } from "@/components/icons";
 import { CodeBlock } from "@/components/code-block";
 
-const checkoutExample = String.raw`curl --fail-with-body "$WC_API_BASE/checkout_sessions" \
-  -H "Authorization: Bearer $WC_SECRET_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"orderId":"order_4821","amount":"49.99","currency":"USDT"}'`;
+const checkoutExample = `import { createCheckoutSession } from "@whitechain-commerce/react/server";
+
+const session = await createCheckoutSession({
+  apiBase: process.env.WC_API_BASE!,
+  secretKey: process.env.WC_SECRET_KEY!,
+  orderId: "order_123",
+  amount: "49.99",
+});
+
+// Redirect the shopper to session.url.`;
 
 const steps = [
   ["Set up your store", "Create an account and connect the wallet where you want to receive payments."],
@@ -85,11 +91,11 @@ export default async function Landing() {
         <section id="developers" className="landing-section landing-developers">
           <div>
             <h2 className="vbg-heading-24">Integrate with your store</h2>
-            <p>Create a checkout link on your server and send shoppers to it. When your server receives a payment update, check its signature before marking the order as paid.</p>
+            <p>Create a checkout session on your server with the TypeScript, Python, or Go SDK and send shoppers to the hosted checkout URL. Verify the payment update before marking the order as paid.</p>
             <Link href="/docs/quickstart" className="public-secondary">Integration quickstart <Icon name="arrowRight" /></Link>
           </div>
           <div className="landing-code">
-            <CodeBlock language="bash" filename="Create a checkout session" code={checkoutExample} />
+            <CodeBlock language="typescript" filename="Create a checkout session" code={checkoutExample} />
           </div>
         </section>
       </main>

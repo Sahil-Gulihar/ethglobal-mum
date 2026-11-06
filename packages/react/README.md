@@ -1,6 +1,28 @@
 # @whitechain-commerce/react
 
-Non-custodial USDT checkout as one React component. The customer pays from their own wallet straight to your payout wallet; we never hold funds.
+Non-custodial USDT checkout for React. The customer pays from their own wallet straight to your payout wallet.
+
+## Installation
+
+In your store project:
+
+```sh
+npm install @whitechain-commerce/react
+```
+
+## Send shoppers to hosted checkout
+
+```tsx
+import { HostedCheckoutButton } from "@whitechain-commerce/react";
+
+<HostedCheckoutButton action="/api/checkout" orderId={order.id} />;
+```
+
+Render the button outside any other form. It posts `orderId` to your server using a native HTML form. In the handler, enforce your site's CSRF protections, verify the shopper can pay that order, and calculate its amount from your own prices. Call `createCheckoutSession` and respond with `Response.redirect(session.url, 303)`. See the webhook example below for fulfilment.
+
+Pass `csrfToken` if your handler expects a form field of that name. Use `children` for a custom label, `className` to style the button, and `disabled` to prevent submission.
+
+## Embed checkout in your store
 
 ## 1. Create a session on your server
 

@@ -1,7 +1,6 @@
 {
   "name": "@whitechain-commerce/react",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -10,6 +9,8 @@
     "./server": "./src/server.ts"
   },
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepack": "pnpm run build",
     "typecheck": "tsc --noEmit",
     "test": "node ../../apps/dashboard/node_modules/tsx/dist/cli.mjs --test src/*.test.ts"
   },
@@ -29,5 +30,29 @@
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "typescript": "^5"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      },
+      "./server": {
+        "types": "./dist/server.d.ts",
+        "import": "./dist/server.js"
+      }
+    }
+  },
+  "description": "React checkout components and server helpers for Whitechain Commerce.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sahil-Gulihar/ethglobal-mum.git",
+    "directory": "packages/react"
   }
 }
