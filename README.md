@@ -103,6 +103,13 @@ router configuration as the dashboard. Restart it on failure and monitor it: wit
 delivery stop. Environment variables supplied by the host work without a `.env` file. Webhooks are delivered at least
 once, so consumers must deduplicate events by ID.
 
+For Coolify, create a Git-backed Docker Compose application with `/compose.worker.yml`.
+Set `DATABASE_URL` to the dashboard database and `WHITECHAIN_RPC_URL` to its chain RPC.
+If the dashboard overrides the router address, set the same `PAYMENT_ROUTER_ADDRESS`.
+Run one replica without a public domain. The worker reads the chain and sends webhooks
+without the router owner's private key. GitHub Actions builds the image and runs a
+checkpoint and webhook retry smoke test against an isolated database.
+
 Contracts: `bash contracts/install-deps.sh && cd contracts && forge test`.
 
 ## Running the demo
