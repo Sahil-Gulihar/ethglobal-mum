@@ -6,8 +6,9 @@
     "introduction",
     "quickstart",
     "---Accept payments---",
-    "checkout-widget",
+    "payment-links",
     "hosted-checkout",
+    "checkout-widget",
     "checkout-sessions",
     "payments",
     "refunds",
@@ -21,7 +22,6 @@
     "smart-contract",
     "---Operate---",
     "dashboard",
-    "testing",
-    "self-hosting"
+    "testing"
   ]
 }

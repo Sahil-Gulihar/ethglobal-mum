@@ -119,7 +119,6 @@ Restart the store after changing its variables.
 | Variable | Notes |
 | --- | --- |
 | `DEPLOYER_ADDRESS` | The address of `DEPLOYER_PRIVATE_KEY`, kept for reference. No code reads it. |
-| `WORLD_APP_ID`, `WORLD_ACTION` | Reserved for the planned World ID verification. Not used yet. |
 
 ## Cron tick instead of the worker
 
@@ -212,16 +211,9 @@ Set a long random `CRON_SECRET` in production. Without it, `/api/cron/tick` reje
 
 ### World ID (SKIP_WORLD_ID)
 
-World ID human verification isn't built yet. A merchant's status is set once, at signup:
+With verification enabled, new merchants remain pending until they complete World ID Proof of Human on **Setup**. Configure `WORLD_APP_ID`, `WORLD_RP_ID`, and `WORLD_RP_SIGNER_PRIVATE_KEY` for your relying party. `WORLD_ACTION` defaults to `merchant-onboarding` and `WORLD_ENVIRONMENT` defaults to `staging`. Use the World simulator for staging or set `WORLD_ENVIRONMENT=production` for World App users.
 
-| `SKIP_WORLD_ID` | New merchants |
-| --- | --- |
-| `false` | `pending` |
-| Any other non-empty value, such as `true` | `active` |
-| Unset or empty, outside production | `active` |
-| Unset or empty, in production | `pending` |
-
-Pending merchants can't register a payout wallet, create keys or create checkout sessions, and there's no flow yet to make them active. So for a production deployment today, set `SKIP_WORLD_ID=true` explicitly. Changing the flag later doesn't change existing merchants.
+Set `SKIP_WORLD_ID=true` to activate new merchants at signup. If unset, verification is skipped only outside production.
 
 ### Webhook URL guard
 
@@ -245,7 +237,7 @@ The demo store is a sample, not a production pattern. Its `/admin` page is publi
 
 ## Related
 
-- [Testing](./testing.md)
-- [Dashboard](./dashboard.md)
-- [Smart contract](./smart-contract.md)
-- [Webhooks](./webhooks.md)
+- [Testing](./developers/testing.md)
+- [Dashboard](./developers/dashboard.md)
+- [Smart contract](./developers/smart-contract.md)
+- [Webhooks](./developers/webhooks.md)

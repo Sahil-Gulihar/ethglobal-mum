@@ -32,7 +32,7 @@ Inside the monorepo, add it as a workspace dependency:
 }
 ```
 
-Then run `pnpm install` from the repo root.
+For an external store, bring both SDK packages into your store's workspace or distribute them through your own package registry. If you do not want to manage SDK source, use [hosted checkout](./hosted-checkout.md) over HTTP.
 
 The package exports TypeScript source (`./src/index.ts` and `./src/server.ts`), so your bundler must compile it. In Next.js, list both workspace packages in `transpilePackages`. This is what the demo store (`apps/demo-store/next.config.ts`) does:
 
@@ -76,12 +76,12 @@ import { createCheckoutSession } from "@whitechain-commerce/react/server";
 export async function POST() {
   const orderId = `order_${Date.now()}`;
   const session = await createCheckoutSession({
-    apiBase: process.env.WC_API_BASE ?? "http://localhost:3000",
+    apiBase: process.env.WC_API_ORIGIN ?? "https://whitechain-dashboard.vercel.app",
     secretKey: process.env.WC_SECRET_KEY!, // sk_test_...
     orderId,
     amount: "4.99", // USDT, decided on the server
-    successUrl: `http://localhost:3001/orders/${orderId}`,
-    cancelUrl: "http://localhost:3001/",
+    successUrl: `https://store.example.com/orders/${orderId}`,
+    cancelUrl: "https://store.example.com/",
   });
   return Response.json({ orderId, sessionId: session.id });
 }
@@ -101,7 +101,7 @@ export function Pay({ orderId, sessionId }: { orderId: string; sessionId: string
   return (
     <WhitechainCheckout
       sessionId={sessionId}
-      apiBase={process.env.NEXT_PUBLIC_WC_API_BASE ?? "http://localhost:3000"}
+      apiBase={process.env.NEXT_PUBLIC_WC_API_BASE ?? "https://whitechain-dashboard.vercel.app"}
       // UI only. Fulfil the order from the payment.succeeded webhook.
       onSuccess={() => router.push(`/orders/${orderId}`)}
       onError={(error) => console.error("Checkout error", error)}
@@ -117,7 +117,7 @@ The demo store uses the same pattern in `apps/demo-store/src/app/api/orders/rout
 | Prop | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
 | `sessionId` | `string` | Yes | | The checkout session id (`cs_...`) returned by `createCheckoutSession` or `POST /api/v1/checkout_sessions`. |
-| `apiBase` | `string` | No | See [API base resolution](#api-base-resolution) | Origin of the Whitechain Commerce API, for example `"http://localhost:3000"`. A trailing slash is removed. |
+| `apiBase` | `string` | No | See [API base resolution](#api-base-resolution) | Origin of the Whitechain Commerce API, for example `"https://whitechain-dashboard.vercel.app"`. A trailing slash is removed. |
 | `onSuccess` | `(result: CheckoutSuccess) => void` | No | | Called once, when the session is `paid` according to the backend. UI only. |
 | `onError` | `(error: Error) => void` | No | | Called on failures. Not called when the customer rejects a request in their wallet. |
 | `onCancel` | `() => void` | No | Navigate to the session's `cancelUrl` | Called when the customer clicks "Cancel and return to store". |
@@ -299,7 +299,7 @@ Creates a checkout session by calling `POST {apiBase}/api/v1/checkout_sessions` 
 
 | Param | Type | Required | Description |
 | --- | --- | --- | --- |
-| `apiBase` | `string` | No | API origin, for example `"http://localhost:3000"`. Defaults to `NEXT_PUBLIC_WC_API_BASE`. Required if that is not set. |
+| `apiBase` | `string` | No | API origin, for example `"https://whitechain-dashboard.vercel.app"`. Defaults to `NEXT_PUBLIC_WC_API_BASE`. Required if that is not set. |
 | `secretKey` | `string` | Yes | Your secret key (`sk_test_...`). |
 | `orderId` | `string` | Yes | Your own order id. One session pays one order. The API accepts 1 to 200 characters after trimming. |
 | `amount` | `string` | Yes | Positive decimal USDT amount with at most 6 decimals, for example `"49.99"`. |
@@ -336,7 +336,7 @@ import { createCheckoutSession, WhitechainApiError } from "@whitechain-commerce/
 
 try {
   const session = await createCheckoutSession({
-    apiBase: "http://localhost:3000",
+    apiBase: "https://whitechain-dashboard.vercel.app",
     secretKey: process.env.WC_SECRET_KEY!,
     orderId: "order_456",
     amount: "49.99",

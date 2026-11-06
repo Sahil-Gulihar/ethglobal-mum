@@ -1,30 +1,22 @@
-# Whitechain Commerce developer docs
+# Accept payments with Whitechain Commerce
 
-Everything you need to accept USDT on Whitechain with Whitechain Commerce.
+Whitechain Commerce gives your store a way to accept USDT payments from customers who use a wallet on Whitechain. The funds go straight to your payout wallet. You can confirm payments in the dashboard, verify transactions on the block explorer, and send full or partial refunds from your wallet.
 
-Whitechain Commerce is a non-custodial USDT checkout for Whitechain Sepolia (chain id `1874`).
-Your server creates a checkout session, the customer pays from their own wallet straight to your payout wallet, and you get a signed webhook when the payment is confirmed onchain.
-You can refund in full or in part from the same payout wallet. The platform never holds your funds.
+**Testnet only.** Use Whitechain Sepolia to try the checkout and verify your integration with test orders. Mainnet payments and live API keys are unavailable.
 
-New here? Read the [introduction](./introduction.md), then follow the [quickstart](./quickstart.md).
+## Choose how to accept payments
 
-## Contents
-
-| Page | What it covers |
+| If you want to… | Start here |
 | --- | --- |
-| [Docs home](./README.md) | This page |
-| [Introduction](./introduction.md) | Core products, how money flows, the object model, statuses, network details and limitations |
-| [Quickstart](./quickstart.md) | Take your first testnet payment end to end in about 10 minutes |
-| [Checkout widget](./checkout-widget.md) | The `<WhitechainCheckout />` React component, its props and callbacks |
-| [Hosted checkout](./hosted-checkout.md) | Redirect customers to a checkout page hosted by the dashboard |
-| [Checkout sessions](./checkout-sessions.md) | Creating sessions from your server, idempotency and expiry |
-| [Payments](./payments.md) | The payment object and how payments are confirmed |
-| [Refunds](./refunds.md) | Full and partial refunds signed by your payout wallet |
-| [Webhooks](./webhooks.md) | Events, signature verification, retries and redelivery |
-| [API reference](./api-reference.md) | Every `/api/v1` endpoint with request and response fields |
-| [Errors](./errors.md) | Error format, error types and HTTP status codes |
-| [Smart contract](./smart-contract.md) | The `PaymentRouter` contract, its functions, events and errors |
-| [Dashboard](./dashboard.md) | The merchant dashboard, onboarding checklist and CSV export |
-| [Testing](./testing.md) | Testnet funds, test webhook events and local fork testing |
-| [Self-hosting](./self-hosting.md) | Running the dashboard, worker and database yourself |
-| [llms.txt](./llms.txt) | A plain-text index of these docs for LLMs and coding agents |
+| Share a fixed-price checkout in a message or on your site | [Payment links](./payment-links.md). Create and share a link from the dashboard without writing code. |
+| Add USDT to your store's existing checkout | [Store integration quickstart](./quickstart.md). Create one session per order, redirect shoppers to hosted checkout, and update your orders with signed webhooks. |
+| Keep checkout inside your React storefront | [Checkout widget](./checkout-widget.md). Embed the wallet and payment flow if you can build with the SDK workspace packages. The SDK is not published to npm. |
+
+## Build and operate your integration
+
+- [Test your integration](./testing.md): get testnet funds, verify webhook delivery, and check a complete payment.
+- [Dashboard](./dashboard.md): manage your payout wallet, payments, refunds, and exports.
+- [Webhooks](./webhooks.md): verify signatures, handle retries, and update orders safely.
+- [API reference](./api-reference.md): request and response formats for checkout sessions, payments, and refunds.
+- [How payments work](./introduction.md): follow the funds from the customer's wallet to yours.
+- [Agents and MCP](./agents.md): connect an agent to your merchant account.

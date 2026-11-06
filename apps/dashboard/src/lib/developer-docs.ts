@@ -10,14 +10,15 @@ import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
-import { visit } from "unist-util-visit";
+import { SKIP, visit } from "unist-util-visit";
+import { codeHighlighter, codeThemes } from "./code-highlighting";
 
 export const docGroups = [
-  { label: "Get started", pages: [["", "Overview"], ["introduction", "Introduction"], ["quickstart", "Quickstart"]] },
-  { label: "Accept payments", pages: [["checkout-sessions", "Checkout sessions"], ["hosted-checkout", "Hosted checkout"], ["checkout-widget", "Checkout widget"], ["payments", "Payments"], ["refunds", "Refunds"], ["webhooks", "Webhooks"]] },
+  { label: "Get started", pages: [["", "Overview"], ["introduction", "Introduction"], ["quickstart", "Store integration quickstart"]] },
+  { label: "Accept payments", pages: [["payment-links", "Payment links"], ["checkout-sessions", "Checkout sessions"], ["hosted-checkout", "Hosted checkout"], ["checkout-widget", "Checkout widget"], ["payments", "Payments"], ["refunds", "Refunds"], ["webhooks", "Webhooks"]] },
   { label: "Agents", pages: [["agents", "Agents and MCP"]] },
   { label: "Reference", pages: [["api-reference", "API reference"], ["errors", "Errors"], ["smart-contract", "Smart contract"]] },
-  { label: "Operate", pages: [["dashboard", "Dashboard"], ["testing", "Testing"], ["self-hosting", "Self-hosting"]] },
+  { label: "Operate", pages: [["dashboard", "Dashboard"], ["testing", "Test your integration"]] },
 ] as const;
 
 export const docPages = docGroups.flatMap(({ label, pages }) =>
@@ -49,6 +50,8 @@ export async function renderDoc(slug: string) {
   const markdown = frontmatter ? raw.slice(frontmatter[0].length).trimStart() : raw;
   const [, title, body] = markdown.match(/^# ([^\n]+)\n+([\s\S]*)$/) ?? [];
   const headings: { id: string; title: string; level: number }[] = [];
+  const highlighter = await codeHighlighter;
+  const languages = new Set(highlighter.getLoadedLanguages());
   const html = await unified()
     .use(remarkParse)
     .use(remarkGfm)
@@ -56,7 +59,32 @@ export async function renderDoc(slug: string) {
     .use(rehypeSanitize)
     .use(rehypeSlug)
     .use(() => (tree: Root) => {
-      visit(tree, "element", (node) => {
+      visit(tree, "element", (node, index, parent) => {
+        if (node.tagName === "pre" && parent && index !== undefined) {
+          const code = node.children[0];
+          if (code?.type === "element" && code.tagName === "code") {
+            const classes = code.properties.className;
+            const lang = Array.isArray(classes)
+              ? classes.find((name) => typeof name === "string" && name.startsWith("language-"))
+              : undefined;
+            const language = typeof lang === "string" ? lang.slice("language-".length) : "";
+            if (languages.has(language)) {
+              const highlighted = highlighter.codeToHast(toString(code).replace(/\n$/, ""), {
+                ...codeThemes,
+                lang: language,
+              });
+              parent.children.splice(index, 1, ...highlighted.children);
+              return SKIP;
+            }
+          }
+        }
+
+        const productImagePrefix = "../../apps/dashboard/public/product/";
+        if (node.tagName === "img" && typeof node.properties.src === "string"
+          && node.properties.src.startsWith(productImagePrefix)) {
+          node.properties.src = node.properties.src.replace(productImagePrefix, "/product/");
+        }
+
         if (node.tagName === "a" && typeof node.properties.href === "string") {
           node.properties.href = docLink(node.properties.href);
         }

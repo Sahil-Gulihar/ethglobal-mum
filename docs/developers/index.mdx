@@ -1,36 +1,25 @@
 ---
-title: Accept USDT on Whitechain
-description: A non-custodial USDT checkout. Customers pay from their own wallet straight to yours, you get a signed webhook when it settles, and you can refund from the same wallet.
+title: Accept payments with Whitechain Commerce
+description: Add on-chain USDT payments to your store on Whitechain Sepolia testnet.
 ---
 
-Your server creates a checkout session, the customer pays from their wallet straight to your payout wallet on Whitechain Sepolia (chain id `1874`), and you get a signed webhook once the payment is confirmed onchain. Whitechain Commerce never holds your funds.
+Whitechain Commerce gives your store a way to accept USDT payments from customers who use a wallet on Whitechain. The funds go straight to your payout wallet. You can confirm payments in the dashboard, verify transactions on the block explorer, and send full or partial refunds from your wallet.
 
-## Get started
+**Testnet only.** Use Whitechain Sepolia to try the checkout and verify your integration with test orders. Mainnet payments and live API keys are unavailable.
 
-<Cards>
-  <Card title="Quickstart" href="/docs/quickstart" description="Take your first testnet payment end to end in about 10 minutes." />
-  <Card title="Introduction" href="/docs/introduction" description="How money flows, the object model, statuses and network details." />
-</Cards>
+## Choose how to accept payments
 
-## Accept payments
+| If you want to… | Start here |
+| --- | --- |
+| Share a fixed-price checkout in a message or on your site | [Payment links](./payment-links.md). Create and share a link from the dashboard without writing code. |
+| Add USDT to your store's existing checkout | [Store integration quickstart](./quickstart.md). Create one session per order, redirect shoppers to hosted checkout, and update your orders with signed webhooks. |
+| Keep checkout inside your React storefront | [Checkout widget](./checkout-widget.md). Embed the wallet and payment flow if you can build with the SDK workspace packages. The SDK is not published to npm. |
 
-<Cards>
-  <Card title="Checkout widget" href="/docs/checkout-widget" description="Embed <WhitechainCheckout /> in your React app." />
-  <Card title="Hosted checkout" href="/docs/hosted-checkout" description="Redirect customers to a payment page we host." />
-  <Card title="Checkout sessions" href="/docs/checkout-sessions" description="Create sessions on your server, with idempotency and expiry." />
-  <Card title="Refunds" href="/docs/refunds" description="Full and partial refunds signed by your payout wallet." />
-</Cards>
+## Build and operate your integration
 
-## Build with the API
-
-<Cards>
-  <Card title="Webhooks" href="/docs/webhooks" description="Events, signature verification, retries and redelivery." />
-  <Card title="Agents and MCP" href="/docs/agents" description="Connect Claude, ChatGPT, Cursor or your own agent over MCP." />
-  <Card title="API reference" href="/docs/api-reference" description="Every /api/v1 endpoint with request and response fields." />
-  <Card title="Errors" href="/docs/errors" description="The error format, error types and HTTP status codes." />
-  <Card title="Smart contract" href="/docs/smart-contract" description="The PaymentRouter contract, its events and errors." />
-</Cards>
-
-## For AI tools
-
-These docs are available as plain text for LLMs and coding agents: [/llms.txt](/llms.txt) (index) and [/llms-full.txt](/llms-full.txt) (everything). Any page can also be fetched as Markdown by adding `.md` to its URL.
+- [Test your integration](./testing.md): get testnet funds, verify webhook delivery, and check a complete payment.
+- [Dashboard](./dashboard.md): manage your payout wallet, payments, refunds, and exports.
+- [Webhooks](./webhooks.md): verify signatures, handle retries, and update orders safely.
+- [API reference](./api-reference.md): request and response formats for checkout sessions, payments, and refunds.
+- [How payments work](./introduction.md): follow the funds from the customer's wallet to yours.
+- [Agents and MCP](./agents.md): connect an agent to your merchant account.

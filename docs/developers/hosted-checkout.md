@@ -13,15 +13,13 @@ Every checkout session has a `url` field. It points to the hosted checkout page,
 4. Once the backend has verified the payment onchain, the page redirects the customer to your `successUrl`.
 5. Your server receives a signed `payment.succeeded` webhook and fulfils the order. See [Webhooks](./webhooks.md).
 
+![Hosted checkout receipt showing a confirmed 49.99 USDT payment for sample order 4821.](../../apps/dashboard/public/product/checkout-sample.webp)
+
+*Sample testnet checkout after payment confirmation.*
+
 ## The checkout URL
 
-The `url` field is built from the dashboard's `APP_URL` setting:
-
-```
-{APP_URL}/checkout/{sessionId}
-```
-
-`APP_URL` defaults to `http://localhost:3000`, so locally a session URL looks like `http://localhost:3000/checkout/cs_...`. Always use the `url` the API returns rather than building it yourself.
+Always use the `url` returned by the API. For example, `https://whitechain-dashboard.vercel.app/checkout/cs_...`.
 
 `url` is part of the secret view of a session (`CheckoutSession`), returned when you create it with your secret key. The public view (`GET /api/v1/checkout_sessions/:id`, used by the widget) does not include it.
 
@@ -30,18 +28,18 @@ The `url` field is built from the dashboard's `APP_URL` setting:
 With curl:
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/checkout_sessions \
+curl -X POST https://whitechain-dashboard.vercel.app/api/v1/checkout_sessions \
   -H "Authorization: Bearer sk_test_..." \
   -H "Content-Type: application/json" \
   -d '{
     "orderId": "order_123",
     "amount": "4.99",
-    "successUrl": "http://localhost:3001/orders/order_123",
-    "cancelUrl": "http://localhost:3001/"
+    "successUrl": "https://store.example.com/orders/order_123",
+    "cancelUrl": "https://store.example.com/"
   }'
 ```
 
-The response is the full session, including `"url": "http://localhost:3000/checkout/cs_..."`. A new session returns HTTP `201`. If an unexpired `open` session (or a `processing` one) for the same `orderId` and amount already exists, the API returns it with HTTP `200`.
+The response is the full session, including `"url": "https://whitechain-dashboard.vercel.app/checkout/cs_..."`. A new session returns HTTP `201`. If an unexpired `open` session (or a `processing` one) for the same `orderId` and amount already exists, the API returns it with HTTP `200`.
 
 With the server helper:
 
@@ -49,14 +47,14 @@ With the server helper:
 import { createCheckoutSession } from "@whitechain-commerce/react/server";
 
 const session = await createCheckoutSession({
-  apiBase: "http://localhost:3000",
+  apiBase: "https://whitechain-dashboard.vercel.app",
   secretKey: process.env.WC_SECRET_KEY!, // sk_test_...
   orderId: "order_123",
   amount: "4.99",
-  successUrl: "http://localhost:3001/orders/order_123",
-  cancelUrl: "http://localhost:3001/",
+  successUrl: "https://store.example.com/orders/order_123",
+  cancelUrl: "https://store.example.com/",
 });
-// session.url === "http://localhost:3000/checkout/cs_..."
+// session.url === "https://whitechain-dashboard.vercel.app/checkout/cs_..."
 ```
 
 For every parameter and error, see [`createCheckoutSession`](./checkout-widget.md#createcheckoutsessionparams) and the [API reference](./api-reference.md).
@@ -72,12 +70,12 @@ import { createCheckoutSession } from "@whitechain-commerce/react/server";
 export async function POST() {
   const orderId = `order_${Date.now()}`;
   const session = await createCheckoutSession({
-    apiBase: process.env.WC_API_BASE ?? "http://localhost:3000",
+    apiBase: process.env.WC_API_ORIGIN ?? "https://whitechain-dashboard.vercel.app",
     secretKey: process.env.WC_SECRET_KEY!,
     orderId,
     amount: "4.99",
-    successUrl: `http://localhost:3001/orders/${orderId}`,
-    cancelUrl: "http://localhost:3001/",
+    successUrl: `https://store.example.com/orders/${orderId}`,
+    cancelUrl: "https://store.example.com/",
   });
   return Response.redirect(session.url, 303);
 }
@@ -115,7 +113,7 @@ The hosted page reads one query parameter:
 | `theme` | `dark` | Light | `?theme=dark` renders the checkout card in the dark theme. Any other value, or none, renders it in the light theme. |
 
 ```
-http://localhost:3000/checkout/cs_...?theme=dark
+https://whitechain-dashboard.vercel.app/checkout/cs_...?theme=dark
 ```
 
 The theme changes the checkout card. The page around it always has a dark background.
@@ -133,7 +131,7 @@ If the session id does not exist, the card shows "We couldn't load this checkout
 | | Hosted checkout | Embedded widget |
 | --- | --- | --- |
 | Frontend code | None. Redirect to `session.url`. | Render `<WhitechainCheckout />` in your React app. |
-| Where the customer pays | On the Whitechain Commerce domain (`APP_URL`). | On your own page, next to your order summary. |
+| Where the customer pays | On the Whitechain Commerce domain. | On your own page, next to your order summary. |
 | After payment | Automatic redirect to `successUrl` after 2 seconds. | Your `onSuccess` callback decides. The widget does not redirect on its own. |
 | Cancel | Navigates to `cancelUrl`. | Your `onCancel` callback, or `cancelUrl` if you do not pass one. |
 | Theme | `?theme=dark` query parameter. | `theme` prop. |

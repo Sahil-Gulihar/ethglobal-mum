@@ -7,13 +7,13 @@ The API is small on purpose. Your server creates checkout sessions and refund re
 
 ## Base URL
 
-The API is served by the dashboard app. Locally that is:
+The hosted API base URL is:
 
 ```
-http://localhost:3000/api/v1
+https://whitechain-dashboard.vercel.app/api/v1
 ```
 
-On a deployed instance, the base is whatever origin the dashboard runs on. The hosted checkout URL returned in `CheckoutSession.url` is built from the `APP_URL` environment variable (default `http://localhost:3000`).
+Use the API origin shown under **Developers** in your dashboard. For hosted checkout, redirect to the URL returned in `CheckoutSession.url`.
 
 Only test mode exists. Keys start with `sk_test_` and every payment settles on Whitechain Sepolia (chain id `1874`).
 
@@ -149,7 +149,7 @@ The merchant account must have a payout wallet registered onchain. Otherwise the
 ### Example
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/checkout_sessions \
+curl -X POST https://whitechain-dashboard.vercel.app/api/v1/checkout_sessions \
   -H "Authorization: Bearer $WC_SECRET_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -181,7 +181,7 @@ curl -X POST http://localhost:3000/api/v1/checkout_sessions \
   "successUrl": "https://shop.example.com/orders/order_1042",
   "cancelUrl": "https://shop.example.com/cart",
   "payment": null,
-  "url": "http://localhost:3000/checkout/cs_Q3n8ZpK2vRt6YxLm4WbH",
+  "url": "https://whitechain-dashboard.vercel.app/checkout/cs_Q3n8ZpK2vRt6YxLm4WbH",
   "metadata": { "customerId": "cus_88" },
   "createdAt": "2026-11-06T10:15:00.000Z"
 }
@@ -193,7 +193,7 @@ From TypeScript, the server helper in the React SDK wraps this endpoint:
 import { createCheckoutSession } from "@whitechain-commerce/react/server";
 
 const session = await createCheckoutSession({
-  apiBase: "http://localhost:3000",
+  apiBase: "https://whitechain-dashboard.vercel.app",
   secretKey: process.env.WC_SECRET_KEY!,
   orderId: "order_1042",
   amount: "49.99",
@@ -229,7 +229,7 @@ There is no authenticated "retrieve session" endpoint. The full [CheckoutSession
 ### Example
 
 ```bash
-curl http://localhost:3000/api/v1/checkout_sessions/cs_Q3n8ZpK2vRt6YxLm4WbH
+curl https://whitechain-dashboard.vercel.app/api/v1/checkout_sessions/cs_Q3n8ZpK2vRt6YxLm4WbH
 ```
 
 ```json
@@ -302,7 +302,7 @@ What it does:
 ### Example
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/checkout_sessions/cs_Q3n8ZpK2vRt6YxLm4WbH/submit \
+curl -X POST https://whitechain-dashboard.vercel.app/api/v1/checkout_sessions/cs_Q3n8ZpK2vRt6YxLm4WbH/submit \
   -H "Content-Type: application/json" \
   -d '{ "txHash": "0xca1467eb1d7b29899ff948051bd8cd21e1c4581e9e60d6d9cbc0ccf74e97e9b4" }'
 ```
@@ -347,7 +347,7 @@ Returns your payments, newest first.
 ### Example
 
 ```bash
-curl "http://localhost:3000/api/v1/payments?limit=2" \
+curl "https://whitechain-dashboard.vercel.app/api/v1/payments?limit=2" \
   -H "Authorization: Bearer $WC_SECRET_KEY"
 ```
 
@@ -395,7 +395,7 @@ Returns one [PaymentObject](#paymentobject). Payments of other merchants return 
 ### Example
 
 ```bash
-curl http://localhost:3000/api/v1/payments/pay_Vb3kT9wQ2mXr7LpN5sZe \
+curl https://whitechain-dashboard.vercel.app/api/v1/payments/pay_Vb3kT9wQ2mXr7LpN5sZe \
   -H "Authorization: Bearer $WC_SECRET_KEY"
 ```
 
@@ -437,7 +437,7 @@ The refundable balance is the payment amount minus what has already been refunde
 ### Example
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/refunds \
+curl -X POST https://whitechain-dashboard.vercel.app/api/v1/refunds \
   -H "Authorization: Bearer $WC_SECRET_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "paymentId": "pay_Vb3kT9wQ2mXr7LpN5sZe", "amount": "10.00" }'
@@ -492,7 +492,7 @@ Returns your refunds, newest first, at most 100.
 ### Example
 
 ```bash
-curl "http://localhost:3000/api/v1/refunds?paymentId=pay_Vb3kT9wQ2mXr7LpN5sZe" \
+curl "https://whitechain-dashboard.vercel.app/api/v1/refunds?paymentId=pay_Vb3kT9wQ2mXr7LpN5sZe" \
   -H "Authorization: Bearer $WC_SECRET_KEY"
 ```
 
@@ -550,7 +550,7 @@ Returned by `POST /api/v1/checkout_sessions`. All fields of [PublicCheckoutSessi
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `url` | string | Hosted checkout page, `<APP_URL>/checkout/<id>`. |
+| `url` | string | Full URL to the hosted checkout page. |
 | `metadata` | object \| null | Your metadata, or `null`. |
 | `createdAt` | string | ISO timestamp of creation. |
 
@@ -591,33 +591,6 @@ Returned by the refunds endpoints and inside `refund.succeeded` events.
 | `txHash` | string \| null | Refund transaction, lowercase. `null` while pending. |
 | `explorerUrl` | string \| null | Explorer link for `txHash`, or `null`. |
 | `createdAt` | string | ISO timestamp. For a request made through the API or dashboard, when the request was created. For a refund made without a request, when the indexer recorded it. |
-
----
-
-## Operator endpoint: cron tick
-
-```
-GET /api/cron/tick
-```
-
-This is not part of the merchant API. It is for whoever runs the platform, to drive the indexer and webhook delivery from a scheduler instead of the long-running worker (`pnpm worker`). See [Self-hosting](./self-hosting.md).
-
-- Auth: `Authorization: Bearer <CRON_SECRET>`, compared in constant time. When `CRON_SECRET` is unset, the secret is `dev-cron-secret` outside production; in production every call returns `503`.
-- It runs one indexer pass, then sends due webhook deliveries.
-- It sends no CORS headers, so it is not meant to be called from a browser.
-
-| Status | Body |
-| --- | --- |
-| 200 | `{ "ok": true, "indexer": { "fromBlock": "...", "toBlock": "...", "processed": 0 }, "webhooks": { "attempted": 0 }, "durationMs": 812 }` |
-| 500 | Same shape with `"ok": false`; the failed part is `{ "error": "<message>" }` |
-| 401 | `{ "error": { "type": "authentication_error", "message": "Invalid cron secret" } }` |
-| 503 | `{ "error": { "type": "server_error", "message": "CRON_SECRET is not configured" } }` |
-
-```bash
-curl http://localhost:3000/api/cron/tick -H "Authorization: Bearer $CRON_SECRET"
-```
-
-Note that the 401 type here is `authentication_error`, not the `authentication` used by `/api/v1`.
 
 ## Not available
 

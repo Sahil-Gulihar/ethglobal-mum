@@ -2,26 +2,19 @@
 
 # Whitechain Commerce
 
-A drop-in, non-custodial USDT checkout for Whitechain. A merchant signs up, registers a payout wallet, and adds a
-React component (or links to a hosted checkout page). Customers pay in USDT straight from their wallet to the merchant's
-wallet in one block. The merchant gets signed webhooks and a dashboard, and can send full or partial refunds that are
-linked to the original payment onchain. Built for ETHGlobal Mumbai 2026.
+Whitechain Commerce lets merchants add on-chain USDT payments to their stores. Customers pay from their wallets and funds settle directly to the merchant's payout wallet. Start with hosted checkout or share a fixed-price payment link. The platform currently runs on Whitechain Sepolia testnet only. Built for ETHGlobal Mumbai 2026.
 
-- [Product spec](docs/SPEC.md) · [Frozen interfaces](docs/INTERFACES.md) · [Deployments](docs/DEPLOYMENTS.md)
+## Merchant docs
 
-## Developer docs
+- [Merchant dashboard](https://whitechain-dashboard.vercel.app) and [merchant docs](https://whitechain-dashboard.vercel.app/docs)
+- [Store integration quickstart](docs/developers/quickstart.md), [payment links](docs/developers/payment-links.md), and [webhooks](docs/developers/webhooks.md)
+- [Agents and MCP](docs/developers/agents.md)
 
-Live docs site: **https://whitechain-docs.vercel.app** (Fumadocs app in `apps/docs`, built from the Markdown in [docs/developers](docs/developers/index.mdx)):
-
-- [Quickstart](docs/developers/quickstart.md): your first testnet payment end to end
-- [Checkout widget](docs/developers/checkout-widget.md) and [hosted checkout](docs/developers/hosted-checkout.md)
-- [Webhooks](docs/developers/webhooks.md) and [API reference](docs/developers/api-reference.md)
-- [Agents and MCP](docs/developers/agents.md): hosted MCP server, `npx @whitechain-commerce/mcp init` for any repo, and an agent toolkit
-- [llms.txt](https://whitechain-docs.vercel.app/llms.txt): a plain-text index for LLMs and coding agents
+For contributors and operators: [self-hosting](docs/SELF_HOSTING.md), [maintainer testing](docs/MAINTAINER_TESTING.md), [product spec](docs/SPEC.md), and [deployments](docs/DEPLOYMENTS.md).
 
 ## Why Whitechain
 
-Card rails can't give a merchant final settlement in seconds to a wallet they control, with no chargebacks, payout delays or cross-border fees. Whitechain USDT settlement does, and every payment and refund is linked to its order onchain so customers can verify it themselves.
+Customers pay in USDT on Whitechain and the funds go directly to the merchant's wallet. Each confirmed payment and refund has a transaction record you can verify on the block explorer.
 
 ## Deployed contract
 

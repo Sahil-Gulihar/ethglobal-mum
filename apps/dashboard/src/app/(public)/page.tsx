@@ -5,14 +5,14 @@ import { Wordmark } from "@/components/brand";
 import { Icon } from "@/components/icons";
 import { CodeBlock } from "@/components/code-block";
 
-const checkoutExample = String.raw`curl --fail-with-body "$WC_API_BASE/api/v1/checkout_sessions" \
+const checkoutExample = String.raw`curl --fail-with-body "$WC_API_BASE/checkout_sessions" \
   -H "Authorization: Bearer $WC_SECRET_KEY" \
   -H "Content-Type: application/json" \
   -d '{"orderId":"order_4821","amount":"49.99","currency":"USDT"}'`;
 
 const steps = [
   ["Set up your store", "Create an account and connect the wallet where you want to receive payments."],
-  ["Add checkout", "Create a session on your server and send customers to your hosted checkout."],
+  ["Add checkout", "Send customers to hosted checkout from your store, or share a fixed-price payment link."],
   ["Get paid directly", "Your customer pays in USDT. A signed webhook tells your store when the payment settles."],
 ];
 
@@ -27,11 +27,11 @@ export default async function Landing() {
         <section className="landing-hero" aria-labelledby="landing-title">
           <div className="landing-intro">
             <p className="landing-network">Whitechain Sepolia · Testnet only</p>
-            <h1 id="landing-title">USDT checkout, straight to your wallet</h1>
+            <h1 id="landing-title">Accept on-chain payments on Whitechain</h1>
             <p className="landing-lede">Let customers pay in USDT on Whitechain. Payments settle directly to your wallet, and signed webhooks tell your store when to fulfil an order.</p>
             <div className="public-actions">
               <Link href={destination} className="public-primary">{cta} <Icon name="arrowRight" /></Link>
-              <Link href="/docs" className="public-secondary">Read the docs</Link>
+              <Link href="/docs" className="public-secondary">Integration guide</Link>
             </div>
           </div>
 
@@ -89,7 +89,7 @@ export default async function Landing() {
             <Link href="/docs/quickstart" className="public-secondary">Integration quickstart <Icon name="arrowRight" /></Link>
           </div>
           <div className="landing-code">
-            <CodeBlock filename="Create a checkout session" code={checkoutExample} />
+            <CodeBlock language="bash" filename="Create a checkout session" code={checkoutExample} />
           </div>
         </section>
       </main>

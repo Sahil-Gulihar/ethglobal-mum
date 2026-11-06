@@ -6,9 +6,11 @@
 
 - [Docs home](./README.md): index of every page in these docs
 - [Introduction](./introduction.md): core products, how money flows, the object model, statuses, network details and limitations
-- [Quickstart](./quickstart.md): take a first testnet payment end to end, from account to verified webhook
+- [Store integration quickstart](./quickstart.md): take a first testnet payment end to end, from account to verified webhook
 
 ## Accept payments
+
+- [Payment links](./payment-links.md): take fixed-price payments without code
 
 - [Checkout widget](./checkout-widget.md): the <WhitechainCheckout /> React component, its props, callbacks, screens and the server helpers
 - [Hosted checkout](./hosted-checkout.md): redirect customers to the checkout page served by the dashboard at /checkout/{sessionId}
@@ -33,5 +35,4 @@
 ## Operate
 
 - [Dashboard](./dashboard.md): signup, onboarding checklist, payout wallet, secret keys, webhook endpoints, refunds and CSV export
-- [Testing](./testing.md): testnet funds, local webhook testing, the project's test suites and local fork runs
-- [Self-hosting](./self-hosting.md): architecture, setup, environment variables, the worker, cron tick and contract deployment
+- [Test your integration](./testing.md): testnet funds, signed test events and end-to-end payment checks
