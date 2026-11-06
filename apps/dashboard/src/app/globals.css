@@ -1,26 +1,147 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Whitechain Commerce tokens (shadcn/ui variable names).
+ * Ink #0B0B12 + electric blue #3B5BFF accent.
+ */
 :root {
+  --radius: 0.75rem;
+  --ink: #0b0b12;
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0b0b12;
+  --card: #ffffff;
+  --card-foreground: #0b0b12;
+  --popover: #ffffff;
+  --popover-foreground: #0b0b12;
+  --primary: #3b5bff;
+  --primary-foreground: #ffffff;
+  --secondary: #f2f3f7;
+  --secondary-foreground: #0b0b12;
+  --muted: #f5f6f9;
+  --muted-foreground: #5b5f72;
+  --accent: #eef1ff;
+  --accent-foreground: #2a44d6;
+  --destructive: #d92d4a;
+  --destructive-foreground: #ffffff;
+  --success: #0e8a5f;
+  --success-soft: #e6f6ef;
+  --warning: #a15c00;
+  --warning-soft: #fdf3e2;
+  --border: #e6e7ee;
+  --input: #dcdee8;
+  --ring: #3b5bff;
+  --sidebar: #fafafc;
+}
+
+.dark {
+  --background: #0b0b12;
+  --foreground: #f3f4f8;
+  --card: #12121c;
+  --card-foreground: #f3f4f8;
+  --popover: #12121c;
+  --popover-foreground: #f3f4f8;
+  --primary: #5873ff;
+  --primary-foreground: #ffffff;
+  --secondary: #1b1b28;
+  --secondary-foreground: #f3f4f8;
+  --muted: #171724;
+  --muted-foreground: #a2a6ba;
+  --accent: #1a2150;
+  --accent-foreground: #b9c4ff;
+  --destructive: #ff5c77;
+  --destructive-foreground: #0b0b12;
+  --success: #3ccf95;
+  --success-soft: #0f2a20;
+  --warning: #f2b54a;
+  --warning-soft: #2b2110;
+  --border: #252536;
+  --input: #2c2c40;
+  --ring: #5873ff;
+  --sidebar: #0e0e17;
 }
 
 @theme inline {
+  --color-ink: var(--ink);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  dialog::backdrop {
+    background: rgb(11 11 18 / 0.55);
+    backdrop-filter: blur(2px);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@media (prefers-reduced-motion: no-preference) {
+  .animate-fade-up {
+    animation: wc-fade-up 400ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  dialog[open] {
+    animation: wc-pop 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+
+@keyframes wc-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes wc-pop {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
