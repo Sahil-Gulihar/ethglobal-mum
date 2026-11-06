@@ -137,7 +137,7 @@ export default async function PaymentDetailPage({ params }: { params: Promise<{ 
                   <span
                     aria-hidden
                     className={cn(
-                      "relative z-[1] grid size-8 shrink-0 place-items-center rounded-full border bg-card",
+                      "relative z-[1] grid size-8 shrink-0 place-items-center rounded-sm border-[0.5px] bg-card",
                       e.tone === "done"
                         ? "border-primary/30 text-primary"
                         : e.tone === "failed"

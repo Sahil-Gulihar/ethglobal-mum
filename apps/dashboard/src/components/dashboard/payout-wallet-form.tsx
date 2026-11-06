@@ -56,7 +56,7 @@ function PayoutWalletFormInner({ currentPayout, currentTxHash, submitLabel = "Us
   return (
     <div className="flex flex-col gap-4">
       {currentPayout && (
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border bg-muted/50 px-3 py-2.5 text-sm">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-sm border-[0.5px] bg-muted/50 px-3 py-2.5 text-sm">
           <span className="text-muted-foreground">Current payout</span>
           <ExplorerLink address={currentPayout} label={shortAddr(currentPayout, 10, 8)} />
           {currentTxHash && (
@@ -70,9 +70,9 @@ function PayoutWalletFormInner({ currentPayout, currentTxHash, submitLabel = "Us
       {!manual ? (
         <div className="flex flex-col gap-3">
           {wallet.isConnected && wallet.address ? (
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border px-3 py-2.5">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-sm border-[0.5px] px-3 py-2.5">
               <div className="flex items-center gap-3">
-                <span className="grid size-8 place-items-center rounded-full bg-accent text-accent-foreground">
+                <span className="grid size-8 place-items-center rounded-sm bg-accent text-accent-foreground">
                   <Icon name="wallet" />
                 </span>
                 <div className="flex flex-col">

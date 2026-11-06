@@ -124,7 +124,7 @@ function InfoCard({ label, value, link }: { label: string; value: string; link?:
 function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
   return (
     <div className="flex gap-4">
-      <span aria-hidden className="grid size-6 shrink-0 place-items-center rounded-full bg-accent text-xs font-semibold text-accent-foreground">
+      <span aria-hidden className="grid size-6 shrink-0 place-items-center rounded-sm border-[0.5px] bg-accent text-xs font-semibold text-accent-foreground">
         {n}
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-3">

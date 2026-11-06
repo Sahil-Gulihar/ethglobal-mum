@@ -67,7 +67,7 @@ export function AuthForm({ mode, next }: { mode: "login" | "signup"; next?: stri
         <FieldError id="password-error">{fe.password}</FieldError>
       </div>
 
-      <Button type="submit" size="lg" className="w-full rounded-lg" disabled={pending}>
+      <Button type="submit" size="lg" className="w-full" disabled={pending}>
         {pending && <Spinner />}
         {mode === "signup" ? (pending ? "Creating account…" : "Create account") : pending ? "Logging in…" : "Log in"}
       </Button>

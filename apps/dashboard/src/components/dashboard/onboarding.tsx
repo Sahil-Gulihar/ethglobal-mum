@@ -40,7 +40,7 @@ export function OnboardingChecklist(p: OnboardingProps) {
       done: p.verified,
       skipped: p.verified && p.skipWorldId,
       body: (
-        <div className="flex items-center gap-3 rounded-lg border border-dashed px-3 py-2.5 text-sm text-muted-foreground">
+        <div className="flex items-center gap-3 rounded-sm border-[0.5px] border-dashed px-3 py-2.5 text-sm text-muted-foreground">
           <Icon name="shield" className="text-primary" />
           {p.skipWorldId ? "Verification is skipped. Your account is active." : "World ID verification is coming soon."}
         </div>
@@ -99,7 +99,7 @@ export function OnboardingChecklist(p: OnboardingProps) {
               <span
                 aria-hidden
                 className={cn(
-                  "mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border text-xs font-semibold",
+                  "mt-0.5 grid size-6 shrink-0 place-items-center rounded-sm border-[0.5px] text-xs font-semibold",
                   s.done ? "border-transparent bg-primary text-primary-foreground" : isCurrent ? "border-primary text-primary" : "text-muted-foreground",
                 )}
               >

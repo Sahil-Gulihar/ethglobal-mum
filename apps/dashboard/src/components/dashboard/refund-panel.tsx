@@ -302,7 +302,7 @@ function RefundPanelInner({ paymentId, chainPaymentId, payout, router: routerAdd
               </p>
             </div>
 
-            <div className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5 text-sm">
+            <div className="flex items-center justify-between gap-3 rounded-sm border-[0.5px] px-3 py-2.5 text-sm">
               <span className="flex items-center gap-2 text-muted-foreground">
                 <Icon name="wallet" /> Payout wallet
               </span>

@@ -48,7 +48,7 @@ export function Dialog({
         if (dismissible && e.target === e.currentTarget) onOpenChange(false);
       }}
       className={cn(
-        "m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border bg-popover p-0 text-popover-foreground shadow-2xl",
+        "m-auto w-[calc(100%-2rem)] max-h-[calc(100dvh-2rem)] max-w-[460px] overflow-y-auto overscroll-contain rounded-none border-[0.5px] bg-popover p-0 text-foreground",
         className,
       )}
     >
@@ -56,7 +56,7 @@ export function Dialog({
         <div className="flex flex-col gap-4 p-6">
           <div className="flex items-start justify-between gap-4">
             <div className="flex flex-col gap-1">
-              <h2 id={titleId} className="text-base font-semibold tracking-tight">
+              <h2 id={titleId} className="text-[18px] font-medium tracking-tight">
                 {title}
               </h2>
               {description && <p className="text-sm text-muted-foreground">{description}</p>}
@@ -66,7 +66,7 @@ export function Dialog({
                 type="button"
                 aria-label="Close"
                 onClick={() => onOpenChange(false)}
-                className="-mt-1 -mr-2 grid size-9 place-items-center rounded-md text-muted-foreground outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+                className="-mt-1 -mr-2 grid size-9 place-items-center rounded-sm text-muted-foreground outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <Icon name="close" />
               </button>

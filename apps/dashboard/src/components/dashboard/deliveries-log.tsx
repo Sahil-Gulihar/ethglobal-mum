@@ -140,7 +140,7 @@ export function DeliveriesLog({ rows }: { rows: DeliveryRow[] }) {
                         {d.attemptLog.map((a) => {
                           const ok = a.statusCode !== null && a.statusCode >= 200 && a.statusCode < 300;
                           return (
-                            <li key={a.id} className="rounded-lg border bg-card p-3 text-xs">
+                            <li key={a.id} className="rounded-sm border-[0.5px] bg-card p-3 text-xs">
                               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                                 <span className="font-medium">Attempt {a.attempt}</span>
                                 <Badge tone={ok ? "success" : "danger"}>{a.statusCode ?? "No response"}</Badge>
