@@ -62,12 +62,21 @@ jobs:
           node-version: 22
           package-manager-cache: false
 
-      - name: Strip git metadata
+      - name: Check app exists on this branch
+        id: exists
         if: steps.gate.outputs.run == 'true'
+        env:
+          APP: ${{ matrix.app }}
+        run: |
+          if [ -d "apps/$APP" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"
+          else echo "::notice::apps/$APP is not on this branch yet; skipping"; echo "ok=false" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Strip git metadata
+        if: steps.exists.outputs.ok == 'true'
         run: rm -rf .git
 
       - name: Deploy to production
-        if: steps.gate.outputs.run == 'true'
+        if: steps.exists.outputs.ok == 'true'
         env:
           VERCEL_PROJECT_ID: ${{ matrix.project_id }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
