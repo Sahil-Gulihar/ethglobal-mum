@@ -20,6 +20,7 @@ import {
   fromUnits,
   paymentRouterAbi,
   PUBLIC_RPC_URL,
+  USDT_ADDRESS,
   whitechainSepolia,
   type PublicCheckoutSession,
 } from "@whitechain-commerce/core";
@@ -41,6 +42,8 @@ import {
   WHITECHAIN_CHAIN_ID,
   type State,
 } from "./state.ts";
+import { CheckoutFunding, switchToSepolia } from "./CheckoutFunding.tsx";
+import { SEPOLIA_ID } from "./funding-chain.ts";
 import { CSS } from "./styles.ts";
 import { lastWallet, rememberWallet, watchWallets, type DetectedWallet, type Eip1193Provider } from "./wallets.ts";
 
@@ -224,6 +227,24 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
     }
   }, [provider, fail]);
 
+  const [fundingBusy, setFundingBusy] = useState(false);
+  const [balanceRevision, setBalanceRevision] = useState(0);
+  const refreshBalance = useCallback(() => setBalanceRevision((revision) => revision + 1), []);
+  const switchFundingNetwork = async () => {
+    if (!provider || fundingBusy) return;
+    setFundingBusy(true);
+    try {
+      await switchToSepolia(provider);
+      const chainId = Number(await provider.request({ method: "eth_chainId" }));
+      if (chainId !== SEPOLIA_ID) throw new Error("Your wallet is still on another network.");
+      dispatch({ type: "CHAIN_CHANGED", chainId });
+    } catch (err) {
+      fail(err, "We couldn’t switch to Ethereum Sepolia. Choose it in your wallet and try again.");
+    } finally {
+      setFundingBusy(false);
+    }
+  };
+
   // ---------- session ----------
   useEffect(() => {
     if (state.phase !== "loading") return;
@@ -292,7 +313,7 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
       cancelled = true;
       clearInterval(t);
     };
-  }, [reviewKey, publicClient]);
+  }, [reviewKey, publicClient, balanceRevision]);
 
   // ---------- pay ----------
   const pay = useCallback(async () => {
@@ -454,6 +475,24 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
     dispatch({ type: "DISCONNECT" });
   }, []);
 
+  const funding = provider && state.account && state.session?.tokenAddress.toLowerCase() === USDT_ADDRESS.toLowerCase() &&
+    (state.phase === "review" || state.phase === "wrong_network") ? (
+      <CheckoutFunding
+        key={`${sessionId}:${state.account.toLowerCase()}`}
+        account={state.account}
+        apiBase={apiBase}
+        chainId={state.chainId}
+        provider={provider}
+        session={state.session}
+        needsFunds={insufficientBalance(state) || insufficientGas(state)}
+        busy={fundingBusy}
+        onBusy={setFundingBusy}
+        onRefresh={refreshBalance}
+        onSepolia={() => void switchFundingNetwork()}
+        onWhitechain={() => void switchNetwork()}
+      />
+    ) : null;
+
   return (
     <div className={`wcc-root${className ? ` ${className}` : ""}`} data-theme={theme}>
       <style>{CSS}</style>
@@ -463,6 +502,8 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
         wallets={wallets}
         walletsSettled={walletsSettled}
         result={result}
+        funding={funding}
+        fundingBusy={fundingBusy}
         canCancel={Boolean(props.onCancel || state.session?.cancelUrl)}
         onConnect={(w) => void connect(w)}
         onSwitch={() => void switchNetwork()}
@@ -497,6 +538,8 @@ export interface ViewProps {
   wallets: DetectedWallet[];
   walletsSettled: boolean;
   result: CheckoutSuccess | null;
+  funding?: ReactNode;
+  fundingBusy?: boolean;
   canCancel: boolean;
   onConnect: (w: DetectedWallet) => void;
   onSwitch: () => void;
@@ -736,8 +779,9 @@ function Body(p: ViewProps & { amountLabel: string }) {
             Choose Whitechain in your wallet to continue.
           </p>
           <ErrorBanner message={state.error} onDismiss={p.onDismissError} />
-          <AccountRow state={state} onDisconnect={p.onDisconnect} />
-          <button className="wcc-btn" data-busy={state.phase === "switching"} disabled={state.phase === "switching"} onClick={p.onSwitch}>
+          <AccountRow state={state} onDisconnect={p.fundingBusy ? undefined : p.onDisconnect} />
+          {p.funding}
+          <button className="wcc-btn" data-busy={state.phase === "switching"} disabled={state.phase === "switching" || p.fundingBusy} onClick={p.onSwitch}>
             {state.phase === "switching" ? (
               <>
                 <span className="wcc-spin" /> Confirm in your wallet…
@@ -785,7 +829,7 @@ function ReviewBody(p: ViewProps & { amountLabel: string }) {
   let button: ReactNode;
   if (state.phase === "review") {
     button = (
-      <button className="wcc-btn" disabled={!canPay(state)} onClick={p.onPay}>
+      <button className="wcc-btn" disabled={!canPay(state) || p.fundingBusy} onClick={p.onPay}>
         {!loaded ? (
           <>
             <span className="wcc-spin" /> Checking balance…
@@ -825,6 +869,7 @@ function ReviewBody(p: ViewProps & { amountLabel: string }) {
           <span>Not enough WBT.</span>
         </div>
       ) : null}
+      {p.funding}
       <div className="wcc-rows">
         {state.account ? (
           <>
@@ -832,7 +877,7 @@ function ReviewBody(p: ViewProps & { amountLabel: string }) {
               <span className="wcc-row-k">Pay from</span>
               <span className="wcc-row-v">
                 <span className="wcc-mono">{short(state.account)}</span>
-                {state.phase === "review" ? (
+                {state.phase === "review" && !p.fundingBusy ? (
                   <button className="wcc-link-btn" onClick={p.onDisconnect}>
                     Change
                   </button>
