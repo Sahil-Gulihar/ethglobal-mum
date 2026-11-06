@@ -59,7 +59,7 @@ export const getSession = (apiBase: string, id: string, signal?: AbortSignal) =>
   });
 
 export const submitTx = (apiBase: string, id: string, txHash: string) =>
-  apiFetch<{ ok: true }>(`${apiBase}/api/v1/checkout_sessions/${encodeURIComponent(id)}/submit`, {
+  apiFetch<{ ok: true; status: PublicCheckoutSession["status"] }>(`${apiBase}/api/v1/checkout_sessions/${encodeURIComponent(id)}/submit`, {
     method: "POST",
     body: JSON.stringify({ txHash }),
   });
