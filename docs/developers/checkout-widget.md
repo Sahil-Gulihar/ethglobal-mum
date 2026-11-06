@@ -20,39 +20,14 @@ Fulfil from the webhook, never from `onSuccess`. See [Security notes](#security-
 
 ## Installation
 
-`@whitechain-commerce/react` is a workspace package in this monorepo. It is not published to npm yet (`"private": true` in `packages/react/package.json`).
-
-Inside the monorepo, add it as a workspace dependency:
-
-```json
-{
-  "dependencies": {
-    "@whitechain-commerce/react": "workspace:*"
-  }
-}
-```
-
-For an external store, bring both SDK packages into your store's workspace or distribute them through your own package registry. If you do not want to manage SDK source, use [hosted checkout](./hosted-checkout.md) over HTTP.
-
-The package exports TypeScript source (`./src/index.ts` and `./src/server.ts`), so your bundler must compile it. In Next.js, list both workspace packages in `transpilePackages`. This is what the demo store (`apps/demo-store/next.config.ts`) does:
-
-```ts
-// next.config.ts
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  transpilePackages: ["@whitechain-commerce/react", "@whitechain-commerce/core"],
-};
-
-export default nextConfig;
-```
+Run `npm install @whitechain-commerce/react` in your store project. Follow the [TypeScript quickstart](./quickstart.md#typescript) to create a checkout session. For hosted checkout, use [HostedCheckoutButton](./quickstart.md#4-add-the-checkout-button) to send shoppers to the hosted page.
 
 Requirements:
 
 | Requirement | Value |
 | --- | --- |
 | Peer dependencies | `react >=18`, `react-dom >=18` |
-| Runtime dependencies | `@whitechain-commerce/core` (workspace), `viem ^2` |
+| Runtime dependencies | `@whitechain-commerce/core`, `viem ^2` |
 | Wallet library | None. The widget talks to the wallet over EIP-1193 with viem. You do not need wagmi. |
 | CSS setup | None. See [Styling and isolation](#styling-and-isolation). |
 

@@ -1,4 +1,4 @@
-import { defineChain } from "viem";
+import { defineChain, type Chain } from "viem";
 
 export const WHITECHAIN_SEPOLIA_ID = 1874 as const;
 
@@ -17,7 +17,7 @@ export const EXPLORER_URL = "https://explorer.testnet.whitechain.io";
 export const PUBLIC_RPC_URL =
   (typeof process !== "undefined" && process.env.NEXT_PUBLIC_WHITECHAIN_RPC_URL) || "https://rpc.testnet.whitechain.io";
 
-export const whitechainSepolia = defineChain({
+export const whitechainSepolia: Chain & { id: typeof WHITECHAIN_SEPOLIA_ID } = defineChain({
   id: WHITECHAIN_SEPOLIA_ID,
   name: "Whitechain Sepolia",
   nativeCurrency: { name: "WhiteBIT Coin", symbol: "WBT", decimals: 18 },

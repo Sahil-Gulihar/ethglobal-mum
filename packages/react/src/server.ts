@@ -3,12 +3,12 @@
  * Never import this file in the browser: it needs your secret key and node:crypto.
  */
 import type { CheckoutSession } from "@whitechain-commerce/core";
-import { apiFetch, resolveApiBase, WhitechainApiError } from "./api";
+import { apiFetch, resolveApiBase, WhitechainApiError } from "./api.js";
 
 export { verifyWebhook, WebhookSignatureError, SIGNATURE_HEADER } from "@whitechain-commerce/core/webhooks";
 export type { WebhookEvent, WebhookEventType, PaymentObject, RefundObject } from "@whitechain-commerce/core/webhooks";
 export type { CheckoutSession } from "@whitechain-commerce/core";
-export { WhitechainApiError } from "./api";
+export { WhitechainApiError } from "./api.js";
 
 export interface CreateCheckoutSessionParams {
   /** Base URL of the Whitechain Commerce API, e.g. "http://localhost:3000". Defaults to NEXT_PUBLIC_WC_API_BASE. */
