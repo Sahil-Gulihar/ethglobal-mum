@@ -8,8 +8,6 @@ import { OnboardingChecklist } from "@/components/dashboard/onboarding";
 import { PaymentsTable } from "@/components/dashboard/payments-table";
 import { ExplorerLink } from "@/components/dashboard/explorer-link";
 import { AutoRefresh } from "@/components/dashboard/auto-refresh";
-import { CodeBlock } from "@/components/code-block";
-import { clientSnippet, serverSnippet } from "@/components/snippets";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { Icon } from "@/components/icons";
@@ -26,19 +24,33 @@ export default async function DashboardHome() {
     <>
       <AutoRefresh active intervalMs={5000} />
       <PageHeader
-        title={`Welcome, ${m.name}`}
-        description="Here’s how your store is doing on Whitechain."
+        title="Dashboard"
+        description={`Welcome back, ${m.name}. Here’s an overview of your store.`}
         actions={
-          <>
-            <a href="/dashboard/payments/export" download className={buttonVariants({ variant: "outline" })}>
-              <Icon name="download" /> Export CSV
-            </a>
-            <Link href="/dashboard/developers" className={buttonVariants({ variant: "outline" })}>
-              <Icon name="code" /> Integration guide
-            </Link>
-          </>
+          <Link href="/dashboard/analytics" className={buttonVariants({ variant: "outline" })}>
+            View analytics <Icon name="arrowRight" />
+          </Link>
         }
       />
+
+      <section aria-label="Summary" className="grid grid-cols-2 border-y border-border xl:grid-cols-4 [&>*:nth-child(n+3)]:border-t xl:[&>*:nth-child(n+3)]:border-t-0">
+        <StatCard label="Gross volume" value={formatAmount(stats.volume)} unit="USDT" hint={`Net ${formatAmount(stats.net)} USDT after refunds`} />
+        <StatCard label="Payments" value={String(stats.count)} hint="Verified onchain settlements" />
+        <StatCard label="Refunded" value={formatAmount(stats.refunded)} unit="USDT" hint={`${stats.refundedCount} payment${stats.refundedCount === 1 ? "" : "s"} refunded`} />
+        <div className="flex flex-col gap-3 border-l border-border px-4 py-5 sm:px-5">
+          <p className="text-xs font-medium text-muted-foreground">Payout wallet</p>
+          {m.payoutAddress ? (
+            <div className="flex flex-col gap-1">
+              <span className="font-mono text-sm font-semibold break-all">{shortAddr(m.payoutAddress, 8, 6)}</span>
+              <ExplorerLink address={m.payoutAddress} label="View on explorer" />
+            </div>
+          ) : (
+            <Link href="/dashboard/settings" className="inline-flex w-fit items-center gap-1 rounded text-sm font-medium text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring">
+              Add a payout wallet <Icon name="arrowRight" className="size-3.5" />
+            </Link>
+          )}
+        </div>
+      </section>
 
       {showOnboarding && (
         <OnboardingChecklist
@@ -50,25 +62,6 @@ export default async function DashboardHome() {
           webhook={ob.webhook}
         />
       )}
-
-      <section aria-label="Summary" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Gross volume" value={formatAmount(stats.volume)} unit="USDT" hint={`Net ${formatAmount(stats.net)} USDT after refunds`} highlight />
-        <StatCard label="Payments" value={String(stats.count)} hint="Verified onchain settlements" />
-        <StatCard label="Refunded" value={formatAmount(stats.refunded)} unit="USDT" hint={`${stats.refundedCount} payment${stats.refundedCount === 1 ? "" : "s"} refunded`} />
-        <Card className="flex flex-col justify-between gap-3 p-5">
-          <p className="text-xs font-medium text-muted-foreground">Payout wallet</p>
-          {m.payoutAddress ? (
-            <div className="flex flex-col gap-1">
-              <span className="font-mono text-sm font-semibold">{shortAddr(m.payoutAddress, 8, 6)}</span>
-              <ExplorerLink address={m.payoutAddress} label="View on explorer" />
-            </div>
-          ) : (
-            <Link href="/dashboard/settings" className="inline-flex w-fit items-center gap-1 rounded text-sm font-medium text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring">
-              Add a payout wallet <Icon name="arrowRight" className="size-3.5" />
-            </Link>
-          )}
-        </Card>
-      </section>
 
       <Card>
         <CardHeader className="flex-row items-center justify-between">
@@ -84,32 +77,20 @@ export default async function DashboardHome() {
           <PaymentsTable rows={recent} />
         </CardContent>
       </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Add checkout in about 20 lines</CardTitle>
-          <CardDescription>Create a session on your server with your secret key, then render the checkout in your store.</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          <CodeBlock filename="server.ts" code={serverSnippet(env.appUrl())} />
-          <CodeBlock filename="Checkout.tsx" code={clientSnippet(env.appUrl())} />
-        </CardContent>
-      </Card>
     </>
   );
 }
 
-function StatCard({ label, value, unit, hint, highlight }: { label: string; value: string; unit?: string; hint?: string; highlight?: boolean }) {
+function StatCard({ label, value, unit, hint }: { label: string; value: string; unit?: string; hint?: string }) {
   return (
-    <Card className={highlight ? "relative overflow-hidden border-transparent bg-ink p-5 text-white" : "p-5"}>
-      {highlight && <div aria-hidden className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-[radial-gradient(closest-side,rgb(59_91_255/0.6),transparent)]" />}
-      <div className="relative flex flex-col gap-3">
-        <p className={highlight ? "text-xs font-medium text-white/70" : "text-xs font-medium text-muted-foreground"}>{label}</p>
-        <p className="text-2xl font-semibold tracking-tight tabular">
-          {value} {unit && <span className={highlight ? "text-sm font-medium text-white/60" : "text-sm font-medium text-muted-foreground"}>{unit}</span>}
+    <div className="border-border px-4 py-5 even:border-l sm:px-5 xl:border-l xl:first:border-l-0">
+      <div className="flex flex-col gap-3">
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <p className="text-[28px] leading-none font-light tracking-tight tabular wrap-anywhere">
+          {value} {unit && <span className="text-sm font-medium text-muted-foreground">{unit}</span>}
         </p>
-        {hint && <p className={highlight ? "text-xs text-white/60" : "text-xs text-muted-foreground"}>{hint}</p>}
+        {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
       </div>
-    </Card>
+    </div>
   );
 }

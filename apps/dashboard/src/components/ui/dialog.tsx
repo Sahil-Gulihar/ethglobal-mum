@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { Icon } from "@/components/icons";
 
 /**
  * Accessible modal built on the native <dialog> element (focus trap, Escape, top layer for free).
@@ -67,9 +68,7 @@ export function Dialog({
                 onClick={() => onOpenChange(false)}
                 className="-mt-1 -mr-2 grid size-9 place-items-center rounded-md text-muted-foreground outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-                  <path d="M18 6 6 18M6 6l12 12" />
-                </svg>
+                <Icon name="close" />
               </button>
             )}
           </div>

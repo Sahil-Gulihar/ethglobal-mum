@@ -10,7 +10,7 @@ const base =
 const variants: Record<ButtonVariant, string> = {
   default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
   secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/70",
-  outline: "border border-input bg-background shadow-xs hover:bg-muted",
+  outline: "border border-input bg-muted hover:bg-secondary",
   ghost: "hover:bg-muted",
   destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
   ink: "bg-ink text-white shadow-sm hover:bg-ink/85",
@@ -19,7 +19,7 @@ const variants: Record<ButtonVariant, string> = {
 
 const sizes: Record<ButtonSize, string> = {
   sm: "h-8 rounded-md px-3 text-xs",
-  default: "h-10 rounded-lg px-4 text-sm",
+  default: "h-9 rounded-md px-3 text-sm",
   lg: "h-12 rounded-full px-6 text-base",
   icon: "size-9 rounded-md",
 };

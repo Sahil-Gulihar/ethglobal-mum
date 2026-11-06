@@ -42,7 +42,7 @@ export function OnboardingChecklist(p: OnboardingProps) {
       body: (
         <div className="flex items-center gap-3 rounded-lg border border-dashed px-3 py-2.5 text-sm text-muted-foreground">
           <Icon name="shield" className="text-primary" />
-          {p.skipWorldId ? "Skipped on testnet. Your account is active." : "World ID verification is coming soon."}
+          {p.skipWorldId ? "Verification is skipped. Your account is active." : "World ID verification is coming soon."}
         </div>
       ),
     },
@@ -77,7 +77,7 @@ export function OnboardingChecklist(p: OnboardingProps) {
 
   return (
     <Card className="overflow-hidden">
-      <div className="flex flex-col gap-4 border-b bg-[linear-gradient(120deg,var(--accent),transparent_70%)] p-5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 border-b bg-muted p-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
           <h2 className="text-base font-semibold tracking-tight">Get set up to accept USDT</h2>
           <p className="text-sm text-muted-foreground">Finish these steps to take your first payment on Whitechain.</p>
@@ -95,7 +95,7 @@ export function OnboardingChecklist(p: OnboardingProps) {
         {steps.map((s, i) => {
           const isCurrent = i === current;
           return (
-            <li key={s.key} className={cn("flex gap-4 px-5 py-4", isCurrent && "bg-muted/30")}>
+            <li key={s.key} className={cn("flex gap-4 px-5 py-4", isCurrent && "bg-muted")}>
               <span
                 aria-hidden
                 className={cn(
@@ -109,7 +109,7 @@ export function OnboardingChecklist(p: OnboardingProps) {
                 <div className="flex flex-col gap-0.5">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className={cn("text-sm font-semibold", s.done && !isCurrent && "text-muted-foreground")}>{s.title}</p>
-                    {s.skipped && <Badge>Skipped on testnet</Badge>}
+                    {s.skipped && <Badge>Verification skipped</Badge>}
                     <span className="sr-only">{s.done ? "(done)" : isCurrent ? "(current step)" : "(to do)"}</span>
                   </div>
                   <p className="text-sm text-muted-foreground">{s.description}</p>

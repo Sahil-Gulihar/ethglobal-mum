@@ -1,14 +1,9 @@
+import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-/** Our mark: a rounded square with a stylised "W" chain link. */
 export function LogoMark({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" aria-hidden className={cn("size-7", className)}>
-      <rect width="32" height="32" rx="9" fill="#3B5BFF" />
-      <path d="M7.5 10.5 11.2 22l4.8-8.6 4.8 8.6 3.7-11.5" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  return <Image src="/brand/logo-128.webp" width={32} height={32} alt="" loading="eager" className={cn("size-7 shrink-0 rounded-sm", className)} />;
 }
 
 export function Wordmark({ className, href = "/", tone = "default" }: { className?: string; href?: string; tone?: "default" | "light" }) {
@@ -22,7 +17,7 @@ export function Wordmark({ className, href = "/", tone = "default" }: { classNam
       )}
     >
       <LogoMark />
-      <span className="text-[15px] font-semibold tracking-tight">
+      <span className="text-[14px] font-medium tracking-tight">
         Whitechain <span className={tone === "light" ? "text-white/60" : "text-muted-foreground"}>Commerce</span>
       </span>
     </Link>

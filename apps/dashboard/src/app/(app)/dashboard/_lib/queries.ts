@@ -37,6 +37,23 @@ export async function listPayments(merchantId: string, limit = 50): Promise<Paym
   }));
 }
 
+export async function dailyPayments(merchantId: string) {
+  const days = 14;
+  const dayMs = 86_400_000;
+  const today = Math.floor(Date.now() / dayMs) * dayMs;
+  const start = today - (days - 1) * dayMs;
+  const day = sql<string>`to_char(${payments.createdAt} at time zone 'UTC', 'YYYY-MM-DD')`;
+  const rows = await db.select({ day, count: count() })
+    .from(payments)
+    .where(and(eq(payments.merchantId, merchantId), gte(payments.createdAt, new Date(start)), lt(payments.createdAt, new Date(today + dayMs))))
+    .groupBy(day);
+  const counts = new Map(rows.map((row) => [row.day, row.count]));
+  return Array.from({ length: days }, (_, index) => {
+    const date = new Date(start + index * dayMs).toISOString().slice(0, 10);
+    return { date, count: counts.get(date) ?? 0 };
+  });
+}
+
 export async function paymentStats(merchantId: string) {
   // All USDT amounts share the token's decimals; sum in numeric to stay bigint-safe.
   const [row] = await db

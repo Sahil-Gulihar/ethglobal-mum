@@ -5,32 +5,38 @@ import { usePathname } from "next/navigation";
 import { Icon, type IconName } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
-const items: { href: string; label: string; icon: IconName }[] = [
-  { href: "/dashboard", label: "Home", icon: "home" },
+export const dashboardLinks: { href: string; label: string; icon: IconName }[] = [
+  { href: "/dashboard", label: "Dashboard", icon: "home" },
   { href: "/dashboard/payments", label: "Payments", icon: "card" },
   { href: "/dashboard/developers", label: "Developers", icon: "code" },
   { href: "/dashboard/webhooks", label: "Webhooks", icon: "webhook" },
+  { href: "/dashboard/analytics", label: "Analytics", icon: "analytics" },
   { href: "/dashboard/settings", label: "Settings", icon: "settings" },
 ];
 
-export function SidebarNav({ orientation = "vertical" }: { orientation?: "vertical" | "horizontal" }) {
+export function SidebarNav({ group = "all", onNavigate }: { group?: "all" | "main" | "settings"; onNavigate?: () => void }) {
   const pathname = usePathname();
+  const links = group === "all" ? dashboardLinks : group === "settings" ? dashboardLinks.slice(-1) : dashboardLinks.slice(0, -1);
+
   return (
-    <nav aria-label="Dashboard" className={cn("flex gap-1", orientation === "vertical" ? "flex-col" : "overflow-x-auto")}>
-      {items.map((it) => {
-        const active = it.href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(it.href);
+    <nav aria-label={group === "settings" ? "Settings" : "Primary"} className="flex flex-col gap-0.5">
+      {links.map((item) => {
+        const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(`${item.href}/`));
         return (
           <Link
-            key={it.href}
-            href={it.href}
+            key={item.href}
+            href={item.href}
+            aria-label={item.label}
             aria-current={active ? "page" : undefined}
+            title={item.label}
+            onNavigate={onNavigate}
             className={cn(
-              "flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium whitespace-nowrap outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
-              active ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground",
+              "shell-nav-link flex h-8 items-center gap-2 rounded-md px-2.5 text-sm leading-[1.4] tracking-[0.14px] transition-colors focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-ring",
+              active ? "bg-secondary text-foreground" : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground",
             )}
           >
-            <Icon name={it.icon} className={cn("size-4", active ? "text-primary" : "")} />
-            {it.label}
+            <Icon name={item.icon} className="size-4" />
+            <span className="shell-label truncate">{item.label}</span>
           </Link>
         );
       })}
