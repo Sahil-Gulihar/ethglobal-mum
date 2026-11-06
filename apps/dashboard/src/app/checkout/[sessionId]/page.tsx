@@ -21,7 +21,7 @@ export default async function CheckoutPage({
   const { theme } = await searchParams;
 
   return (
-    <main className={theme === "dark" ? `dark ${styles.page}` : styles.page} data-theme={theme === "dark" ? "dark" : "light"}>
+    <main className={`${theme === "dark" ? "checkout-dark" : "checkout-light"} ${styles.page}`} data-theme={theme === "dark" ? "dark" : "light"}>
 
       <header className={styles.top}>
         <span className={styles.brand}>

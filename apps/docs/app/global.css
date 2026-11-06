@@ -2,25 +2,28 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 
-/* Whitechain Commerce look (docs/DESIGN.md): Geist, monochrome, light and dark. */
+/* Whitechain Commerce documentation palette. */
 @theme {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 :root {
-  --color-fd-primary: oklch(0.205 0 0);
-  --color-fd-primary-foreground: oklch(1 0 0);
-  --color-fd-ring: oklch(57.61% 0.2508 258.23);
+  --color-fd-background: var(--vbg-surface-primary, light-dark(#fff, #000));
+  --color-fd-foreground: var(--vbg-text-primary, light-dark(#171717, #ededed));
+  --color-fd-card: var(--vbg-surface-secondary, light-dark(#fafafa, #111));
+  --color-fd-muted: light-dark(#f2f2f2, #222);
+  --color-fd-muted-foreground: var(--vbg-text-secondary, light-dark(#525252, #a1a1a1));
+  --color-fd-accent: var(--color-fd-muted);
+  --color-fd-accent-foreground: var(--color-fd-foreground);
+  --color-fd-border: var(--vbg-border-default, light-dark(#e5e5e5, #333));
+  --color-fd-primary: var(--color-fd-foreground);
+  --color-fd-primary-foreground: var(--color-fd-background);
+  --color-fd-ring: var(--color-fd-foreground);
 }
 
-.dark {
-  --color-fd-background: oklch(0 0 0);
-  --color-fd-card: oklch(0.027 0 0);
-  --color-fd-primary: oklch(0.946 0 0);
-  --color-fd-primary-foreground: oklch(0 0 0);
-  --color-fd-ring: oklch(71.7% 0.1648 250.794);
-}
+:root { color-scheme: light; }
+.dark { color-scheme: dark; }
 
 body {
   font-feature-settings: 'rlig' 1, 'calt' 0, 'ss11' 1;

@@ -27,7 +27,7 @@ export function DashboardShell({ account, network, children }: { account: ReactN
   }, []);
 
   return (
-    <div className="dark dashboard-shell text-foreground" data-compact={compact}>
+    <div className="dashboard-shell text-foreground" data-compact={compact}>
       <aside className="dashboard-rail min-h-0 flex-col">
         <div className="flex h-8 shrink-0 items-center gap-1">
           <Wordmark href="/dashboard" className="shell-label min-w-0 shrink [&>span]:text-xs" />
@@ -64,7 +64,7 @@ export function DashboardShell({ account, network, children }: { account: ReactN
       <dialog
         ref={drawer}
         aria-label="Navigation"
-        className="fixed inset-y-0 left-0 m-0 h-dvh max-h-none w-[min(320px,85vw)] max-w-none border-r border-border bg-[var(--dashboard-chrome)] p-5 text-foreground shadow-2xl"
+        className="fixed inset-y-0 left-0 m-0 h-dvh max-h-none w-[min(320px,85vw)] max-w-none border-r border-border bg-sidebar p-5 text-foreground shadow-2xl"
         onClick={(event) => { if (event.target === event.currentTarget) drawer.current?.close(); }}
       >
         <div className="flex min-h-full flex-col gap-6">
@@ -77,8 +77,8 @@ export function DashboardShell({ account, network, children }: { account: ReactN
         </div>
       </dialog>
 
-      <div className="dashboard-inset flex min-w-0 flex-col rounded-md border-[0.5px] border-[var(--dashboard-frame)] bg-background">
-        <header className="flex h-12 shrink-0 items-center gap-3 border-b-[0.5px] border-white/10 px-4 text-sm min-[721px]:px-5">
+      <div className="dashboard-inset flex min-w-0 flex-col bg-background">
+        <header className="flex h-12 shrink-0 items-center gap-3 border-b border-border px-4 text-sm min-[721px]:px-5">
           <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-2">
             {parent ? (
               <>
@@ -90,7 +90,7 @@ export function DashboardShell({ account, network, children }: { account: ReactN
           </nav>
         </header>
         <main key={pathname} className="min-w-0 flex-1">
-          <div className="flex min-w-0 flex-col gap-4 px-4 pt-4 pb-4 min-[721px]:px-5">{children}</div>
+          <div className="flex min-w-0 flex-col gap-6 px-4 py-6 min-[721px]:px-8 min-[721px]:py-8">{children}</div>
         </main>
       </div>
     </div>

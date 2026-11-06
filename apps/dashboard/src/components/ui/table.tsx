@@ -18,7 +18,7 @@ export function TableRow({ className, ...props }: HTMLAttributes<HTMLTableRowEle
   return <tr className={cn("border-b-[0.5px] transition-colors hover:bg-muted/50", className)} {...props} />;
 }
 export function TableHead({ className, ...props }: ThHTMLAttributes<HTMLTableCellElement>) {
-  return <th className={cn("h-8 bg-card px-4 text-left align-middle text-xs font-medium whitespace-nowrap text-muted-foreground", className)} {...props} />;
+  return <th className={cn("h-9 bg-muted px-4 text-left align-middle text-xs font-medium whitespace-nowrap text-muted-foreground", className)} {...props} />;
 }
 export function TableCell({ className, ...props }: TdHTMLAttributes<HTMLTableCellElement>) {
   return <td className={cn("px-4 py-2.5 align-middle whitespace-nowrap", className)} {...props} />;

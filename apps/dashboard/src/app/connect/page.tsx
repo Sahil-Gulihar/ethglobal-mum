@@ -109,7 +109,7 @@ export default async function ConnectPage({ searchParams }: { searchParams: Prom
               ) : merchant.status !== "active" ? (
                 <div className="flex flex-col gap-3">
                   <Alert tone="warning">Verify your account before connecting an agent. Agents can only use verified accounts.</Alert>
-                  <Link href="/dashboard/setup" className={buttonVariants({ variant: "ink", size: "lg", className: "w-full" })}>
+                  <Link href="/dashboard/setup" className={buttonVariants({ size: "lg", className: "w-full" })}>
                     <Icon name="shield" /> Verify account
                   </Link>
                 </div>

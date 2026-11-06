@@ -1,23 +1,25 @@
 @import "tailwindcss";
 
-@theme {
-  --color-cream: #111411;
-  --color-paper: #1b1f1c;
-  --color-ink: #f2f4f1;
-  --color-masala: #d3dfd4;
-  --color-masala-dark: #e2ece3;
-  --color-saffron: #b8c9bb;
-  --color-cardamom: #83bb94;
-  --color-muted: #a5afa7;
-  --color-line: #323a34;
-  /* System stacks only: no network font fetch, works offline at the venue. */
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  --font-display: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+:root {
+  color-scheme: light dark;
+}
+
+@theme inline {
+  --color-cream: var(--vbg-surface-primary, light-dark(#fff, #000));
+  --color-paper: var(--vbg-surface-secondary, light-dark(#fafafa, #111));
+  --color-ink: var(--vbg-text-primary, light-dark(#171717, #ededed));
+  --color-masala: var(--color-ink);
+  --color-masala-dark: light-dark(#383838, #ccc);
+  --color-saffron: light-dark(#875000, #f2be67);
+  --color-cardamom: light-dark(#087651, #73d6aa);
+  --color-muted: var(--vbg-text-secondary, light-dark(#525252, #a1a1a1));
+  --color-line: var(--vbg-border-default, light-dark(#e5e5e5, #333));
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, Menlo, monospace;
 }
 
 html {
-  color-scheme: dark;
   background: var(--color-cream);
   color: var(--color-ink);
 }
@@ -28,7 +30,7 @@ body {
 }
 
 ::selection {
-  background: color-mix(in oklab, var(--color-saffron) 40%, transparent);
+  background: color-mix(in oklab, var(--color-ink) 20%, transparent);
 }
 
 @keyframes steam {
@@ -51,4 +53,4 @@ body {
   .steam path, .animate-drawer, .animate-fade, .animate-rise { animation: none; }
 }
 
-:focus-visible { outline: 2px solid #96c5a2; outline-offset: 3px; }
+:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }

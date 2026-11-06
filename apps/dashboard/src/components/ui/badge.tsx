@@ -13,7 +13,7 @@ const tones: Record<BadgeTone, string> = {
 
 export function Badge({ className, tone = "neutral", dot, children, ...props }: HTMLAttributes<HTMLSpanElement> & { tone?: BadgeTone; dot?: boolean }) {
   return (
-    <span className={cn("inline-flex items-center gap-1.5 border-[0.5px] px-2 py-0.5 text-xs font-medium whitespace-nowrap", tones[tone], className)} {...props}>
+    <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap", tones[tone], className)} {...props}>
       {dot && <span aria-hidden className="size-1.5 rounded-full bg-current" />}
       {children}
     </span>
