@@ -498,6 +498,7 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
       <style>{CSS}</style>
       <View
         state={state}
+        hostedUrl={`${apiBase}/checkout/${encodeURIComponent(sessionId)}`}
         msLeft={msLeft}
         wallets={wallets}
         walletsSettled={walletsSettled}
@@ -534,6 +535,8 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
 
 export interface ViewProps {
   state: State;
+  /** Hosted checkout URL, used when the merchant requires the 0G human check (verified buyers only). */
+  hostedUrl?: string;
   msLeft: number;
   wallets: DetectedWallet[];
   walletsSettled: boolean;
@@ -630,7 +633,18 @@ export function View(p: ViewProps) {
         </div>
       </div>
       <div className="wcc-divider" />
-      <Body {...p} amountLabel={amountLabel} />
+      {session.buyerCheck?.required && !session.buyerCheck.verified && isPrePay(state.phase) ? (
+        // The human check runs on the hosted checkout (it needs the buyer's 0G session cookie there).
+        <section className="wcc-body">
+          <p className="wcc-title">Quick human check first</p>
+          <p className="wcc-text">This store only accepts payments from verified buyers. It takes about 10 seconds.</p>
+          <a className="wcc-btn" href={p.hostedUrl} style={{ display: "block", textAlign: "center", color: "var(--wcc-accent-fg)" }}>
+            Verify and pay
+          </a>
+        </section>
+      ) : (
+        <Body {...p} amountLabel={amountLabel} />
+      )}
     </>
   );
 }

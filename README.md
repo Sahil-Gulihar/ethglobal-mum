@@ -29,6 +29,23 @@ The v0.1.0 ZIP defaults to the original Vercel hostname. To use the current Whit
 
 Customers pay in USDT on Whitechain and the funds go directly to the merchant's wallet. Each confirmed payment and refund has a transaction record you can verify on the block explorer.
 
+## Verified buyers, powered by 0G
+
+Checkout bots farm sessions, test stolen wallets, and empty limited drops. **Verified buyers** adds an optional human check before payment, and it runs on [0G Private Computer](https://pc.0g.ai). Merchants turn on **Settings → Verified buyers only**. The buyer then names what's in a picture that 0G drew a moment ago. They can type the answer or say it, and 0G judges it in a TEE. Only after that does the pay button appear. Each payment, and each `payment.succeeded` webhook, carries `buyerVerified`.
+
+| Step | 0G model (TEE, `X-0G-Provider-Trust-Mode: private`) |
+|---|---|
+| Draw a fresh challenge picture | `z-image-turbo` |
+| Transcribe a spoken answer | `whisper-large-v3` |
+| Judge the answer (synonyms, typos, other languages) | `0gm-1.0-35b-a3b` |
+
+- **Sign in with 0G.** Buyers connect their 0G account with a management key. We mint a capped (0.5/day, daily reset), model-restricted inference key on *their* account. Checks then spend their own 0G credits, including iAI daily credits, and the checkout shows the balance before and after.
+- **Request IDs.** Every 0G call's `X-Request-ID` is stored on the check. The buyer sees it at checkout, and the merchant sees it on the payment page.
+- **Why buyers come back.** The Verified buyer badge lasts 30 days on every Whitechain store, so the next checkout skips the picture. Merchants see it on every order.
+- **Without 0G, nothing protects the checkout from bots.** No fresh picture can be drawn, no spoken answer transcribed, and no answer judged. Each bot attempt also stops costing anything, because the buyer's own 0G credits are what pay for every try.
+
+Code: [`apps/dashboard/src/lib/zg/`](apps/dashboard/src/lib/zg). Docs: [verified buyers](docs/developers/verified-buyers.md). Judge walkthrough: [docs/0G.md](docs/0G.md).
+
 ## Deployed contract
 
 | | |

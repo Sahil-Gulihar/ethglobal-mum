@@ -1,0 +1,47 @@
+---
+title: "Verified buyers"
+description: "Stop checkout bots with a human check on 0G Private Computer, and see which payments came from verified people."
+---
+
+Bots abuse open checkouts. They farm sessions, test stolen wallets, and spam limited drops. With **Verified buyers**, a person proves they're human before they pay. The check runs on [0G Private Computer](https://pc.0g.ai), and every payment shows whether its buyer was verified.
+
+## How the check works
+
+1. **A fresh picture.** 0G's `z-image-turbo` image model, running in a TEE, draws a new picture for each check, for example "one purple teapot on a sandy beach." Only our server knows the answer. Pictures are never reused, so there is no pool for a bot to scrape.
+2. **Type it or say it.** The buyer writes what they see, or presses the mic and says it. Voice answers are transcribed by `whisper-large-v3` on 0G.
+3. **0G judges the answer.** `0gm-1.0-35b-a3b`, also in a TEE, decides whether the answer matches. It accepts synonyms, typos, and other languages ("navy kettle" passes for a blue teapot).
+
+Each check allows 3 answers. A checkout allows 4 pictures, and answers that come in faster than a person could look at the picture are rejected. Every 0G call's router request ID is stored with the check and shown to the buyer and the merchant.
+
+## Sign in with 0G
+
+Buyers can connect their own 0G account from the checkout: **Sign in with 0G**, then paste a 0G management key with the `account:read` and `keys:create` scopes. You create one at [pc.0g.ai → API keys](https://pc.0g.ai/dashboard/api-keys).
+
+- Whitechain reads the buyer's 0G account address and credit balance with that key. It also creates an inference key on the buyer's account that is capped at 0.5 per day, resets daily, and can only call the three models above. The keys are stored AES-256-GCM encrypted.
+- Checks then **spend the buyer's own 0G credits**, including iAI daily credits. The checkout shows the balance before and after.
+- A buyer who passes gets a **Verified buyer** badge for 30 days. While it's active, their next checkout at any Whitechain store skips the picture.
+- Buyers who don't sign in can still verify as guests. The store's platform 0G key pays for their check, but no badge carries over.
+
+Making each attempt cost real 0G credits is the point. A bot farm that wants to look human pays 0G for every try.
+
+## Turn it on
+
+In the dashboard, open **Settings → Verified buyers** and switch on **Verified buyers only**.
+
+- **On:** the hosted checkout shows the human check first and only shows the pay button after it passes. The embedded widget sends buyers to the hosted checkout to verify.
+- **Off (default):** the check is optional. Buyers can still earn the badge, and you still see it.
+
+## See it on payments
+
+- **Payments** and the payment page show a **Verified buyer** badge. The payment page also lists the 0G request IDs for that buyer's check.
+- The `payment.succeeded` webhook and the Payments API include `buyerVerified: true | false`:
+
+```json
+{ "type": "payment.succeeded", "data": { "payment": { "id": "pay_…", "amount": "4.99", "buyerVerified": true } } }
+```
+
+The PaymentRouter contract stays permissionless, so anyone can still call `pay` directly. If you want to be strict, fulfil only orders where `buyerVerified` is `true`.
+
+## Self-hosting
+
+Set `ZG_API_KEY` (an `sk-` key from pc.0g.ai) to pay for guest checks. `BUYER_KEY_SECRET` encrypts buyers' keys and defaults to `CRON_SECRET`. Optional settings: `ZG_ROUTER_URL`, `ZG_IMAGE_MODEL`, `ZG_JUDGE_MODEL`, `ZG_ASR_MODEL`, and `ZG_TRUST_MODE` (default `private`, which pins every call to TEE providers). Apply `apps/dashboard/sql/2026-11-07-verified-buyers.sql` to your database.

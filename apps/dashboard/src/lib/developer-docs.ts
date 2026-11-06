@@ -15,7 +15,7 @@ import { codeHighlighter, codeThemes } from "./code-highlighting";
 
 export const docGroups = [
   { label: "Get started", pages: [["", "Overview"], ["introduction", "Introduction"], ["quickstart", "Store integration quickstart"]] },
-  { label: "Accept payments", pages: [["payment-links", "Payment links"], ["checkout-sessions", "Checkout sessions"], ["hosted-checkout", "Hosted checkout"], ["checkout-widget", "Checkout widget"], ["payments", "Payments"], ["refunds", "Refunds"], ["webhooks", "Webhooks"]] },
+  { label: "Accept payments", pages: [["payment-links", "Payment links"], ["checkout-sessions", "Checkout sessions"], ["hosted-checkout", "Hosted checkout"], ["checkout-widget", "Checkout widget"], ["payments", "Payments"], ["refunds", "Refunds"], ["verified-buyers", "Verified buyers"], ["webhooks", "Webhooks"]] },
   { label: "Agents", pages: [["agents", "Agents and MCP"], ["integrate-with-ai", "Integrate with AI"]] },
   { label: "Reference", pages: [["api-reference", "API reference"], ["errors", "Errors"], ["smart-contract", "Smart contract"]] },
   { label: "Operate", pages: [["dashboard", "Dashboard"], ["testing", "Test your integration"]] },

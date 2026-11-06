@@ -12,6 +12,7 @@
     "checkout-sessions",
     "payments",
     "refunds",
+    "verified-buyers",
     "---Webhooks---",
     "webhooks",
     "---Agents---",
