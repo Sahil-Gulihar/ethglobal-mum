@@ -1,6 +1,7 @@
-# Testing
-
-How to get testnet funds, test your webhook handler, and run the project's test suites.
+---
+title: "Testing"
+description: "How to get testnet funds, test your webhook handler, and run the project's test suites."
+---
 
 Whitechain Commerce runs on Whitechain Sepolia (chain id `1874`) only. There is no live mode: every secret key is `sk_test_`, and every payment uses testnet USDT with no real value.
 

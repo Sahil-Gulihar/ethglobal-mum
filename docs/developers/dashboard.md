@@ -1,6 +1,7 @@
-# Dashboard
-
-The merchant dashboard is where you set up your account, manage keys and webhooks, follow payments and send refunds.
+---
+title: "Dashboard"
+description: "The merchant dashboard is where you set up your account, manage keys and webhooks, follow payments and send refunds."
+---
 
 The dashboard is part of the `apps/dashboard` Next.js app. Locally it runs at `http://localhost:3000` (the `APP_URL` default). Everything in it is test mode on Whitechain Sepolia (chain id `1874`).
 

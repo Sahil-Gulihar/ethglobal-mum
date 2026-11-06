@@ -1,6 +1,7 @@
-# Hosted checkout
-
-Send customers to a payment page that Whitechain Commerce serves, with no frontend code on your side.
+---
+title: "Hosted checkout"
+description: "Send customers to a payment page that Whitechain Commerce serves, with no frontend code on your side."
+---
 
 Every checkout session has a `url` field. It points to the hosted checkout page, `/checkout/:sessionId` on the Whitechain Commerce dashboard. The page renders the same [checkout widget](./checkout-widget.md) you can embed, centered on its own page, and sends the customer back to your `successUrl` after they pay.
 

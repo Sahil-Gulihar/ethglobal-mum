@@ -1,6 +1,7 @@
-# Smart contract
-
-The `PaymentRouter` contract moves USDT from the customer straight to your payout wallet, and back again for refunds.
+---
+title: "Smart contract"
+description: "The PaymentRouter contract moves USDT from the customer straight to your payout wallet, and back again for refunds."
+---
 
 Every Whitechain Commerce payment and refund is a call to one small, non-upgradeable contract on Whitechain Sepolia. It records which order was paid, emits an event that links the transfer to the order, and never holds a token balance. This page lists its full interface and shows how to check any payment on the chain yourself.
 
@@ -15,7 +16,7 @@ Every Whitechain Commerce payment and refund is a call to one small, non-upgrade
 | Owner (backend signer) | [`0xA8d17110550f389801470A0088e423C72C5A9c12`](https://explorer.testnet.whitechain.io/address/0xA8d17110550f389801470A0088e423C72C5A9c12) |
 | Token | USDT [`0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7`](https://explorer.testnet.whitechain.io/token/0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7), 6 decimals |
 | Compiler | solc `0.8.30`, optimizer on (200 runs), EVM version `prague`, OpenZeppelin Contracts `v5.7.0` |
-| Source | [`contracts/src/PaymentRouter.sol`](../../contracts/src/PaymentRouter.sol) |
+| Source | [`contracts/src/PaymentRouter.sol`](https://github.com/Sahil-Gulihar/ethglobal-mum/blob/main/contracts/src/PaymentRouter.sol) |
 | Public RPC | `https://rpc.testnet.whitechain.io` |
 | Explorer | https://explorer.testnet.whitechain.io (Blockscout) |
 
@@ -225,9 +226,9 @@ A `transferFrom` that reverts inside the token passes the token's own revert dat
 
 ## Non-custodial guarantees
 
-These follow from the contract code, which you can read in full in [`PaymentRouter.sol`](../../contracts/src/PaymentRouter.sol):
+These follow from the contract code, which you can read in full in [`PaymentRouter.sol`](https://github.com/Sahil-Gulihar/ethglobal-mum/blob/main/contracts/src/PaymentRouter.sol):
 
-- **It never holds funds.** `pay` transfers straight from the payer to the payout wallet, and `refund` straight from the payout wallet to the payer, each with a single `transferFrom`. The router's own USDT balance stays at zero. The fuzz test `testFuzz_routerNeverHoldsFunds` in [`contracts/test/PaymentRouter.t.sol`](../../contracts/test/PaymentRouter.t.sol) checks this after every payment and refund.
+- **It never holds funds.** `pay` transfers straight from the payer to the payout wallet, and `refund` straight from the payout wallet to the payer, each with a single `transferFrom`. The router's own USDT balance stays at zero. The fuzz test `testFuzz_routerNeverHoldsFunds` in [`contracts/test/PaymentRouter.t.sol`](https://github.com/Sahil-Gulihar/ethglobal-mum/blob/main/contracts/test/PaymentRouter.t.sol) checks this after every payment and refund.
 - **There is no withdraw function.** Nothing in the contract can move tokens except `pay` and `refund`, and both only move tokens from the caller.
 - **Refunds go to the original payer only.** The destination is the stored `payer`; the caller can't choose it.
 - **Refunds are capped.** The total refunded can never exceed the amount paid.

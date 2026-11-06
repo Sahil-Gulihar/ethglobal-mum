@@ -1,6 +1,7 @@
-# Webhooks
-
-Get a signed HTTP request on your server whenever a payment or refund is confirmed onchain.
+---
+title: "Webhooks"
+description: "Get a signed HTTP request on your server whenever a payment or refund is confirmed onchain."
+---
 
 Webhooks are how your backend learns that money has moved. Whitechain Commerce watches the `PaymentRouter` contract, checks each payment against the checkout session it belongs to, and then sends a `POST` request to every enabled endpoint you have added. Fulfil orders from these requests, not from the browser. The `onSuccess` callback of the [checkout widget](./checkout-widget.md) is a UI signal only.
 
@@ -93,7 +94,7 @@ All amounts are decimal strings, never floats. Compare them exactly, for example
 
 ### Example: `payment.succeeded`
 
-This is the event from the first live testnet run (see the [README](../../README.md#payment-and-refund-explorer-links)):
+This is the event from the first live testnet run (see the [README](https://github.com/Sahil-Gulihar/ethglobal-mum/blob/main/README.md#payment-and-refund-explorer-links)):
 
 ```json
 {
@@ -284,7 +285,7 @@ export async function POST(req: Request) {
 
 `alreadyProcessed`, `markProcessed`, `markOrderPaid` and `recordRefund` stand for your own database code. `WebhookEvent` is a discriminated union, so `event.data` is typed correctly inside each `case`.
 
-The demo store has a complete handler at [`apps/demo-store/src/app/api/webhooks/whitechain/route.ts`](../../apps/demo-store/src/app/api/webhooks/whitechain/route.ts). It checks the amount against the order total, dedupes on `event.id`, and never moves a refunded total backwards.
+The demo store has a complete handler at [`apps/demo-store/src/app/api/webhooks/whitechain/route.ts`](https://github.com/Sahil-Gulihar/ethglobal-mum/blob/main/apps/demo-store/src/app/api/webhooks/whitechain/route.ts). It checks the amount against the order total, dedupes on `event.id`, and never moves a refunded total backwards.
 
 The `@whitechain-commerce/*` packages are private workspace packages in this repository and are not published to npm. If you can't use them, use the dependency-free version below.
 

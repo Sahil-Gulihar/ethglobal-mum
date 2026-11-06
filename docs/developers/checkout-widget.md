@@ -1,6 +1,7 @@
-# Checkout widget
-
-Embed a non-custodial USDT checkout in your React app with one component, `<WhitechainCheckout />`.
+---
+title: "Checkout widget"
+description: "Embed a non-custodial USDT checkout in your React app with one component, <WhitechainCheckout />."
+---
 
 The widget ships in `@whitechain-commerce/react`. It loads a checkout session, connects the customer's wallet, moves them to Whitechain Sepolia (chain 1874), checks their balance, asks for an exact-amount USDT approval when needed, sends the payment to the PaymentRouter contract, and waits until the Whitechain Commerce backend has verified the payment onchain.
 

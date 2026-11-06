@@ -1,6 +1,7 @@
-# Checkout sessions
-
-A checkout session is a request to pay a fixed USDT amount for one of your orders, valid for 30 minutes.
+---
+title: "Checkout sessions"
+description: "A checkout session is a request to pay a fixed USDT amount for one of your orders, valid for 30 minutes."
+---
 
 You create a session on your server, then send the customer to pay it, either with the embedded `<WhitechainCheckout />` widget or by redirecting to the hosted checkout page in `session.url`. The customer pays from their own wallet straight to your payout wallet. Once the indexer has validated the payment onchain, the session becomes `paid`, a [payment](./payments.md) is recorded and a `payment.succeeded` webhook is sent.
 

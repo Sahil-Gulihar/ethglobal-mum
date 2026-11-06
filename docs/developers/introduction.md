@@ -1,6 +1,7 @@
-# Introduction
-
-The concepts behind Whitechain Commerce: what it does, how money moves, and the objects you work with.
+---
+title: "Introduction"
+description: "The concepts behind Whitechain Commerce: what it does, how money moves, and the objects you work with."
+---
 
 Whitechain Commerce lets a merchant accept USDT on Whitechain Sepolia without ever handing custody of funds to a third party. Customers pay from their own wallet through a small onchain contract, the `PaymentRouter`, which moves the USDT directly to the merchant's payout wallet in the same transaction. The platform watches the chain, confirms each payment against the order it belongs to, and tells your server with a signed webhook.
 
