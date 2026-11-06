@@ -5,10 +5,15 @@ import { Wordmark } from "@/components/brand";
 import { Icon } from "@/components/icons";
 import { CodeBlock } from "@/components/code-block";
 
+const checkoutExample = String.raw`curl --fail-with-body "$WC_API_BASE/checkout_sessions" \
+  -H "Authorization: Bearer $WC_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"orderId":"order_4821","amount":"49.99","currency":"USDT"}'`;
+
 const steps = [
   ["Set up your store", "Create an account and connect the wallet where you want to receive payments."],
   ["Add checkout", "Send customers to hosted checkout from your store, or share a fixed-price payment link."],
-  ["Get paid directly", "Receive USDT in your payout wallet. Use signed webhooks to update store orders after confirmation."],
+  ["Get paid directly", "Your customer pays in USDT. A signed webhook tells your store when the payment settles."],
 ];
 
 export default async function Landing() {
@@ -19,48 +24,49 @@ export default async function Landing() {
   return (
     <>
       <main className="public-frame landing-main">
-        <section className="landing-intro">
-          <p className="landing-network">Whitechain Sepolia <span>Testnet only</span></p>
-          <h1>Accept on-chain payments on Whitechain</h1>
-          <p className="landing-lede">Add USDT as a payment option in your store. Customers pay from their wallets, and funds go straight to yours.</p>
-          <div className="public-actions">
-            <Link href={destination} className="public-primary">{cta} <Icon name="arrowRight" /></Link>
-            <Link href="/docs" className="public-secondary">Integration guide</Link>
+        <section className="landing-hero" aria-labelledby="landing-title">
+          <div className="landing-intro">
+            <p className="landing-network">Whitechain Sepolia · Testnet only</p>
+            <h1 id="landing-title">Accept on-chain payments on Whitechain</h1>
+            <p className="landing-lede">Let customers pay in USDT on Whitechain. Payments settle directly to your wallet, and signed webhooks tell your store when to fulfil an order.</p>
+            <div className="public-actions">
+              <Link href={destination} className="public-primary">{cta} <Icon name="arrowRight" /></Link>
+              <Link href="/docs" className="public-secondary">Integration guide</Link>
+            </div>
           </div>
+
+          <figure className="landing-stage">
+            <figcaption>Chai House <span>Example payment</span></figcaption>
+            <div className="landing-receipt">
+              <div className="landing-receipt-total">
+                <span>Order #4821</span>
+                <p>49.99 <span>USDT</span></p>
+              </div>
+              <dl>
+                <div><dt>Checkout</dt><dd>Payment received</dd></div>
+                <div><dt>Settlement</dt><dd>Merchant wallet</dd></div>
+                <div><dt>Store notification</dt><dd>Signed webhook</dd></div>
+              </dl>
+            </div>
+            <p>Illustrative receipt · Whitechain Sepolia</p>
+          </figure>
         </section>
 
-        <section id="payments" className="landing-showcase" aria-label="Payments">
-          <figure className="landing-preview">
-            <figcaption>Chai House <span>Sample store · Synthetic payments</span></figcaption>
-            <div className="landing-preview-body">
-              <Image
-                src="/product/dashboard-sample.webp"
-                alt="Chai House dashboard with three sample payments, 91.99 USDT in gross volume and an 18.00 USDT refund"
-                width={1120}
-                height={480}
-                unoptimized
-                preload
-              />
-              <Image
-                src="/product/checkout-sample.webp"
-                alt="Dark checkout receipt for the sample 49.99 USDT payment, order 4821"
-                width={856}
-                height={1164}
-                loading="eager"
-                unoptimized
-              />
-            </div>
-          </figure>
-
-          <div className="landing-feature-rail">
-            <h2>Follow a payment from checkout to settlement</h2>
-            <ul aria-label="Payment features">
-              <li>Hosted checkout and payment links</li>
-              <li>Direct wallet settlement</li>
-              <li>Full and partial refunds</li>
-              <li>Signed webhooks</li>
-            </ul>
+        <section id="payments" className="landing-section landing-payments" aria-labelledby="payments-title">
+          <div>
+            <h2 id="payments-title">See what settled</h2>
+            <p>Track USDT payments in the dashboard and issue full or partial refunds.</p>
           </div>
+          <figure className="landing-preview">
+            <Image
+              src="/product/dashboard-sample.webp"
+              alt="Chai House dashboard showing three sample payments, 91.99 USDT in gross volume, and an 18.00 USDT refund"
+              width={1120}
+              height={480}
+              unoptimized
+            />
+            <figcaption>Chai House dashboard · Synthetic payments</figcaption>
+          </figure>
         </section>
 
         <section id="how" className="landing-section">
@@ -79,14 +85,11 @@ export default async function Landing() {
         <section id="developers" className="landing-section landing-developers">
           <div>
             <h2>Integrate with your store</h2>
-            <p>Add a USDT payment option with a single API call from your store server. Send shoppers to the checkout URL and fulfil orders after verifying the payment webhook.</p>
+            <p>Create a checkout session on your server and send customers to the hosted checkout URL in the response. Verify the signed webhook before fulfilling the order.</p>
             <Link href="/docs/quickstart" className="public-secondary">Integration quickstart <Icon name="arrowRight" /></Link>
           </div>
           <div className="landing-code">
-            <CodeBlock language="bash" filename="Create a checkout session" code={`curl --fail-with-body "$WC_API_BASE/checkout_sessions" \\
-  -H "Authorization: Bearer $WC_SECRET_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{"orderId":"order_123","amount":"49.99","currency":"USDT"}'`} />
+            <CodeBlock language="bash" filename="Create a checkout session" code={checkoutExample} />
           </div>
         </section>
       </main>
