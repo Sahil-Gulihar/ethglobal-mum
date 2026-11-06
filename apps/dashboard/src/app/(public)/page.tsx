@@ -3,7 +3,6 @@ import Link from "next/link";
 import { getCurrentMerchant } from "@/lib/auth";
 import { Wordmark } from "@/components/brand";
 import { Icon } from "@/components/icons";
-import { buttonVariants } from "@/components/ui/button";
 import { CodeBlock } from "@/components/code-block";
 import { clientSnippet, serverSnippet } from "@/components/snippets";
 
@@ -19,23 +18,16 @@ export default async function Landing() {
   const cta = merchant ? "Open dashboard" : "Get started";
 
   return (
-    <div className="landing dark">
-      <header className="landing-header">
-        <Wordmark />
-        <nav aria-label="Main navigation" className="landing-nav">
-          <a href="#payments">Payments</a>
-          <a href="#how">How it works</a>
-          <a href="#developers">Developers</a>
-        </nav>
-        <div className="landing-header-actions">
-          {!merchant && <Link href="/login">Log in</Link>}
-          <Link href={destination} className={buttonVariants({ className: "landing-button" })}>{cta} <Icon name="arrowRight" /></Link>
-        </div>
-      </header>
-      <main className="landing-main">
+    <>
+      <main className="public-frame landing-main">
         <section className="landing-intro">
-          <h1>Whitechain Commerce <span>USDT checkout for online stores</span></h1>
-          <Link href={destination} className={buttonVariants({ size: "lg", className: "landing-button" })}>{cta} <Icon name="arrowRight" /></Link>
+          <p className="landing-network">Whitechain Sepolia <span>Testnet</span></p>
+          <h1>USDT checkout for online stores</h1>
+          <p className="landing-lede">Accept USDT on Whitechain and settle directly to your own wallet.</p>
+          <div className="public-actions">
+            <Link href={destination} className="public-primary">{cta} <Icon name="arrowRight" /></Link>
+            <Link href="/docs" className="public-secondary">Read the docs</Link>
+          </div>
         </section>
 
         <section id="payments" className="landing-showcase" aria-label="Payments">
@@ -62,7 +54,7 @@ export default async function Landing() {
           </figure>
 
           <div className="landing-feature-rail">
-            <h2>Get paid directly. <span>USDT goes from your customer’s wallet to yours on Whitechain.</span></h2>
+            <h2>Follow a payment from checkout to settlement</h2>
             <ul aria-label="Payment features">
               <li>Hosted checkout</li>
               <li>Onchain settlement</li>
@@ -89,7 +81,7 @@ export default async function Landing() {
           <div>
             <h2>Integrate with your store</h2>
             <p>Create a checkout session on your server, render the checkout, and fulfil orders when the signed webhook arrives.</p>
-            <Link href={destination} className={buttonVariants({ className: "landing-button" })}>Get your API keys <Icon name="arrowRight" /></Link>
+            <Link href="/docs/quickstart" className="public-secondary">Integration quickstart <Icon name="arrowRight" /></Link>
           </div>
           <div className="landing-code">
             <CodeBlock filename="app/api/checkout/route.ts" code={serverSnippet()} />
@@ -97,12 +89,13 @@ export default async function Landing() {
           </div>
         </section>
       </main>
-      <footer className="landing-footer">
+      <footer className="public-frame landing-footer">
         <Wordmark />
         <p>© {new Date().getFullYear()} Whitechain Commerce</p>
+        <Link href="/docs">Docs</Link>
         {!merchant && <Link href="/login">Log in</Link>}
         <a href="https://explorer.testnet.whitechain.io" target="_blank" rel="noreferrer">Whitechain Explorer ↗</a>
       </footer>
-    </div>
+    </>
   );
 }
