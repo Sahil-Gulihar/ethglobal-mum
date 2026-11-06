@@ -4,12 +4,11 @@ import { getCurrentMerchant } from "@/lib/auth";
 import { Wordmark } from "@/components/brand";
 import { Icon } from "@/components/icons";
 import { CodeBlock } from "@/components/code-block";
-import { clientSnippet, serverSnippet } from "@/components/snippets";
 
 const steps = [
   ["Set up your store", "Create an account and connect the wallet where you want to receive payments."],
-  ["Add checkout", "Create a session on your server and send customers to your hosted checkout."],
-  ["Get paid directly", "Your customer pays in USDT. A signed webhook tells your store when the payment settles."],
+  ["Add checkout", "Send customers to hosted checkout from your store, or share a fixed-price payment link."],
+  ["Get paid directly", "Receive USDT in your payout wallet. Use signed webhooks to update store orders after confirmation."],
 ];
 
 export default async function Landing() {
@@ -21,12 +20,12 @@ export default async function Landing() {
     <>
       <main className="public-frame landing-main">
         <section className="landing-intro">
-          <p className="landing-network">Whitechain Sepolia <span>Testnet</span></p>
-          <h1>USDT checkout for online stores</h1>
-          <p className="landing-lede">Accept USDT on Whitechain and settle directly to your own wallet.</p>
+          <p className="landing-network">Whitechain Sepolia <span>Testnet only</span></p>
+          <h1>Accept on-chain payments on Whitechain</h1>
+          <p className="landing-lede">Add USDT as a payment option in your store. Customers pay from their wallets, and funds go straight to yours.</p>
           <div className="public-actions">
             <Link href={destination} className="public-primary">{cta} <Icon name="arrowRight" /></Link>
-            <Link href="/docs" className="public-secondary">Read the docs</Link>
+            <Link href="/docs" className="public-secondary">Integration guide</Link>
           </div>
         </section>
 
@@ -56,8 +55,8 @@ export default async function Landing() {
           <div className="landing-feature-rail">
             <h2>Follow a payment from checkout to settlement</h2>
             <ul aria-label="Payment features">
-              <li>Hosted checkout</li>
-              <li>Onchain settlement</li>
+              <li>Hosted checkout and payment links</li>
+              <li>Direct wallet settlement</li>
               <li>Full and partial refunds</li>
               <li>Signed webhooks</li>
             </ul>
@@ -80,12 +79,14 @@ export default async function Landing() {
         <section id="developers" className="landing-section landing-developers">
           <div>
             <h2>Integrate with your store</h2>
-            <p>Create a checkout session on your server, render the checkout, and fulfil orders when the signed webhook arrives.</p>
+            <p>Add a USDT payment option with a single API call from your store server. Send shoppers to the checkout URL and fulfil orders after verifying the payment webhook.</p>
             <Link href="/docs/quickstart" className="public-secondary">Integration quickstart <Icon name="arrowRight" /></Link>
           </div>
           <div className="landing-code">
-            <CodeBlock filename="app/api/checkout/route.ts" code={serverSnippet()} />
-            <CodeBlock filename="Checkout.tsx" code={clientSnippet()} />
+            <CodeBlock language="bash" filename="Create a checkout session" code={`curl --fail-with-body "$WC_API_BASE/checkout_sessions" \\
+  -H "Authorization: Bearer $WC_SECRET_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"orderId":"order_123","amount":"49.99","currency":"USDT"}'`} />
           </div>
         </section>
       </main>

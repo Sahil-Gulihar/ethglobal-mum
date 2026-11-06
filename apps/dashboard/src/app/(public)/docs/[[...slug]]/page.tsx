@@ -14,7 +14,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const current = ((await params).slug ?? []).join("/");
   const page = docPages.find(({ slug }) => slug === current);
-  return { title: page?.slug ? `${page.title} | Docs` : "Developer docs" };
+  return { title: page?.slug ? `${page.title} | Docs` : "Merchant docs" };
 }
 
 export default async function DocsPage({ params }: Props) {
@@ -49,8 +49,8 @@ export default async function DocsPage({ params }: Props) {
             <h1>{title ?? page.title}</h1>
             {!slug && (
               <div className="public-actions">
-                <Link className="public-primary" href="/docs/quickstart">Start the quickstart</Link>
-                <Link className="public-secondary" href="/docs/api-reference">API reference</Link>
+                <Link className="public-primary" href="/docs/quickstart">Integrate your store</Link>
+                <Link className="public-secondary" href="/docs/payment-links">Use payment links</Link>
               </div>
             )}
           </header>

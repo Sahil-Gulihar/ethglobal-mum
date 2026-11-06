@@ -171,6 +171,13 @@
 .docs-prose :not(pre) > code { padding: 2px 4px; border: 1px solid var(--border); border-radius: 4px; background: var(--card); color: var(--foreground); }
 .docs-prose pre { overflow-x: auto; padding: 16px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); color: var(--foreground); }
 .docs-prose pre code { font-size: inherit; }
+.docs-prose img { display: block; max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 6px; }
+.docs-prose img[src="/product/checkout-sample.webp"] { max-width: min(100%, 340px); }
+
+.public-site .shiki span { color: var(--shiki-light, inherit); }
+@media (prefers-color-scheme: dark) {
+  .public-site .shiki span { color: var(--shiki-dark, inherit); }
+}
 .docs-prose blockquote { padding: 8px 16px; border-left: 2px solid var(--border); }
 .docs-prose table { display: block; overflow-x: auto; font-size: 14px; }
 .docs-prose :is(th, td) { padding: 8px 12px; border: 1px solid var(--border); text-align: left; }

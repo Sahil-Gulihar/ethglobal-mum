@@ -14,7 +14,7 @@ Payments are never created through the API. The indexer creates one when it sees
 
 The regular pass scans router logs up to one block behind the chain head (1 confirmation). The hint path waits for the same confirmation depth. Both paths run the same checks and are idempotent, so a payment is recorded once even if both see it.
 
-The indexer runs as a background worker (`pnpm worker`, one pass every 4 seconds) or through the operator cron endpoint. If neither is running, payments are only picked up through the submit hint, and queued webhooks are not delivered, because the same worker or cron tick sends them.
+Check **Payments** for confirmed transactions and **Webhooks** for delivery status.
 
 ### Settlement checks
 
@@ -82,18 +82,18 @@ Do not fulfil from the widget's `onSuccess` callback or from the customer landin
 
 ```bash
 # Newest first, 1 to 100 (default 20)
-curl "http://localhost:3000/api/v1/payments?limit=50" \
+curl "https://whitechain-dashboard.vercel.app/api/v1/payments?limit=50" \
   -H "Authorization: Bearer $WC_SECRET_KEY"
 
 # One payment
-curl http://localhost:3000/api/v1/payments/pay_Vb3kT9wQ2mXr7LpN5sZe \
+curl https://whitechain-dashboard.vercel.app/api/v1/payments/pay_Vb3kT9wQ2mXr7LpN5sZe \
   -H "Authorization: Bearer $WC_SECRET_KEY"
 ```
 
 ```ts
 import type { PaymentObject } from "@whitechain-commerce/react/server";
 
-const res = await fetch("http://localhost:3000/api/v1/payments?limit=50", {
+const res = await fetch("https://whitechain-dashboard.vercel.app/api/v1/payments?limit=50", {
   headers: { Authorization: `Bearer ${process.env.WC_SECRET_KEY}` },
 });
 if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -129,5 +129,5 @@ When the amount differs from the session's `amountUnits`, more or less:
 ## Limitations
 
 - Payments settle only in USDT on Whitechain Sepolia. There is no live mode.
-- A payment always pays a checkout session. There are no payment links, invoices or subscriptions.
+- A payment always pays a checkout session. Each visit to a reusable payment link creates a new session.
 - `createdAt` is the time the payment was indexed, not the block time. Use `txHash` on the explorer for the exact block.

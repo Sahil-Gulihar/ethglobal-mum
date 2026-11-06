@@ -12,7 +12,7 @@ Webhooks are how your backend learns that money has moved. Whitechain Commerce w
 3. In the same database transaction that records the payment or refund, an event is created with one pending delivery per enabled endpoint.
 4. The delivery worker signs the event body and posts it to your URL. Failed attempts are retried on a fixed schedule.
 
-Deliveries are sent by the worker (`pnpm worker`, which ticks every 4 seconds) or by `GET /api/cron/tick` called with `Authorization: Bearer $CRON_SECRET`. If neither is running, events queue up and nothing is sent. See [self-hosting](./self-hosting.md).
+Manage delivery status and retries from **Webhooks** in the dashboard.
 
 ## Add an endpoint
 
@@ -415,23 +415,7 @@ There is no test event for `refund.succeeded`. To exercise refunds, make a real 
 
 ## URL restrictions
 
-To stop endpoints from being pointed at internal services, webhook URLs are checked when you add them and again before every delivery.
-
-In production (`NODE_ENV=production`), a URL is rejected if:
-
-- the hostname is `localhost`, or ends in `.localhost`, `.internal` or `.local`, or
-- it doesn't resolve, or any address it resolves to is in a blocked range.
-
-| Family | Blocked ranges |
-| --- | --- |
-| IPv4 | `0.0.0.0/8`, `10.0.0.0/8`, `100.64.0.0/10`, `127.0.0.0/8`, `169.254.0.0/16`, `172.16.0.0/12`, `192.0.0.0/24`, `192.0.2.0/24`, `192.168.0.0/16`, `198.18.0.0/15`, `198.51.100.0/24`, `203.0.113.0/24`, `224.0.0.0/4`, `240.0.0.0/4` |
-| IPv6 | `::/128`, `::1/128`, `::ffff:0:0/96`, `64:ff9b::/96`, `100::/64`, `2001:db8::/32`, `fc00::/7`, `fe80::/10`, `ff00::/8` |
-
-Outside production, or when `ALLOW_PRIVATE_WEBHOOK_URLS=true` is set, these checks are skipped so you can use local URLs such as the demo store's `http://localhost:3001/api/webhooks/whitechain`. Only the `http:`/`https:` scheme check always applies.
-
-Both variables are read by the process that runs the check: the dashboard when you add an endpoint, send a test event or redeliver, and the worker (or the dashboard, for `/api/cron/tick`) before a scheduled delivery. `next start` sets `NODE_ENV=production` for the dashboard, but `pnpm worker` doesn't set it, so set `NODE_ENV=production` in the worker's environment too if you want the checks applied there.
-
-To receive webhooks on your laptop from a production deployment, expose your local server through a public HTTPS tunnel and add the tunnel URL as the endpoint.
+Register a public HTTPS URL that receives POST requests. The hosted service checks the address at registration and again at delivery, and rejects private, reserved, or unresolvable addresses. To test a handler on your machine, register the public HTTPS URL of a tunnel to it.
 
 ## Best practices
 

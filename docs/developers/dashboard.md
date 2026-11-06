@@ -3,7 +3,7 @@ title: "Dashboard"
 description: "The merchant dashboard is where you set up your account, manage keys and webhooks, follow payments and send refunds."
 ---
 
-The dashboard is part of the `apps/dashboard` Next.js app. Locally it runs at `http://localhost:3000` (the `APP_URL` default). Everything in it is test mode on Whitechain Sepolia (chain id `1874`).
+Use the [merchant dashboard](https://whitechain-dashboard.vercel.app/dashboard) to manage payments on Whitechain Sepolia testnet (chain ID `1874`).
 
 ## Pages
 
@@ -40,9 +40,11 @@ Sessions last 7 days. The session cookie (`wc_session`) is `httpOnly`, `SameSite
 
 A merchant account is either `active` or `pending`. Only active merchants can register a payout wallet, create secret keys and create checkout sessions.
 
-World ID human verification is planned but not built yet. While the server runs with `SKIP_WORLD_ID` on, new merchants are `active` immediately, and the dashboard shows "Skipped on testnet" on the verification step. See [Self-hosting](./self-hosting.md#world-id-skip_world_id) for how the flag is read.
+The dashboard shows a **Pending verification** badge if your account is pending. An active account is required to register a payout wallet or create an API key.
 
-A pending account shows a **Pending verification** badge in the header. There's no verification flow yet, so a merchant created while `SKIP_WORLD_ID` is off stays pending.
+![Merchant dashboard showing payment totals, a payout wallet and three sample transactions.](../../apps/dashboard/public/product/dashboard-sample.webp)
+
+*Example dashboard for Chai House with synthetic payments.*
 
 ## Onboarding checklist
 
@@ -51,7 +53,7 @@ Until every step is done, the home page shows a "Get set up to accept USDT" chec
 | Step | Done when |
 | --- | --- |
 | 1. Add your business | Always done after signup. Edit the name in Settings. |
-| 2. Verify you're human | The account is `active`. Shows "Skipped on testnet" while `SKIP_WORLD_ID` is on. |
+| 2. Verify you're human | The account is `active`. Shows "Skipped on testnet" when verification is skipped. |
 | 3. Connect your payout wallet | A payout address is registered onchain. |
 | 4. Create an API key | You have at least one secret key that isn't revoked. |
 | 5. Add a webhook endpoint | You have at least one webhook endpoint. |
@@ -63,7 +65,7 @@ The home page also shows:
 - **Refunded**, the refunded total and how many payments had a refund.
 - **Payout wallet**, with an explorer link, or a link to add one.
 - **Recent payments**, the last five.
-- Server and client code snippets that use your `APP_URL` as the API base.
+- Server and client code snippets that use the dashboard origin.
 
 The home page refreshes every 5 seconds while the tab is visible. Refreshing pauses while a dialog is open, so a one-time secret key isn't lost.
 
@@ -126,7 +128,7 @@ Keys look like `sk_test_` followed by 32 letters and digits. All keys are test k
 
 Choose **Revoke** on the key and confirm. Requests with that key fail right away. Revoking can't be undone. Revoked keys stay in the table with a "Revoked" badge and their revocation date.
 
-The Developers page also shows your API base URL (`APP_URL` followed by `/api/v1`), the `PaymentRouter` address, the USDT address, and a three-step integration guide.
+The Developers page also shows your API base URL (ending in `/api/v1`), the `PaymentRouter` address, the USDT address, and a three-step integration guide.
 
 ## Webhooks
 
@@ -136,7 +138,7 @@ Manage endpoints on **Webhooks** (`/dashboard/webhooks`). For the event format a
 
 Enter a full `http://` or `https://` URL and choose **Add endpoint**. You can add up to 10 endpoints. Every endpoint receives both event types, `payment.succeeded` and `refund.succeeded`.
 
-In production, the URL must resolve to a public IP address. Localhost and private addresses are rejected unless the server sets `ALLOW_PRIVATE_WEBHOOK_URLS=true`. Outside production they're allowed, so `http://localhost:3001/api/webhooks/whitechain` works for the demo store. The same check runs again before every delivery. See [Self-hosting](./self-hosting.md#webhook-url-guard).
+Use a public HTTPS endpoint your store controls. The hosted platform cannot deliver webhooks to localhost or private addresses.
 
 ### Signing secret
 
@@ -276,7 +278,7 @@ Text cells that start with `=`, `+`, `-`, `@`, a tab or a carriage return get a 
 
 - **Business**: edit the business name (2 to 80 characters). It's shown to customers at checkout.
 - **Payout wallet**: add or change the payout wallet, as described in [Payout wallet](#payout-wallet).
-- **Account**: your email, status (with a "World ID skipped on testnet" badge while `SKIP_WORLD_ID` is on), merchant id (`mer_...`), onchain merchant id, network (Whitechain Sepolia, 1874) and signup date. Both ids have a copy button.
+- **Account**: your email, status (with a "World ID skipped on testnet" badge when verification is skipped), merchant id (`mer_...`), onchain merchant id, network (Whitechain Sepolia, 1874) and signup date. Both ids have a copy button.
 
 ## Related
 
@@ -284,4 +286,4 @@ Text cells that start with `=`, `+`, `-`, `@`, a tab or a carriage return get a 
 - [Webhooks](./webhooks.md)
 - [Refunds](./refunds.md)
 - [Testing](./testing.md)
-- [Self-hosting](./self-hosting.md)
+- [Payment links](./payment-links.md)

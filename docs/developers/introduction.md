@@ -10,6 +10,7 @@ Whitechain Commerce lets a merchant accept USDT on Whitechain Sepolia without ev
 | Product | What it is | Read more |
 | --- | --- | --- |
 | Checkout widget | `<WhitechainCheckout />`, a React component that connects the customer's wallet, prompts a switch to Whitechain Sepolia, checks the USDT balance, asks for an `approve` if needed, sends `pay`, and waits for the backend to confirm the payment. | [Checkout widget](./checkout-widget.md) |
+| Payment links | Reusable links for a fixed USDT amount, created in the dashboard without code. | [Payment links](./payment-links.md) |
 | Hosted checkout | A full-page checkout at `/checkout/{sessionId}` on the dashboard. Create a session and send the customer to its `url`. No frontend code needed. | [Hosted checkout](./hosted-checkout.md) |
 | Checkout sessions | One session prices one order. Your server creates it with a secret key, so the amount can't be changed in the browser. | [Checkout sessions](./checkout-sessions.md) |
 | Refunds | Full or partial refunds back to the wallet that paid. You sign them from your payout wallet in the dashboard. | [Refunds](./refunds.md) |
@@ -84,7 +85,7 @@ The onchain `orderId` comes from the session id, not from your own `orderId`. Yo
 | `pending` | Signed up but not yet active. API keys don't authenticate and checkout sessions can't be created. |
 | `active` | Can register a payout wallet, create API keys and create checkout sessions. |
 
-Merchants become `active` at signup when World ID verification is skipped: `SKIP_WORLD_ID` is set to any value other than `false` (the `.env.example` default is `true`), or it is unset or empty and `NODE_ENV` is not `production`. World ID verification itself is not implemented yet. See [Limitations](#limitations).
+The dashboard shows whether your merchant account is active. Only active accounts can create checkout sessions.
 
 ### Checkout session
 
@@ -158,12 +159,11 @@ Whitechain Commerce runs on testnet only. Every API key is an `sk_test_` key and
 
 - **Testnet only.** There are no live keys and no mainnet deployment.
 - **USDT only.** `currency` must be `"USDT"`.
-- **World ID is not enforced.** The `pending` merchant status exists, but there is no verification flow yet. With World ID skipped, merchants are `active` at signup. If skipping is turned off (for example `SKIP_WORLD_ID=false`, or a production build with it unset), new merchants stay `pending` and can't use the API.
 - **Refunds need your signature.** `POST /api/v1/refunds` only creates a `pending` request. You sign the refund from your payout wallet in the dashboard, and the payout wallet needs enough USDT and some WBT for gas.
 - **One payment per session.** A session's onchain order id can be paid once.
 - **Payout changes are rate limited.** Once per 5 minutes per merchant, and new changes are refused while 60 or more merchants have changed their payout in the past hour, because each change is an onchain transaction paid by the backend signer. Payments made to a previous payout wallet are still recorded. Only the current payout wallet can refund.
 - **Small server SDK.** `createCheckoutSession` and `verifyWebhook` are the only server helpers. Use HTTP for payments and refunds.
-- **Not published to npm.** The SDK packages live in this monorepo as workspace packages. See the [quickstart](./quickstart.md#install-the-sdk).
+- **Not published to npm.** The SDK packages live in this monorepo as workspace packages. See the [widget installation guide](./checkout-widget.md#installation).
 
 Coming soon, not available today: World ID Proof of Human at onboarding, live mode, payment links and subscriptions.
 
