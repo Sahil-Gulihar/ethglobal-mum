@@ -1,21 +1,22 @@
 import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
+/* A white surface on the panel: a hairline ring instead of a tonal border, 10px radius. */
 export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("rounded-xl border bg-card text-card-foreground shadow-[0_1px_2px_rgb(11_11_18/0.04)]", className)} {...props} />;
+  return <div className={cn("rounded-lg bg-card text-card-foreground shadow-card", className)} {...props} />;
 }
 export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("flex flex-col gap-1 p-5 pb-3", className)} {...props} />;
+  return <div className={cn("flex flex-col gap-1 px-4 pt-4 pb-3", className)} {...props} />;
 }
 export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
-  return <h2 className={cn("text-sm font-semibold tracking-tight", className)} {...props} />;
+  return <h2 className={cn("text-[13px] leading-5 font-semibold text-foreground", className)} {...props} />;
 }
 export function CardDescription({ className, ...props }: HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={cn("text-sm text-muted-foreground", className)} {...props} />;
+  return <p className={cn("text-[13px] leading-5 text-muted-foreground", className)} {...props} />;
 }
 export function CardContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("p-5 pt-0", className)} {...props} />;
+  return <div className={cn("px-4 pb-4", className)} {...props} />;
 }
 export function CardFooter({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("flex items-center gap-2 border-t px-5 py-3", className)} {...props} />;
+  return <div className={cn("flex items-center gap-2 border-t px-4 py-3", className)} {...props} />;
 }

@@ -6,60 +6,110 @@
  * Whitechain Commerce tokens (shadcn/ui variable names).
  * Ink #0B0B12 + electric blue #3B5BFF accent.
  */
+/*
+ * Whitechain Commerce look, built on the Stageshow light theme
+ * (.agents/skills/stageshow/kit/stage.css): one warm neutral family, white
+ * surfaces on a warm canvas, hairline translucent lines, three text inks,
+ * one accent (#3B5BFF) spent on what is acted on, status color only for status.
+ * Variable names stay shadcn-style so every component reads them.
+ */
 :root {
-  --radius: 0.75rem;
-  --ink: #0b0b12;
-  --background: #ffffff;
-  --foreground: #0b0b12;
+  --radius: 0.625rem; /* 10px: cards and popovers (ss-radius-lg) */
+  --ink: #18181a;
+
+  /* Surfaces */
+  --canvas: #f6f5f4; /* ss-canvas: the app ground behind the main panel */
+  --background: #ffffff; /* ss-surface */
+  --well: #f3f2f0; /* ss-well, a step under the surface: code, table heads */
+  --raised: #ffffff;
+  --foreground: #262628; /* ss-text-strong */
   --card: #ffffff;
-  --card-foreground: #0b0b12;
+  --card-foreground: #262628;
   --popover: #ffffff;
-  --popover-foreground: #0b0b12;
+  --popover-foreground: #262628;
+
+  /* Accent */
   --primary: #3b5bff;
   --primary-foreground: #ffffff;
-  --secondary: #f2f3f7;
-  --secondary-foreground: #0b0b12;
-  --muted: #f5f6f9;
-  --muted-foreground: #5b5f72;
-  --accent: #eef1ff;
-  --accent-foreground: #2a44d6;
-  --destructive: #d92d4a;
+  --accent: rgb(59 91 255 / 0.1); /* ss-accent-soft */
+  --accent-foreground: #2f49cc; /* ss-accent-text */
+
+  /* Neutrals */
+  --secondary: rgb(0 0 0 / 0.04); /* ss-ink-1 */
+  --secondary-foreground: #262628;
+  --muted: rgb(0 0 0 / 0.04);
+  --muted-foreground: #6e6e72; /* ss-text, one tone up for white surfaces */
+  --faint: #9a9a9d; /* ss-text-faint */
+  --icon: #707074; /* ss-icon */
+
+  /* Status: soft fill, strong text */
+  --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --success: #0e8a5f;
-  --success-soft: #e6f6ef;
-  --warning: #a15c00;
-  --warning-soft: #fdf3e2;
-  --border: #e6e7ee;
-  --input: #dcdee8;
+  --destructive-soft: rgb(239 68 68 / 0.1);
+  --destructive-text: #b91c1c;
+  --success: #15803d; /* ss-success-text */
+  --success-dot: #22c55e;
+  --success-soft: rgb(34 197 94 / 0.12);
+  --warning: #b45309; /* ss-warning-text */
+  --warning-dot: #f59e0b;
+  --warning-soft: rgb(245 158 11 / 0.14);
+
+  /* Lines */
+  --border: rgb(0 0 0 / 0.07); /* ss-line, a touch firmer for a dense app */
+  --border-faint: rgb(0 0 0 / 0.04);
+  --input: rgb(0 0 0 / 0.12);
   --ring: #3b5bff;
-  --sidebar: #fafafc;
+  --sidebar: #f6f5f4;
+
+  /* Depth (Stageshow shadow set) */
+  --shadow-card: 0 0 0 1px rgb(0 0 0 / 0.06), 0 1px 2px rgb(0 0 0 / 0.04);
+  --shadow-window: 0 0 0 1px rgb(0 0 0 / 0.06), 0 4px 16px rgb(0 0 0 / 0.06);
+  --shadow-float: 0 0 0 1px rgb(0 0 0 / 0.08), 0 4px 16px rgb(0 0 0 / 0.12), 0 12px 32px rgb(0 0 0 / 0.08);
+  --shadow-hero: 0 0 0 1px rgb(0 0 0 / 0.06), 0 30px 60px -12px rgb(50 50 93 / 0.25), 0 18px 36px -18px rgb(0 0 0 / 0.3);
+  --shadow-button: 0 0 0 1px rgb(0 0 0 / 0.1), 0 1px 2px rgb(0 0 0 / 0.06);
 }
 
 .dark {
-  --background: #0b0b12;
-  --foreground: #f3f4f8;
-  --card: #12121c;
-  --card-foreground: #f3f4f8;
-  --popover: #12121c;
-  --popover-foreground: #f3f4f8;
+  --ink: #ececee;
+  --canvas: #111113;
+  --background: #1a1a1d;
+  --well: #151517;
+  --raised: #26262a;
+  --foreground: #ececee;
+  --card: #1a1a1d;
+  --card-foreground: #ececee;
+  --popover: #26262a;
+  --popover-foreground: #ececee;
   --primary: #5873ff;
   --primary-foreground: #ffffff;
-  --secondary: #1b1b28;
-  --secondary-foreground: #f3f4f8;
-  --muted: #171724;
-  --muted-foreground: #a2a6ba;
-  --accent: #1a2150;
-  --accent-foreground: #b9c4ff;
-  --destructive: #ff5c77;
-  --destructive-foreground: #0b0b12;
-  --success: #3ccf95;
-  --success-soft: #0f2a20;
-  --warning: #f2b54a;
-  --warning-soft: #2b2110;
-  --border: #252536;
-  --input: #2c2c40;
+  --accent: rgb(88 115 255 / 0.2);
+  --accent-foreground: #aab8ff;
+  --secondary: rgb(255 255 255 / 0.05);
+  --secondary-foreground: #ececee;
+  --muted: rgb(255 255 255 / 0.05);
+  --muted-foreground: #9d9da1;
+  --faint: #6c6c70;
+  --icon: #9a9aa0;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --destructive-soft: rgb(239 68 68 / 0.16);
+  --destructive-text: #f87171;
+  --success: #4ade80;
+  --success-dot: #22c55e;
+  --success-soft: rgb(34 197 94 / 0.16);
+  --warning: #fbbf24;
+  --warning-dot: #f59e0b;
+  --warning-soft: rgb(245 158 11 / 0.18);
+  --border: rgb(255 255 255 / 0.08);
+  --border-faint: rgb(255 255 255 / 0.05);
+  --input: rgb(255 255 255 / 0.14);
   --ring: #5873ff;
-  --sidebar: #0e0e17;
+  --sidebar: #111113;
+  --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.06);
+  --shadow-window: 0 0 0 1px rgb(255 255 255 / 0.08), 0 4px 16px rgb(0 0 0 / 0.4);
+  --shadow-float: 0 0 0 1px rgb(255 255 255 / 0.1), 0 4px 16px rgb(0 0 0 / 0.4), 0 12px 32px rgb(0 0 0 / 0.3);
+  --shadow-hero: 0 0 0 1px rgb(255 255 255 / 0.08), 0 30px 60px -12px rgb(0 0 0 / 0.6);
+  --shadow-button: 0 0 0 1px rgb(255 255 255 / 0.1);
 }
 
 @theme inline {
@@ -88,11 +138,27 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-sidebar: var(--sidebar);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --color-canvas: var(--canvas);
+  --color-well: var(--well);
+  --color-raised: var(--raised);
+  --color-faint: var(--faint);
+  --color-icon: var(--icon);
+  --color-border-faint: var(--border-faint);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-destructive-text: var(--destructive-text);
+  --color-success-dot: var(--success-dot);
+  --color-warning-dot: var(--warning-dot);
+  --shadow-card: var(--shadow-card);
+  --shadow-window: var(--shadow-window);
+  --shadow-float: var(--shadow-float);
+  --shadow-hero: var(--shadow-hero);
+  --shadow-button: var(--shadow-button);
+  --radius-sm: 6px; /* menu row, segment thumb */
+  --radius-md: 8px; /* field, button */
+  --radius-lg: 10px; /* card, popover, toast */
+  --radius-xl: 12px; /* the app window / main panel */
+  --radius-2xl: 16px;
+  --font-sans: var(--font-inter), "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 }
 
@@ -101,17 +167,24 @@
     border-color: var(--border);
   }
   body {
-    background: var(--background);
+    background: var(--canvas);
     color: var(--foreground);
     font-family: var(--font-sans);
     font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: rgb(59 91 255 / 0.18);
   }
   .tabular {
     font-variant-numeric: tabular-nums;
   }
   dialog::backdrop {
-    background: rgb(11 11 18 / 0.55);
-    backdrop-filter: blur(2px);
+    background: rgb(24 24 26 / 0.32);
+  }
+  /* Center a short label on its letters, not its line box (Stageshow craft) */
+  .trim-cap {
+    text-box: trim-both cap alphabetic;
   }
 }
 
