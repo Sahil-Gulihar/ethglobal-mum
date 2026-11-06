@@ -22,7 +22,7 @@ export default async function PaymentsPage() {
       <AutoRefresh active intervalMs={5000} />
       <PageHeader
         title="Payments"
-        description="Every USDT payment settled to your payout wallet, verified against the PaymentSettled event."
+        description="View confirmed USDT payments sent to your payout wallet."
         actions={
           // Plain <a>: a route handler download, not a client-side navigation.
           <a href="/dashboard/payments/export" download className={buttonVariants({ variant: "outline" })}>
