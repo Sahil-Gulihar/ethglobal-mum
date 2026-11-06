@@ -1,6 +1,7 @@
-# API reference
-
-Every HTTP endpoint under `/api/v1`, with request schemas, response objects and status codes as implemented.
+---
+title: "API reference"
+description: "Every HTTP endpoint under /api/v1, with request schemas, response objects and status codes as implemented."
+---
 
 The API is small on purpose. Your server creates checkout sessions and refund requests and reads payments. The checkout widget reads a public view of a session and reports the transaction hash it sent. Money never moves through the API: payments go from the customer's wallet to your payout wallet through the PaymentRouter contract, and refunds are signed by your payout wallet.
 

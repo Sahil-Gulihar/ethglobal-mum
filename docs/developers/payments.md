@@ -1,6 +1,7 @@
-# Payments
-
-A payment is the record of a validated onchain USDT transfer that paid one checkout session.
+---
+title: "Payments"
+description: "A payment is the record of a validated onchain USDT transfer that paid one checkout session."
+---
 
 Payments are never created through the API. The indexer creates one when it sees a `PaymentSettled` event from the PaymentRouter and the event passes every settlement check below. At that moment the session becomes `paid` and a `payment.succeeded` webhook is queued.
 

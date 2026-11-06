@@ -1,6 +1,7 @@
-# Quickstart
-
-Take your first testnet USDT payment end to end: account, payout wallet, API key, checkout session, widget, webhook.
+---
+title: "Quickstart"
+description: "Take your first testnet USDT payment end to end: account, payout wallet, API key, checkout session, widget, webhook."
+---
 
 This guide takes about 10 minutes. The code samples use Next.js (App Router) and TypeScript, the same stack as the sample store in `apps/demo-store`. Read the [introduction](./introduction.md) first if you want the concepts behind each step.
 

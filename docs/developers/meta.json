@@ -1,0 +1,25 @@
+{
+  "title": "Whitechain Commerce",
+  "pages": [
+    "index",
+    "---Getting started---",
+    "introduction",
+    "quickstart",
+    "---Accept payments---",
+    "checkout-widget",
+    "hosted-checkout",
+    "checkout-sessions",
+    "payments",
+    "refunds",
+    "---Webhooks---",
+    "webhooks",
+    "---Reference---",
+    "api-reference",
+    "errors",
+    "smart-contract",
+    "---Operate---",
+    "dashboard",
+    "testing",
+    "self-hosting"
+  ]
+}

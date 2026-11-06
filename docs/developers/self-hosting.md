@@ -1,6 +1,7 @@
-# Self-hosting
-
-How to run Whitechain Commerce yourself: the architecture, setup, every environment variable, the worker, and contract deployment.
+---
+title: "Self-hosting"
+description: "How to run Whitechain Commerce yourself: the architecture, setup, every environment variable, the worker, and contract deployment."
+---
 
 ## Architecture
 

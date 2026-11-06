@@ -1,6 +1,7 @@
-# Errors
-
-How the API reports failures, every error type it returns, and the usual causes.
+---
+title: "Errors"
+description: "How the API reports failures, every error type it returns, and the usual causes."
+---
 
 ## Error envelope
 
