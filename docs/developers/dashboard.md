@@ -48,7 +48,7 @@ The dashboard shows a **Pending verification** badge if your account is pending.
 
 ## Onboarding checklist
 
-Until every step is done, the home page shows a "Get set up to accept USDT" checklist with a progress bar. Only the current step shows its controls.
+The Setup page shows a checklist and a progress bar. You can work on any unfinished step with an available action. Your account must be active before you can connect a payout wallet or create an API key.
 
 | Step | Done when |
 | --- | --- |
