@@ -1,4 +1,4 @@
-# Deploys the dashboard and docs to Vercel on every push to main, whoever
+# Deploys the dashboard, docs and demo store to Vercel on every push to main, whoever
 # authored the commit.
 #
 # The Vercel team is on the Hobby plan, which refuses deployments of commits
@@ -8,9 +8,9 @@
 #
 # Same flow as a manual deploy: run `vercel deploy --prod` from the repo root
 # with VERCEL_ORG_ID / VERCEL_PROJECT_ID set; Vercel builds remotely using the
-# project's root directory (apps/dashboard or apps/docs) and its env vars.
+# project's root directory (apps/dashboard, apps/docs or apps/demo-store) and its env vars.
 #
-# Both apps deploy on every push. Each app has its own concurrency group that
+# Every app deploys on every push. Each app has its own concurrency group that
 # cancels older runs, so the newest commit always wins and an older build can
 # never finish last and roll production back.
 name: Vercel deploy
@@ -21,9 +21,9 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: Which app to deploy
+        description: Which app to deploy (both = all apps)
         type: choice
-        options: [both, dashboard, docs]
+        options: [both, dashboard, docs, demo-store]
         default: both
 
 env:
@@ -40,6 +40,8 @@ jobs:
             project_id: prj_cIaiTGSv9tfa9THRbVn20KSqDFRO
           - app: docs
             project_id: prj_SufyVSa2MTUSHYwOthwYEL3Uk7xu
+          - app: demo-store
+            project_id: prj_puaMIIj4KxR3yRlB4PPTCtOOygke
     concurrency:
       group: vercel-deploy-${{ matrix.app }}
       cancel-in-progress: true

@@ -42,7 +42,7 @@ importers:
         version: 0.45.4(postgres@4.1.0)
       geist:
         specifier: ^1.9.2
-        version: 1.9.2(next@16.4.5(@babel/core@7.29.13)(@types/node@20.19.43)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))
+        version: 1.9.2(next@16.4.5(@types/node@20.19.43)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))
       hast-util-to-string:
         specifier: ^3.0.1
         version: 3.0.1
@@ -121,7 +121,7 @@ importers:
         version: 9.39.5(jiti@2.7.0)
       eslint-config-next:
         specifier: 16.4.5
-        version: 16.4.5(@typescript-eslint/parser@8.72.1(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)
+        version: 16.4.5(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)
       tailwindcss:
         specifier: ^4
         version: 4.3.4
@@ -152,6 +152,9 @@ importers:
       next:
         specifier: 16.4.5
         version: 16.4.5(@babel/core@7.29.13)(@types/node@20.19.43)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      postgres:
+        specifier: ^4.1.0
+        version: 4.1.0
       react:
         specifier: 19.3.0
         version: 19.3.0
@@ -176,7 +179,7 @@ importers:
         version: 9.39.5(jiti@2.7.0)
       eslint-config-next:
         specifier: 16.4.5
-        version: 16.4.5(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)
+        version: 16.4.5(@typescript-eslint/parser@8.72.1(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)
       tailwindcss:
         specifier: ^4
         version: 4.3.4
@@ -6350,9 +6353,9 @@ snapshots:
 
   functions-have-names@1.2.3: {}
 
-  geist@1.9.2(next@16.4.5(@babel/core@7.29.13)(@types/node@20.19.43)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)):
+  geist@1.9.2(next@16.4.5(@types/node@20.19.43)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)):
     dependencies:
-      next: 16.4.5(@babel/core@7.29.13)(@types/node@20.19.43)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      next: 16.4.5(@types/node@20.19.43)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
 
   geist@1.9.2(next@16.4.5(@types/node@26.6.6)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)):
     dependencies:
@@ -7322,6 +7325,31 @@ snapshots:
       react-dom: 19.3.0(react@19.3.0)
 
   next@16.4.5(@babel/core@7.29.13)(@types/node@20.19.43)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
+    dependencies:
+      '@next/env': 16.4.5
+      '@swc/helpers': 0.5.23
+      baseline-browser-mapping: 2.11.35
+      caniuse-lite: 1.0.30001823
+      postcss: 8.5.23
+      react: 19.3.0
+      react-dom: 19.3.0(react@19.3.0)
+      styled-jsx: 5.1.6(@babel/core@7.29.13)(react@19.3.0)
+    optionalDependencies:
+      '@next/swc-darwin-arm64': 16.4.5
+      '@next/swc-darwin-x64': 16.4.5
+      '@next/swc-linux-arm64-gnu': 16.4.5
+      '@next/swc-linux-arm64-musl': 16.4.5
+      '@next/swc-linux-x64-gnu': 16.4.5
+      '@next/swc-linux-x64-musl': 16.4.5
+      '@next/swc-win32-arm64-msvc': 16.4.5
+      '@next/swc-win32-x64-msvc': 16.4.5
+      sharp: 0.35.5(@types/node@20.19.43)
+    transitivePeerDependencies:
+      - '@babel/core'
+      - '@types/node'
+      - babel-plugin-macros
+
+  next@16.4.5(@types/node@20.19.43)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
     dependencies:
       '@next/env': 16.4.5
       '@swc/helpers': 0.5.23
