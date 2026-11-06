@@ -1,0 +1,33 @@
+# Whitechain Commerce
+
+> Whitechain Commerce is a non-custodial USDT checkout for Whitechain Sepolia (chain id 1874, testnet only). A merchant signs up in the dashboard, registers a payout wallet, and creates checkout sessions from their server with an sk_test_ secret key. Customers pay with the embeddable <WhitechainCheckout /> React widget or the hosted checkout page; the PaymentRouter contract (0xa99a6D97607567f4fe734831910D24f4e9BD0508) moves USDT (0xcedfB56113143d55b2358b8CFbB0dEB5Ad2f55a7, 6 decimals) straight from the customer's wallet to the payout wallet. An indexer confirms each payment onchain and sends HMAC-SHA256 signed payment.succeeded and refund.succeeded webhooks. Full and partial refunds are signed by the merchant's payout wallet; the platform never holds funds. The server SDK has two helpers, createCheckoutSession and verifyWebhook, from @whitechain-commerce/react/server; everything else is plain HTTP under /api/v1.
+
+## Getting started
+
+- [Docs home](./README.md): index of every page in these docs
+- [Introduction](./introduction.md): core products, how money flows, the object model, statuses, network details and limitations
+- [Quickstart](./quickstart.md): take a first testnet payment end to end, from account to verified webhook
+
+## Accept payments
+
+- [Checkout widget](./checkout-widget.md): the <WhitechainCheckout /> React component, its props, callbacks, screens and the server helpers
+- [Hosted checkout](./hosted-checkout.md): redirect customers to the checkout page served by the dashboard at /checkout/{sessionId}
+- [Checkout sessions](./checkout-sessions.md): creating sessions on your server, lifecycle, expiry, idempotency per orderId, amounts and metadata
+- [Payments](./payments.md): the payment object, settlement checks, late payments and wrong amounts
+- [Refunds](./refunds.md): full and partial refunds signed by your payout wallet, pending requests and onchain matching
+
+## Webhooks
+
+- [Webhooks](./webhooks.md): event types, payload format, WC-Signature verification, retries, redelivery and test events
+
+## Reference
+
+- [API reference](./api-reference.md): every /api/v1 endpoint with request fields, response objects and status codes
+- [Errors](./errors.md): the error envelope, error types, messages and onchain revert errors
+- [Smart contract](./smart-contract.md): the PaymentRouter interface, ids, events, errors and how to verify a payment onchain
+
+## Operate
+
+- [Dashboard](./dashboard.md): signup, onboarding checklist, payout wallet, secret keys, webhook endpoints, refunds and CSV export
+- [Testing](./testing.md): testnet funds, local webhook testing, the project's test suites and local fork runs
+- [Self-hosting](./self-hosting.md): architecture, setup, environment variables, the worker, cron tick and contract deployment
