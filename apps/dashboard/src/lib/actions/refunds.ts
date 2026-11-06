@@ -8,6 +8,7 @@ import { db, payments, refunds } from "@/lib/db";
 import { requireMerchant } from "@/lib/auth";
 import { publicClient } from "@/lib/chain";
 import { createPendingRefund } from "@/lib/refunds";
+import { validateTx } from "@/lib/indexer";
 import { err, errorMessage, ok, type ActionResult } from "./result";
 
 /**
@@ -73,7 +74,18 @@ export async function txStatus(hash: string): Promise<ActionResult<"pending" | "
   }
 }
 
-export async function refreshPayment(paymentId: string): Promise<void> {
+/**
+ * Runs the indexer's full settlement check on a just-confirmed refund tx so the dashboard
+ * doesn't have to wait for the next worker pass. Idempotent; the worker would do the same.
+ */
+export async function indexRefundTx(paymentId: string, hash: string): Promise<ActionResult<boolean>> {
   await requireMerchant();
-  revalidatePath(`/dashboard/payments/${paymentId}`);
+  if (!isHash(hash)) return err("Invalid transaction hash.");
+  try {
+    const r = await validateTx(hash as Hex);
+    revalidatePath(`/dashboard/payments/${paymentId}`);
+    return ok(r.ok);
+  } catch (e) {
+    return err(errorMessage(e));
+  }
 }
