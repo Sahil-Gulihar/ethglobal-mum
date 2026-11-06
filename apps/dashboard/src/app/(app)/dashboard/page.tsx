@@ -29,9 +29,14 @@ export default async function DashboardHome() {
         title={`Welcome, ${m.name}`}
         description="Here’s how your store is doing on Whitechain."
         actions={
-          <Link href="/dashboard/developers" className={buttonVariants({ variant: "outline" })}>
-            <Icon name="code" /> Integration guide
-          </Link>
+          <>
+            <a href="/dashboard/payments/export" download className={buttonVariants({ variant: "outline" })}>
+              <Icon name="download" /> Export CSV
+            </a>
+            <Link href="/dashboard/developers" className={buttonVariants({ variant: "outline" })}>
+              <Icon name="code" /> Integration guide
+            </Link>
+          </>
         }
       />
 

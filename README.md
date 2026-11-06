@@ -118,6 +118,7 @@ pnpm --filter @whitechain-commerce/react test            # SDK state machine and
 cd contracts && forge test                               # 19 unit and fuzz tests (+ fork test when WHITECHAIN_RPC_URL is set)
 cd apps/dashboard
 pnpm smoke:api                                           # /api/v1 handlers against local Postgres
+pnpm test:csv                                            # accountant CSV export (builder + merchant-scoped query)
 pnpm exec tsx --env-file=../../.env scripts/test-webhooks.ts
 PATH=$HOME/.foundry/bin:$PATH pnpm exec tsx --env-file=../../.env src/lib/indexer/e2e-test.ts   # indexer on an anvil fork
 ```

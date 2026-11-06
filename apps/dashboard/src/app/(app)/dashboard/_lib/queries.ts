@@ -1,9 +1,10 @@
 import "server-only";
-import { and, asc, count, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, inArray, isNull, lt, sql, type SQL } from "drizzle-orm";
 import { fromUnits } from "@whitechain-commerce/core";
 import { apiKeys, checkoutSessions, db, payments, refunds, webhookAttempts, webhookDeliveries, webhookEndpoints, webhookEvents } from "@/lib/db";
 import type { Merchant } from "@/lib/auth";
 import { isTestEvent } from "@/lib/webhooks";
+import { sortLedger, type LedgerEntry, type LedgerRange } from "@/lib/csv-export";
 
 export type PaymentListItem = {
   id: string;
@@ -57,6 +58,70 @@ export async function paymentStats(merchantId: string) {
     refundedCount: Number(row?.refundedCount ?? 0),
     net: fromUnits(BigInt((row?.volume ?? "0").split(".")[0]) - BigInt((row?.refunded ?? "0").split(".")[0]), decimals),
   };
+}
+
+/**
+ * Ledger for the CSV export: every payment plus every succeeded refund of this merchant, oldest first.
+ * `range.to` is exclusive. Pending refunds moved no money, so they're left out.
+ */
+export async function listLedgerEntries(merchantId: string, range: LedgerRange = {}): Promise<LedgerEntry[]> {
+  const within = (col: typeof payments.createdAt | typeof refunds.createdAt): SQL[] => [
+    ...(range.from ? [gte(col, range.from)] : []),
+    ...(range.to ? [lt(col, range.to)] : []),
+  ];
+  const [payRows, refundRows] = await Promise.all([
+    db
+      .select({ p: payments, orderId: checkoutSessions.orderId })
+      .from(payments)
+      .innerJoin(checkoutSessions, eq(checkoutSessions.id, payments.sessionId))
+      .where(and(eq(payments.merchantId, merchantId), eq(checkoutSessions.merchantId, merchantId), ...within(payments.createdAt))),
+    db
+      .select({ r: refunds, p: payments, orderId: checkoutSessions.orderId })
+      .from(refunds)
+      .innerJoin(payments, eq(payments.id, refunds.paymentId))
+      .innerJoin(checkoutSessions, eq(checkoutSessions.id, payments.sessionId))
+      .where(
+        and(
+          eq(refunds.merchantId, merchantId),
+          eq(payments.merchantId, merchantId),
+          eq(refunds.status, "succeeded"),
+          ...within(refunds.createdAt),
+        ),
+      ),
+  ]);
+  const entries: LedgerEntry[] = [
+    ...payRows.map(({ p, orderId }) => ({
+      date: p.createdAt,
+      type: "payment" as const,
+      paymentId: p.id,
+      refundId: null,
+      orderId,
+      sessionId: p.sessionId,
+      amountUnits: p.amountUnits,
+      decimals: p.decimals,
+      status: p.status,
+      payer: p.payer,
+      payout: p.payout,
+      txHash: p.txHash,
+      blockNumber: p.blockNumber,
+    })),
+    ...refundRows.map(({ r, p, orderId }) => ({
+      date: r.createdAt,
+      type: "refund" as const,
+      paymentId: p.id,
+      refundId: r.id,
+      orderId,
+      sessionId: p.sessionId,
+      amountUnits: r.amountUnits,
+      decimals: p.decimals,
+      status: r.status,
+      payer: p.payer,
+      payout: p.payout,
+      txHash: r.txHash,
+      blockNumber: r.blockNumber,
+    })),
+  ];
+  return sortLedger(entries);
 }
 
 export type OnboardingState = {

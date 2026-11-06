@@ -7,6 +7,7 @@ import { PaymentsTable } from "@/components/dashboard/payments-table";
 import { AutoRefresh } from "@/components/dashboard/auto-refresh";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
+import { Icon } from "@/components/icons";
 
 export const metadata: Metadata = { title: "Payments" };
 
@@ -16,7 +17,16 @@ export default async function PaymentsPage() {
   return (
     <>
       <AutoRefresh active intervalMs={5000} />
-      <PageHeader title="Payments" description="Every USDT payment settled to your payout wallet, verified against the PaymentSettled event." />
+      <PageHeader
+        title="Payments"
+        description="Every USDT payment settled to your payout wallet, verified against the PaymentSettled event."
+        actions={
+          // Plain <a>: a route handler download, not a client-side navigation.
+          <a href="/dashboard/payments/export" download className={buttonVariants({ variant: "outline" })}>
+            <Icon name="download" /> Export CSV
+          </a>
+        }
+      />
       <Card className="py-1">
         <PaymentsTable
           rows={rows}
