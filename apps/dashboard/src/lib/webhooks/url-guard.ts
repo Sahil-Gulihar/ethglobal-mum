@@ -10,7 +10,9 @@ import { BlockList, isIP } from "node:net";
  *
  * Checked when the endpoint is created and again before every delivery (DNS can change).
  */
-const blocked = new BlockList();
+// Separate lists: Node's BlockList checks IPv4 addresses against IPv6 rules too (as ::ffff:a.b.c.d).
+const blocked4 = new BlockList();
+const blocked6 = new BlockList();
 for (const [net, prefix] of [
   ["0.0.0.0", 8],
   ["10.0.0.0", 8],
@@ -27,12 +29,12 @@ for (const [net, prefix] of [
   ["224.0.0.0", 4],
   ["240.0.0.0", 4],
 ] as const) {
-  blocked.addSubnet(net, prefix, "ipv4");
+  blocked4.addSubnet(net, prefix, "ipv4");
 }
 for (const [net, prefix] of [
   ["::", 128],
   ["::1", 128],
-  ["::ffff:0:0", 96], // IPv4-mapped; the embedded v4 address is checked separately
+  ["::ffff:0:0", 96], // IPv4-mapped literals: never needed for a real webhook host
   ["64:ff9b::", 96],
   ["100::", 64],
   ["2001:db8::", 32],
@@ -40,7 +42,7 @@ for (const [net, prefix] of [
   ["fe80::", 10],
   ["ff00::", 8],
 ] as const) {
-  blocked.addSubnet(net, prefix, "ipv6");
+  blocked6.addSubnet(net, prefix, "ipv6");
 }
 
 export function allowPrivateWebhookUrls(): boolean {
@@ -49,12 +51,8 @@ export function allowPrivateWebhookUrls(): boolean {
 
 export function isPrivateAddress(ip: string): boolean {
   const v = isIP(ip);
-  if (v === 4) return blocked.check(ip, "ipv4");
-  if (v === 6) {
-    const mapped = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/i.exec(ip);
-    if (mapped) return blocked.check(mapped[1], "ipv4");
-    return blocked.check(ip, "ipv6");
-  }
+  if (v === 4) return blocked4.check(ip, "ipv4");
+  if (v === 6) return blocked6.check(ip, "ipv6");
   return true; // not an IP: treat as unsafe
 }
 
