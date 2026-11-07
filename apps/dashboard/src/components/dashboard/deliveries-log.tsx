@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Spinner } from "@/components/ui/spinner";
 import { Icon } from "@/components/icons";
-import { cn, formatDateTime, relativeTime } from "@/lib/utils";
+import { cn, relativeTime } from "@/lib/utils";
+import { LocalTime } from "@/components/ui/local-time";
 
 export type DeliveryRow = {
   id: string;
@@ -96,7 +97,7 @@ export function DeliveriesLog({ rows }: { rows: DeliveryRow[] }) {
                   {d.lastStatusCode ?? (d.lastError ? <span className="text-destructive">error</span> : "—")}
                 </TableCell>
                 <TableCell className="text-muted-foreground">{d.status === "pending" ? relativeTime(d.nextAttemptAt) : "—"}</TableCell>
-                <TableCell className="text-muted-foreground tabular">{formatDateTime(d.createdAt)}</TableCell>
+                <TableCell className="text-muted-foreground tabular"><LocalTime value={d.createdAt} /></TableCell>
                 <TableCell className="text-right">
                   <Button
                     variant="ghost"
@@ -145,7 +146,7 @@ export function DeliveriesLog({ rows }: { rows: DeliveryRow[] }) {
                                 <span className="font-medium">Attempt {a.attempt}</span>
                                 <Badge tone={ok ? "success" : "danger"}>{a.statusCode ?? "No response"}</Badge>
                                 {a.durationMs !== null && <span className="text-muted-foreground tabular">{a.durationMs} ms</span>}
-                                <span className="text-muted-foreground">{formatDateTime(a.createdAt)}</span>
+                                <span className="text-muted-foreground"><LocalTime value={a.createdAt} /></span>
                               </div>
                               {a.error && <p className="mt-1.5 text-destructive">{a.error}</p>}
                               {a.responseBody && (

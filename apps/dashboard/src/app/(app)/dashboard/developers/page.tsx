@@ -16,7 +16,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { CopyButton } from "@/components/ui/copy-button";
 import { buttonVariants } from "@/components/ui/button";
-import { formatDate, relativeTime } from "@/lib/utils";
+import { relativeTime } from "@/lib/utils";
+import { LocalTime } from "@/components/ui/local-time";
 
 export const metadata: Metadata = { title: "Developers" };
 
@@ -63,10 +64,10 @@ export default async function DevelopersPage() {
                     <TableCell>
                       <span className="font-mono text-xs">{k.prefix}••••••••</span>
                     </TableCell>
-                    <TableCell className="text-muted-foreground tabular">{formatDate(k.createdAt)}</TableCell>
+                    <TableCell className="text-muted-foreground tabular"><LocalTime value={k.createdAt} mode="date" /></TableCell>
                     <TableCell className="text-muted-foreground">{k.lastUsedAt ? relativeTime(k.lastUsedAt) : "Never"}</TableCell>
                     <TableCell className="text-right">
-                      {k.revokedAt ? <Badge>Revoked {formatDate(k.revokedAt)}</Badge> : <RevokeKeyButton id={k.id} prefix={k.prefix} />}
+                      {k.revokedAt ? <Badge>Revoked <LocalTime value={k.revokedAt} mode="date" /></Badge> : <RevokeKeyButton id={k.id} prefix={k.prefix} />}
                     </TableCell>
                   </TableRow>
                 ))}

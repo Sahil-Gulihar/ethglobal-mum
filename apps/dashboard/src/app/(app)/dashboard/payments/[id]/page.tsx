@@ -15,7 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { CopyButton } from "@/components/ui/copy-button";
 import { Icon, type IconName } from "@/components/icons";
-import { cn, formatAmount, formatDateTime, shortAddr, shortHash } from "@/lib/utils";
+import { cn, formatAmount, shortAddr, shortHash } from "@/lib/utils";
+import { LocalTime } from "@/components/ui/local-time";
 
 export const metadata: Metadata = { title: "Payment" };
 
@@ -98,7 +99,7 @@ export default async function PaymentDetailPage({ params }: { params: Promise<{ 
         }
         description={
           <span className="flex items-center gap-1">
-            Order <span className="font-mono text-foreground">{p.orderId}</span> · {formatDateTime(p.createdAt)}
+            Order <span className="font-mono text-foreground">{p.orderId}</span> · <LocalTime value={p.createdAt} />
           </span>
         }
         actions={
@@ -151,7 +152,7 @@ export default async function PaymentDetailPage({ params }: { params: Promise<{ 
                     <p className="text-sm font-medium">
                       {e.title} {e.tone === "pending" && <Badge tone="warning">Pending</Badge>}
                     </p>
-                    <p className="text-xs text-muted-foreground">{formatDateTime(e.at)}</p>
+                    <p className="text-xs text-muted-foreground"><LocalTime value={e.at} /></p>
                     {e.detail && <div className="text-xs text-muted-foreground">{e.detail}</div>}
                   </div>
                 </li>

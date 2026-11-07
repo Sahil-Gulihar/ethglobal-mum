@@ -9,7 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { CopyButton } from "@/components/ui/copy-button";
-import { formatDate, shortHash } from "@/lib/utils";
+import { shortHash } from "@/lib/utils";
+import { LocalTime } from "@/components/ui/local-time";
 
 export const metadata: Metadata = { title: "Settings" };
 
@@ -65,7 +66,7 @@ export default async function SettingsPage() {
               <span className="font-mono text-xs">{shortHash(m.chainMerchantId)}</span>
             </Row>
             <Row label="Network">Whitechain Sepolia (1874)</Row>
-            <Row label="Member since">{formatDate(m.createdAt)}</Row>
+            <Row label="Member since"><LocalTime value={m.createdAt} mode="date" /></Row>
           </dl>
         </CardContent>
       </Card>

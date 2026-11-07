@@ -3,7 +3,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { ExplorerLink } from "@/components/dashboard/explorer-link";
-import { formatAmount, formatDateTime, shortAddr } from "@/lib/utils";
+import { formatAmount, shortAddr } from "@/lib/utils";
+import { LocalTime } from "@/components/ui/local-time";
 
 export type PaymentRowView = {
   id: string;
@@ -58,7 +59,7 @@ export function PaymentsTable({ rows, emptyAction, compact = false }: { rows: Pa
                 <ExplorerLink hash={p.txHash} />
               </TableCell>
             )}
-            <TableCell className="font-mono text-[13px] text-muted-foreground max-sm:hidden">{formatDateTime(p.createdAt)}</TableCell>
+            <TableCell className="font-mono text-[13px] text-muted-foreground max-sm:hidden"><LocalTime value={p.createdAt} /></TableCell>
             <TableCell className="text-right">
               <span className="font-medium">{formatAmount(p.amount)}</span> <span className="text-[13px] text-muted-foreground">USDT</span>
               {Number(p.refunded) > 0 && <span className="block text-[13px] text-muted-foreground">−{formatAmount(p.refunded)} refunded</span>}
