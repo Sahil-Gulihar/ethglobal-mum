@@ -16,7 +16,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { CopyButton } from "@/components/ui/copy-button";
 import { Spinner } from "@/components/ui/spinner";
 import { Icon } from "@/components/icons";
-import { formatDate } from "@/lib/utils";
+import { LocalTime } from "@/components/ui/local-time";
 
 export type EndpointCardProps = { id: string; url: string; enabled: boolean; createdAt: string; secretHint: string };
 
@@ -54,7 +54,7 @@ export function WebhookEndpointCard({ id, url, enabled, createdAt, secretHint }:
             </Badge>
           </div>
           <p className="text-xs text-muted-foreground">
-            Added {formatDate(createdAt)} · payment.succeeded, refund.succeeded
+            Added <LocalTime value={createdAt} mode="date" /> · payment.succeeded, refund.succeeded
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-1">

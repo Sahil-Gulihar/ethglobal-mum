@@ -12,22 +12,31 @@ export function shortHash(hash: string | null | undefined): string {
   return shortAddr(hash, 8, 6);
 }
 
-const dateFmt = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-});
-const dayFmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" });
-
-export function formatDateTime(d: Date | string | null | undefined): string {
-  if (!d) return "—";
-  return dateFmt.format(typeof d === "string" ? new Date(d) : d);
+const dateTimeOpts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" };
+const dayOpts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" };
+const fmtCache = new Map<string, Intl.DateTimeFormat>();
+function fmtFor(kind: "dt" | "d", timeZone?: string): Intl.DateTimeFormat {
+  const key = `${kind}:${timeZone ?? ""}`;
+  let f = fmtCache.get(key);
+  if (!f) {
+    f = new Intl.DateTimeFormat("en-US", { ...(kind === "dt" ? dateTimeOpts : dayOpts), timeZone });
+    fmtCache.set(key, f);
+  }
+  return f;
 }
 
-export function formatDate(d: Date | string | null | undefined): string {
+/**
+ * Formats in `timeZone`, or the runtime's local zone when omitted. On the server that is UTC,
+ * so for user-facing output render `<LocalTime>` instead, which formats in the browser.
+ */
+export function formatDateTime(d: Date | string | null | undefined, timeZone?: string): string {
   if (!d) return "—";
-  return dayFmt.format(typeof d === "string" ? new Date(d) : d);
+  return fmtFor("dt", timeZone).format(typeof d === "string" ? new Date(d) : d);
+}
+
+export function formatDate(d: Date | string | null | undefined, timeZone?: string): string {
+  if (!d) return "—";
+  return fmtFor("d", timeZone).format(typeof d === "string" ? new Date(d) : d);
 }
 
 /** Formats a decimal string like "49.5" as "49.50" (min 2 decimals, keeps extra precision). */

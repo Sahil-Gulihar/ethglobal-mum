@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { CopyButton } from "@/components/ui/copy-button";
-import { formatDate } from "@/lib/utils";
+import { LocalTime } from "@/components/ui/local-time";
 
 export const metadata: Metadata = { title: "Payment links" };
 
@@ -74,7 +74,7 @@ export default async function PaymentLinksPage() {
                       <TableCell className="text-right tabular text-muted-foreground">
                         {l.paidCount} · {l.paidTotal} USDT
                       </TableCell>
-                      <TableCell className="text-muted-foreground tabular">{formatDate(l.createdAt)}</TableCell>
+                      <TableCell className="text-muted-foreground tabular"><LocalTime value={l.createdAt} mode="date" /></TableCell>
                       <TableCell className="text-right">
                         <TogglePaymentLinkButton id={l.id} active={l.active} />
                       </TableCell>

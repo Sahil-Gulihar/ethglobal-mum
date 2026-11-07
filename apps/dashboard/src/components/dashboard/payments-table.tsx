@@ -4,7 +4,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { VerifiedBuyerBadge } from "@/components/verified-buyer-badge";
 import { ExplorerLink } from "@/components/dashboard/explorer-link";
-import { formatAmount, formatDateTime, shortAddr } from "@/lib/utils";
+import { formatAmount, shortAddr } from "@/lib/utils";
+import { LocalTime } from "@/components/ui/local-time";
 
 export type PaymentRowView = {
   id: string;
@@ -66,7 +67,7 @@ export function PaymentsTable({ rows, emptyAction }: { rows: PaymentRowView[]; e
             <TableCell className="relative z-[1] hidden xl:table-cell">
               <ExplorerLink hash={p.txHash} />
             </TableCell>
-            <TableCell className="text-right text-muted-foreground tabular">{formatDateTime(p.createdAt)}</TableCell>
+            <TableCell className="text-right text-muted-foreground tabular"><LocalTime value={p.createdAt} /></TableCell>
           </TableRow>
         ))}
       </TableBody>

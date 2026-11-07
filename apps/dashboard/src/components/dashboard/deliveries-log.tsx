@@ -12,7 +12,8 @@ import { CopyButton } from "@/components/ui/copy-button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Spinner } from "@/components/ui/spinner";
 import { Icon } from "@/components/icons";
-import { cn, formatDateTime, relativeTime } from "@/lib/utils";
+import { cn, relativeTime } from "@/lib/utils";
+import { LocalTime } from "@/components/ui/local-time";
 
 export type DeliveryRow = {
   id: string;
@@ -155,7 +156,7 @@ export function DeliveriesLog({ rows }: { rows: DeliveryRow[] }) {
               {delivery.eventId} · {delivery.id}
             </p>
             <p className="text-xs text-muted-foreground">
-              Created {formatDateTime(delivery.createdAt)}
+              Created <LocalTime value={delivery.createdAt} />
               {delivery.status === "pending" && ` · Next retry ${relativeTime(delivery.nextAttemptAt)}`}
             </p>
             {delivery.attemptLog.length ? (
@@ -168,7 +169,7 @@ export function DeliveriesLog({ rows }: { rows: DeliveryRow[] }) {
                       <Badge tone={attempt.statusCode !== null && attempt.statusCode >= 200 && attempt.statusCode < 300 ? "success" : "danger"}>
                         {attempt.statusCode ?? "No response"}
                       </Badge>
-                      <span className="text-muted-foreground">{formatDateTime(attempt.createdAt)}</span>
+                      <span className="text-muted-foreground"><LocalTime value={attempt.createdAt} /></span>
                       {attempt.durationMs !== null && <span>{attempt.durationMs} ms</span>}
                     </div>
                     {attempt.error && <p className="wrap-anywhere text-destructive">{attempt.error}</p>}
