@@ -281,6 +281,8 @@ Creates a checkout session by calling `POST {apiBase}/api/v1/checkout_sessions` 
 | `successUrl` | `string` | No | `http` or `https` URL, at most 2048 characters. |
 | `cancelUrl` | `string` | No | `http` or `https` URL, at most 2048 characters. |
 | `metadata` | `Record<string, string>` | No | Up to 20 keys. Keys at most 40 characters, values at most 500. |
+| `requireVerifiedBuyer` | `boolean` | No | The buyer must verify with World ID before paying. See [Verified buyers](./verified-buyers.md). |
+| `verifiedBuyerMethod` | `"world_id" \| "zg"` | No | How the buyer verifies. Defaults to `"world_id"`. |
 
 The helper always sends `currency: "USDT"`. It does not read `WC_API_BASE`; pass that yourself as `apiBase` if you use it.
 

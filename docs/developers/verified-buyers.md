@@ -29,10 +29,25 @@ Making each attempt cost real 0G credits is the point. A bot farm that wants to 
 
 ## Turn it on
 
-In the dashboard, open **Settings → Verified buyers**, pick **World ID** or **0G picture check**, and switch on **Verified buyers only**.
+Verified buyers is switched on in code, per checkout. Pass `requireVerifiedBuyer: true` when your server creates the checkout session:
 
-- **On:** the hosted checkout shows the human check first and only shows the pay button after it passes. The embedded widget sends buyers to the hosted checkout to verify.
-- **Off (default):** the check is optional. Buyers can still earn the badge, and you still see it.
+```ts
+import { createCheckoutSession } from "@whitechain-commerce/react/server";
+
+const session = await createCheckoutSession({
+  secretKey: process.env.WC_SECRET_KEY!,
+  orderId: order.id,
+  amount: "4.99",
+  requireVerifiedBuyer: true, // buyer verifies with World ID before paying
+});
+```
+
+Over plain HTTP, send the same field to `POST /api/v1/checkout_sessions`. With Python, pass `require_verified_buyer=True`. To use the 0G picture check instead of World ID, also send `verifiedBuyerMethod: "zg"`.
+
+- **`requireVerifiedBuyer: true`:** the hosted checkout shows a small **Verify with World ID** row inside the checkout card, and the pay steps appear only after the proof passes. The embedded widget sends buyers to the hosted checkout to verify.
+- **Left out (default):** no check. The checkout works as before.
+
+The [demo store](https://demo.100lana.com) sets `requireVerifiedBuyer: true` on every order.
 
 ## See it on payments
 

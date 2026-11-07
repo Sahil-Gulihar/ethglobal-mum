@@ -22,11 +22,15 @@ export interface CreateCheckoutSessionParams {
   successUrl?: string;
   cancelUrl?: string;
   metadata?: Record<string, string>;
+  /** Verified buyers: the customer must prove they're human (World ID by default) before they can pay. */
+  requireVerifiedBuyer?: boolean;
+  /** How the customer proves it: "world_id" (default) or "zg" (0G picture check). */
+  verifiedBuyerMethod?: "world_id" | "zg";
 }
 
 /** Creates a checkout session on your server so the amount cannot be tampered with in the browser. */
 export async function createCheckoutSession(params: CreateCheckoutSessionParams): Promise<CheckoutSession> {
-  const { secretKey, orderId, amount, successUrl, cancelUrl, metadata } = params;
+  const { secretKey, orderId, amount, successUrl, cancelUrl, metadata, requireVerifiedBuyer, verifiedBuyerMethod } = params;
   if (!secretKey || !secretKey.startsWith("sk_"))
     throw new WhitechainApiError(
       "createCheckoutSession: secretKey must be a secret key starting with sk_",
@@ -50,7 +54,7 @@ export async function createCheckoutSession(params: CreateCheckoutSessionParams)
   return apiFetch<CheckoutSession>(`${base}/api/v1/checkout_sessions`, {
     method: "POST",
     headers: { Authorization: `Bearer ${secretKey}` },
-    body: JSON.stringify({ orderId, amount, currency: "USDT", successUrl, cancelUrl, metadata }),
+    body: JSON.stringify({ orderId, amount, currency: "USDT", successUrl, cancelUrl, metadata, requireVerifiedBuyer, verifiedBuyerMethod }),
     cache: "no-store",
   });
 }

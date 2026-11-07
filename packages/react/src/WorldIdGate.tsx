@@ -1,9 +1,8 @@
-"use client";
-
 import { useState } from "react";
 import { IDKitRequestWidget, proofOfHuman, type IDKitResult } from "@worldcoin/idkit";
-import { completeBuyerWorldId, startBuyerWorldId } from "@/lib/actions/buyer-world-id";
-import type { WorldIdRequest } from "@/lib/world-id";
+import { startWorldId, verifyWorldId, type WorldIdStart } from "./api.ts";
+
+type Request = Extract<WorldIdStart, { verified: false }>;
 
 function ShieldIcon() {
   return (
@@ -14,21 +13,9 @@ function ShieldIcon() {
   );
 }
 
-/** Shown in the card once the buyer is verified. */
-export function WorldIdVerifiedRow() {
-  return (
-    <div className="wcc-gate">
-      <span className="wcc-verified">
-        <ShieldIcon /> Verified buyer
-      </span>
-      <span className="wcc-text">Verified with World ID</span>
-    </div>
-  );
-}
-
-/** Verified buyers with World ID: one compact row inside the checkout card with a small "Verify with World ID" button. */
-export function WorldIdBuyerCheck({ sessionId, required, onVerified }: { sessionId: string; required: boolean; onVerified: () => void }) {
-  const [request, setRequest] = useState<WorldIdRequest | null>(null);
+/** Verified buyers: a small "Verify with World ID" row inside the checkout card. Works on any origin (CORS API). */
+export function WorldIdGate({ apiBase, sessionId, onVerified }: { apiBase: string; sessionId: string; onVerified: () => void }) {
+  const [request, setRequest] = useState<Request | null>(null);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,36 +24,36 @@ export function WorldIdBuyerCheck({ sessionId, required, onVerified }: { session
     setBusy(true);
     setError(null);
     try {
-      const r = await startBuyerWorldId(sessionId);
-      if (!r.ok) return setError(r.error);
-      if (r.value.verified) return onVerified();
-      setRequest(r.value);
+      const r = await startWorldId(apiBase, sessionId);
+      if (r.verified) return onVerified();
+      setRequest(r);
       setOpen(true);
-    } catch {
-      setError("Something went wrong. Try again.");
+    } catch (e) {
+      setError((e as Error).message || "Something went wrong. Try again.");
     } finally {
       setBusy(false);
     }
   }
 
   async function verify(result: IDKitResult) {
-    const r = await completeBuyerWorldId(sessionId, result);
-    if (!r.ok) {
-      setError(r.error);
+    try {
+      await verifyWorldId(apiBase, sessionId, result);
+    } catch (e) {
+      const msg = (e as Error).message || "World ID couldn't verify you. Try again.";
+      setError(msg);
       // Close the widget so the specific reason shows here instead of IDKit's generic "Verification declined".
       setOpen(false);
       setRequest(null);
-      throw new Error(r.error);
+      throw e;
     }
   }
 
-  // Rendered inside the WhitechainCheckout card, so it uses the widget's own classes and theme.
   return (
     <div>
       <div className="wcc-gate">
         <div>
-          <p className="wcc-title">{required ? "Verify you're human to pay" : "Get the Verified buyer badge"}</p>
-          <p className="wcc-text">{required ? "This store only takes payments from real people." : "Optional. The store sees it on your order."}</p>
+          <p className="wcc-title">Verify you're human to pay</p>
+          <p className="wcc-text">This store only takes payments from real people.</p>
         </div>
         <button type="button" className="wcc-btn wcc-btn-sm" onClick={start} disabled={busy || open} data-busy={busy}>
           <ShieldIcon /> {busy ? "Opening…" : "Verify with World ID"}
@@ -103,6 +90,18 @@ export function WorldIdBuyerCheck({ sessionId, required, onVerified }: { session
           onError={(code) => setError((e) => e ?? `World ID verification didn't finish (${code}).`)}
         />
       )}
+    </div>
+  );
+}
+
+/** Shown in the card once the buyer is verified. */
+export function VerifiedRow() {
+  return (
+    <div className="wcc-gate">
+      <span className="wcc-verified">
+        <ShieldIcon /> Verified buyer
+      </span>
+      <span className="wcc-text">Verified with World ID</span>
     </div>
   );
 }

@@ -156,6 +156,7 @@ export const tools: ToolDef[] = [
       successUrl: httpUrl.optional().describe("Where to send the customer after a successful payment."),
       cancelUrl: httpUrl.optional().describe("Where to send the customer if they cancel."),
       metadata: z.record(z.string().max(40), z.string().max(500)).optional().describe("Up to 20 string key/value pairs echoed back in webhooks."),
+      requireVerifiedBuyer: z.boolean().optional().describe("Verified buyers: the customer must prove they're human with World ID before they can pay."),
     }),
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     run: async (m, a) => {
@@ -168,6 +169,7 @@ export const tools: ToolDef[] = [
           successUrl: a.successUrl,
           cancelUrl: a.cancelUrl,
           metadata,
+          requireVerifiedBuyer: a.requireVerifiedBuyer,
         }),
       );
     },

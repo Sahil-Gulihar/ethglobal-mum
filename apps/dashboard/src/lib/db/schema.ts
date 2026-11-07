@@ -15,10 +15,6 @@ export const merchants = pgTable("merchants", {
   registeredTxHash: text("registered_tx_hash"),
   /** Last time the backend signer registered/changed the payout onchain (rate limit). */
   payoutChangedAt: timestamp("payout_changed_at", { withTimezone: true }),
-  /** Settings toggle: buyers must pass the 0G human check before the hosted checkout shows the pay button. */
-  requireVerifiedBuyers: boolean("require_verified_buyers").notNull().default(false),
-  /** How buyers prove they're human: World ID (default) or the 0G picture check. */
-  verifiedBuyerMethod: text("verified_buyer_method", { enum: ["world_id", "zg"] }).notNull().default("world_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -57,6 +53,10 @@ export const checkoutSessions = pgTable(
     successUrl: text("success_url"),
     cancelUrl: text("cancel_url"),
     metadata: jsonb("metadata").$type<Record<string, string>>(),
+    /** Set by the merchant's code at session creation: the buyer must prove they're human before paying. */
+    requireVerifiedBuyer: boolean("require_verified_buyer").notNull().default(false),
+    /** How the buyer proves it: World ID (default) or the 0G picture check. */
+    verifiedBuyerMethod: text("verified_buyer_method", { enum: ["world_id", "zg"] }).notNull().default("world_id"),
     /** Set when the buyer passed the verified-buyer check (World ID or 0G). */
     humanVerifiedAt: timestamp("human_verified_at", { withTimezone: true }),
     humanCheckId: text("human_check_id"),

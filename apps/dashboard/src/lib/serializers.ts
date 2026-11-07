@@ -62,7 +62,7 @@ export function toPublicSession(s: SessionRow, m: MerchantRow, p: PaymentRow | n
     successUrl: s.successUrl,
     cancelUrl: s.cancelUrl,
     payment: p ? { id: p.id, txHash: p.txHash as `0x${string}`, explorerUrl: explorerTx(p.txHash) } : null,
-    buyerCheck: { required: m.requireVerifiedBuyers, verified: !!s.humanVerifiedAt, method: m.verifiedBuyerMethod },
+    buyerCheck: { required: s.requireVerifiedBuyer, verified: !!s.humanVerifiedAt, method: s.verifiedBuyerMethod },
   };
 }
 

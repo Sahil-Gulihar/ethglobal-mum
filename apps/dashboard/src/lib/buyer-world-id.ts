@@ -1,22 +1,22 @@
-"use server";
+import "server-only";
 
 import { and, eq, isNull } from "drizzle-orm";
 import type { IDKitResult } from "@worldcoin/idkit-core";
-import { checkoutSessions, db, merchants } from "@/lib/db";
+import { checkoutSessions, db } from "@/lib/db";
 import { signWorldIdRequest, verifyWorldIdProof, worldIdConfig, type WorldIdRequest } from "@/lib/world-id";
-import { err, ok, type ActionResult } from "./result";
+import { err, ok, type ActionResult } from "@/lib/actions/result";
 
 /**
- * Verified buyers with World ID. Public (no merchant login): anyone holding the checkout link can run it.
+ * Verified buyers with World ID. Public (no merchant login): the checkout widget calls it through
+ * POST /api/v1/checkout_sessions/:id/world_id and /world_id/verify, so it works on the hosted page and on merchants' sites.
  * The proof's signal is the checkout session ID, so a proof only unlocks the checkout it was made for.
  */
 
 async function openSession(sessionId: string) {
   if (typeof sessionId !== "string" || !/^cs_[A-Za-z0-9]+$/.test(sessionId)) return null;
   const [row] = await db
-    .select({ s: checkoutSessions, method: merchants.verifiedBuyerMethod })
+    .select({ s: checkoutSessions })
     .from(checkoutSessions)
-    .innerJoin(merchants, eq(merchants.id, checkoutSessions.merchantId))
     .where(eq(checkoutSessions.id, sessionId))
     .limit(1);
   if (!row || row.s.status !== "open" || row.s.expiresAt.getTime() < Date.now()) return null;
@@ -30,7 +30,7 @@ export async function startBuyerWorldId(sessionId: string): Promise<ActionResult
   const row = await openSession(sessionId);
   if (!row) return err("This checkout is no longer open.");
   if (row.s.humanVerifiedAt) return ok({ verified: true });
-  if (row.method !== "world_id") return err("This store doesn't use World ID for buyer checks.");
+  if (row.s.verifiedBuyerMethod !== "world_id") return err("This store doesn't use World ID for buyer checks.");
   const cfg = worldIdConfig();
   if (!cfg) return err("World ID isn't configured on this server.");
   return ok({ verified: false, ...signWorldIdRequest(cfg, cfg.buyerAction, sessionId) });
@@ -41,7 +41,7 @@ export async function completeBuyerWorldId(sessionId: string, result: IDKitResul
   const row = await openSession(sessionId);
   if (!row) return err("This checkout is no longer open.");
   if (row.s.humanVerifiedAt) return ok({ verified: true });
-  if (row.method !== "world_id") return err("This store doesn't use World ID for buyer checks.");
+  if (row.s.verifiedBuyerMethod !== "world_id") return err("This store doesn't use World ID for buyer checks.");
   const cfg = worldIdConfig();
   if (!cfg) return err("World ID isn't configured on this server.");
 

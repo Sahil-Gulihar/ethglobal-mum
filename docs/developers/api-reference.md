@@ -124,6 +124,8 @@ Creates a checkout session for one of your orders. Call this from your server, s
 | `successUrl` | string or null | No | Where the hosted checkout sends the customer after a confirmed payment. Must be an `http` or `https` URL, at most 2048 characters. |
 | `cancelUrl` | string or null | No | Where the widget's Cancel button and the expired screen send the customer. Same rules as `successUrl`. |
 | `metadata` | object or null | No | String-to-string map stored with the session. Keys at most 40 characters, values at most 500 characters, at most 20 keys. Values must be strings. |
+| `requireVerifiedBuyer` | boolean | No | `true` makes the buyer prove they're human before they can pay. See [Verified buyers](./verified-buyers.md). Default `false`. |
+| `verifiedBuyerMethod` | string | No | `"world_id"` (default) or `"zg"` (0G picture check). Only used with `requireVerifiedBuyer: true`. |
 
 The merchant account must have a payout wallet registered onchain. Otherwise the request fails with `409 conflict` (see [Errors](./errors.md#conflict)).
 

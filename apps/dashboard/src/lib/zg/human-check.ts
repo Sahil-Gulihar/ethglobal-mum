@@ -89,7 +89,7 @@ export async function startHumanCheck(sessionId: string): Promise<StartResult | 
   const r = await loadOpenSession(sessionId);
   if (!r.ok) return r;
   if (r.s.humanVerifiedAt) return { ok: true, verified: true, via: "session" };
-  if (r.m.verifiedBuyerMethod !== "zg") return fail(409, "wrong_method", "This store verifies buyers with World ID.");
+  if (r.s.verifiedBuyerMethod !== "zg") return fail(409, "wrong_method", "This store verifies buyers with World ID.");
 
   const buyer = await getCurrentBuyer();
   // A signed-in buyer who passed a check in the last 30 days carries the badge across every store.

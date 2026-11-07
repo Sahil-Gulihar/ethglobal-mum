@@ -15,6 +15,9 @@ const CreateSession = z.object({
     .record(z.string().max(40), z.string().max(500))
     .refine((m) => Object.keys(m).length <= 20, "at most 20 keys")
     .nullish(),
+  /** Verified buyers: require the buyer to prove they're human (World ID by default) before paying. */
+  requireVerifiedBuyer: z.boolean().optional(),
+  verifiedBuyerMethod: z.enum(["world_id", "zg"]).optional(),
 });
 
 export const OPTIONS = preflight;

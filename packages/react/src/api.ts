@@ -1,4 +1,5 @@
 import type { ApiError, PublicCheckoutSession } from "@whitechain-commerce/core";
+import type { RpContext } from "@worldcoin/idkit";
 
 /** Error from the Whitechain Commerce HTTP API. */
 export class WhitechainApiError extends Error {
@@ -62,4 +63,25 @@ export const submitTx = (apiBase: string, id: string, txHash: string) =>
   apiFetch<{ ok: true; status: PublicCheckoutSession["status"] }>(`${apiBase}/api/v1/checkout_sessions/${encodeURIComponent(id)}/submit`, {
     method: "POST",
     body: JSON.stringify({ txHash }),
+  });
+
+/** Verified buyers (World ID): what the browser needs to open IDKit for this checkout. */
+export type WorldIdStart =
+  | { verified: true }
+  | {
+      verified: false;
+      appId: `app_${string}`;
+      action: string;
+      environment: "production" | "staging";
+      signal: string;
+      rpContext: RpContext;
+    };
+
+export const startWorldId = (apiBase: string, id: string) =>
+  apiFetch<WorldIdStart>(`${apiBase}/api/v1/checkout_sessions/${encodeURIComponent(id)}/world_id`, { method: "POST", cache: "no-store" });
+
+export const verifyWorldId = (apiBase: string, id: string, result: unknown) =>
+  apiFetch<{ verified: true }>(`${apiBase}/api/v1/checkout_sessions/${encodeURIComponent(id)}/world_id/verify`, {
+    method: "POST",
+    body: JSON.stringify(result),
   });

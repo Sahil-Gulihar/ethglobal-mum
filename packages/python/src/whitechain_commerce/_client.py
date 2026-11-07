@@ -49,6 +49,7 @@ class Whitechain:
         success_url: str | None = None,
         cancel_url: str | None = None,
         metadata: dict[str, str] | None = None,
+        require_verified_buyer: bool | None = None,
     ) -> CheckoutSession:
         """Create or reuse a payable session for an order. Amounts are decimal strings."""
         payload = {
@@ -58,6 +59,7 @@ class Whitechain:
             "successUrl": success_url,
             "cancelUrl": cancel_url,
             "metadata": metadata,
+            "requireVerifiedBuyer": require_verified_buyer,
         }
         return cast(
             CheckoutSession,

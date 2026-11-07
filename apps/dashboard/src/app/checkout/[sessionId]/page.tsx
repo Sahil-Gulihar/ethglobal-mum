@@ -21,7 +21,8 @@ export default async function CheckoutPage({
   const { sessionId } = await params;
   const { theme } = await searchParams;
   const session = await getPublicCheckoutSession(sessionId).catch(() => null);
-  const buyerCheck = session && session.status === "open" ? (session.buyerCheck ?? null) : null;
+  // Verified buyers is switched on per checkout by the merchant's code (requireVerifiedBuyer at session creation).
+  const buyerCheck = session && session.status === "open" && session.buyerCheck?.required ? session.buyerCheck : null;
 
   return (
     <main className={`${theme === "dark" ? "checkout-dark" : "checkout-light"} ${styles.page}`} data-theme={theme === "dark" ? "dark" : "light"}>

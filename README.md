@@ -31,7 +31,7 @@ Customers pay in USDT on Whitechain and the funds go directly to the merchant's 
 
 ## Verified buyers, powered by 0G
 
-Checkout bots farm sessions, test stolen wallets, and empty limited drops. **Verified buyers** adds an optional human check before payment, and it runs on [0G Private Computer](https://pc.0g.ai). Merchants turn on **Settings → Verified buyers only**. The buyer then names what's in a picture that 0G drew a moment ago. They can type the answer or say it, and 0G judges it in a TEE. Only after that does the pay button appear. Each payment, and each `payment.succeeded` webhook, carries `buyerVerified`.
+Checkout bots farm sessions, test stolen wallets, and empty limited drops. **Verified buyers** adds a human check before payment. Merchants switch it on in code by passing `requireVerifiedBuyer: true` when they create a checkout session. By default the buyer proves they're human with World ID, in a small row inside the checkout card. With `verifiedBuyerMethod: "zg"` the check runs on [0G Private Computer](https://pc.0g.ai) instead: the buyer names what's in a picture that 0G drew a moment ago, by typing or saying it, and 0G judges the answer in a TEE. Only after the check passes does the pay button appear. Each payment, and each `payment.succeeded` webhook, carries `buyerVerified`.
 
 | Step | 0G model (TEE, `X-0G-Provider-Trust-Mode: private`) |
 |---|---|

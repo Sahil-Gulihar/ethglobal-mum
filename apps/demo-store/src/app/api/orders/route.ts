@@ -37,6 +37,8 @@ export async function POST(req: Request) {
       successUrl: `${STORE_URL}/orders/${orderId}`,
       cancelUrl: `${STORE_URL}/`,
       metadata: { store: "chai-and-co", items: String(items.length) },
+      // Verified buyers: shoppers prove they're human with World ID before they can pay.
+      requireVerifiedBuyer: true,
     });
   } catch (err) {
     console.error("[orders] createCheckoutSession failed:", err);

@@ -39,6 +39,10 @@ export interface CreateSessionInput {
   successUrl?: string | null;
   cancelUrl?: string | null;
   metadata?: Record<string, string> | null;
+  /** Verified buyers: the buyer must prove they're human before the pay button appears. */
+  requireVerifiedBuyer?: boolean;
+  /** How the buyer proves it. Defaults to "world_id". */
+  verifiedBuyerMethod?: "world_id" | "zg";
 }
 
 const fail = (status: number, type: ErrorType, message: string): SessionFailure => ({ ok: false, status, type, message });
@@ -80,6 +84,7 @@ export async function createCheckoutSessionForMerchant(
     const sameAmount = existing.find(
       (r) =>
         r.s.amountUnits === units.toString() &&
+        r.s.requireVerifiedBuyer === !!input.requireVerifiedBuyer &&
         (r.s.status === "processing" || (r.s.status === "open" && r.s.expiresAt.getTime() > now)),
     );
     if (sameAmount) return { ok: true as const, value: toCheckoutSession(sameAmount.s, merchant, null), created: false };
@@ -103,6 +108,8 @@ export async function createCheckoutSessionForMerchant(
         successUrl: input.successUrl ?? null,
         cancelUrl: input.cancelUrl ?? null,
         metadata: input.metadata ?? null,
+        requireVerifiedBuyer: !!input.requireVerifiedBuyer,
+        verifiedBuyerMethod: input.verifiedBuyerMethod ?? "world_id",
         expiresAt: new Date(now + SESSION_TTL_MS),
       })
       .returning();

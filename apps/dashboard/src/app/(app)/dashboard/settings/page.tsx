@@ -11,10 +11,17 @@ import { CopyButton } from "@/components/ui/copy-button";
 import { formatDate, shortHash } from "@/lib/utils";
 
 import { DashboardSections } from "@/components/dashboard/dashboard-pages";
-import { VerifiedBuyersToggle } from "@/components/dashboard/verified-buyers-toggle";
+import { CodeBlock } from "@/components/code-block";
 import { humanCheckStats } from "../_lib/queries";
 
 export const metadata: Metadata = { title: "Settings" };
+
+const VERIFIED_BUYER_SNIPPET = `const session = await createCheckoutSession({
+  secretKey: process.env.WC_SECRET_KEY!,
+  orderId: order.id,
+  amount: "4.99",
+  requireVerifiedBuyer: true, // buyer verifies with World ID before paying
+});`;
 
 export default async function SettingsPage() {
   const m = await requireMerchant();
@@ -71,12 +78,13 @@ export default async function SettingsPage() {
                 <CardHeader>
                   <CardTitle>Verified buyers</CardTitle>
                   <CardDescription>
-                    Stop bots from buying at your checkout. Buyers prove they're human with World ID, or name what they see in a fresh picture drawn by
-                    0G Private Computer. Payments show a Verified buyer badge, and webhooks carry <code>buyerVerified</code>.
+                    Stop bots from buying at your checkout. Turn it on in code: pass <code>requireVerifiedBuyer: true</code> when you create a checkout
+                    session, and the buyer proves they&apos;re human with World ID before the pay button appears. Payments show a Verified buyer badge,
+                    and webhooks carry <code>buyerVerified</code>.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4">
-                  <VerifiedBuyersToggle initial={m.requireVerifiedBuyers} initialMethod={m.verifiedBuyerMethod} />
+                  <CodeBlock code={VERIFIED_BUYER_SNIPPET} language="ts" filename="app/api/orders/route.ts" />
                   <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
                     <Stat label="Verified with World ID" value={checks.worldId} />
                     <Stat label="Checks run on 0G" value={checks.total} />
