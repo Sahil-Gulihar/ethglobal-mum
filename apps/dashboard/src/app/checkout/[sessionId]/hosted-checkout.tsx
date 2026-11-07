@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { WhitechainCheckout, type CheckoutSuccess } from "@whitechain-commerce/react";
 import styles from "./checkout.module.css";
 import { HumanCheck } from "./human-check";
-import { WorldIdBuyerCheck } from "./world-id-check";
+import { WorldIdBuyerCheck, WorldIdVerifiedRow } from "./world-id-check";
 import { VerifiedBuyerBadge } from "@/components/verified-buyer-badge";
 
 const REDIRECT_MS = 2000;
@@ -30,31 +30,41 @@ export function HostedCheckout({
     return () => clearTimeout(t);
   }, [redirectTo]);
 
+  // World ID lives inside the checkout card. The 0G picture check is bigger, so it stays above the card.
+  const worldIdSlot =
+    buyerCheck && worldId ? (
+      verified ? (
+        <WorldIdVerifiedRow />
+      ) : (
+        <WorldIdBuyerCheck sessionId={sessionId} required={buyerCheck.required} onVerified={() => setVerified(true)} />
+      )
+    ) : undefined;
+
   return (
     <div className={styles.cardWrap}>
-      {buyerCheck &&
-        !verified &&
-        (worldId ? (
-          <WorldIdBuyerCheck sessionId={sessionId} required={buyerCheck.required} onVerified={() => setVerified(true)} />
-        ) : (
-          <HumanCheck sessionId={sessionId} required={buyerCheck.required} onVerified={() => setVerified(true)} />
-        ))}
-      {buyerCheck && verified && (
+      {buyerCheck && !worldId && !verified && (
+        <HumanCheck sessionId={sessionId} required={buyerCheck.required} onVerified={() => setVerified(true)} />
+      )}
+      {buyerCheck && !worldId && verified && (
         <div className="mb-3 flex items-center justify-between gap-3 rounded-lg border bg-card px-4 py-3">
           <VerifiedBuyerBadge />
-          <span className="text-xs text-muted-foreground">{worldId ? "Verified with World ID" : "Checked on 0G Private Computer"}</span>
+          <span className="text-xs text-muted-foreground">Checked on 0G Private Computer</span>
         </div>
       )}
-      {!gated && <WhitechainCheckout
-        sessionId={sessionId}
-        apiBase=""
-        theme={theme}
-        onSuccess={(r: CheckoutSuccess) => {
-          // Already paid before we loaded: show that state and let "Return to store" do the redirect.
-          if (r.successUrl && !r.alreadyPaid) setRedirectTo(r.successUrl);
-        }}
-        onError={(e) => console.error("[whitechain-checkout]", e)}
-      />}
+      {(worldId || !gated) && (
+        <WhitechainCheckout
+          sessionId={sessionId}
+          apiBase=""
+          theme={theme}
+          buyerCheck={worldIdSlot}
+          buyerVerified={buyerCheck ? verified : undefined}
+          onSuccess={(r: CheckoutSuccess) => {
+            // Already paid before we loaded: show that state and let "Return to store" do the redirect.
+            if (r.successUrl && !r.alreadyPaid) setRedirectTo(r.successUrl);
+          }}
+          onError={(e) => console.error("[whitechain-checkout]", e)}
+        />
+      )}
       <p className={styles.redirect} data-show={redirectTo ? "true" : "false"} aria-live="polite">
         {redirectTo ? "Payment confirmed. Taking you back to the store…" : " "}
       </p>

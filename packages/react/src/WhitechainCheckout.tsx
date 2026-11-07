@@ -76,6 +76,13 @@ export interface WhitechainCheckoutProps {
   onCancel?: () => void;
   theme?: "light" | "dark";
   className?: string;
+  /**
+   * Verified buyers: content rendered inside the card, under the amount (e.g. a "Verify with World ID" row,
+   * or a Verified buyer badge). While the buyer still has to verify, it replaces the pay steps.
+   */
+  buyerCheck?: ReactNode;
+  /** Overrides the session's `buyerCheck.verified` once the host has verified the buyer in this page. */
+  buyerVerified?: boolean;
 }
 
 const CHAIN_HEX = `0x${WHITECHAIN_CHAIN_ID.toString(16)}`;
@@ -499,6 +506,8 @@ export function WhitechainCheckout(props: WhitechainCheckoutProps) {
       <View
         state={state}
         hostedUrl={`${apiBase}/checkout/${encodeURIComponent(sessionId)}`}
+        buyerCheck={props.buyerCheck}
+        buyerVerified={props.buyerVerified}
         msLeft={msLeft}
         wallets={wallets}
         walletsSettled={walletsSettled}
@@ -537,6 +546,8 @@ export interface ViewProps {
   state: State;
   /** Hosted checkout URL, used when the merchant requires the 0G human check (verified buyers only). */
   hostedUrl?: string;
+  buyerCheck?: ReactNode;
+  buyerVerified?: boolean;
   msLeft: number;
   wallets: DetectedWallet[];
   walletsSettled: boolean;
@@ -606,6 +617,8 @@ export function View(p: ViewProps) {
   const amountLabel = formatAmount(BigInt(session.amountUnits), decimals);
   const countdown = formatCountdown(p.msLeft);
   const showTimer = isPrePay(state.phase) && countdown;
+  const buyerVerified = p.buyerVerified ?? session.buyerCheck?.verified ?? false;
+  const gated = Boolean(session.buyerCheck?.required) && !buyerVerified && isPrePay(state.phase);
 
   return (
     <>
@@ -633,12 +646,14 @@ export function View(p: ViewProps) {
         </div>
       </div>
       <div className="wcc-divider" />
-      {session.buyerCheck?.required && !session.buyerCheck.verified && isPrePay(state.phase) ? (
-        // The buyer check (World ID or the 0G picture check) runs on the hosted checkout.
+      {gated && p.buyerCheck ? (
+        <section className="wcc-body">{p.buyerCheck}</section>
+      ) : gated ? (
+        // No in-page check (embedded widget): send the buyer to the hosted checkout to verify.
         <section className="wcc-body">
-          <p className="wcc-title">{session.buyerCheck.method === "zg" ? "Quick human check first" : "Verify you're human first"}</p>
+          <p className="wcc-title">{session.buyerCheck?.method === "zg" ? "Quick human check first" : "Verify you're human first"}</p>
           <p className="wcc-text">
-            {session.buyerCheck.method === "zg"
+            {session.buyerCheck?.method === "zg"
               ? "This store only accepts payments from verified buyers. It takes about 10 seconds."
               : "This store only accepts payments from verified buyers. Verify with World ID, then pay."}
           </p>
@@ -647,7 +662,10 @@ export function View(p: ViewProps) {
           </a>
         </section>
       ) : (
-        <Body {...p} amountLabel={amountLabel} />
+        <>
+          {p.buyerCheck && isPrePay(state.phase) ? <div className="wcc-buyer">{p.buyerCheck}</div> : null}
+          <Body {...p} amountLabel={amountLabel} />
+        </>
       )}
     </>
   );

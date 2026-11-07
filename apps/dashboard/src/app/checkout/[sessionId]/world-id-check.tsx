@@ -4,11 +4,29 @@ import { useState } from "react";
 import { IDKitRequestWidget, proofOfHuman, type IDKitResult } from "@worldcoin/idkit";
 import { completeBuyerWorldId, startBuyerWorldId } from "@/lib/actions/buyer-world-id";
 import type { WorldIdRequest } from "@/lib/world-id";
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
-import { Icon } from "@/components/icons";
 
-/** Verified buyers with World ID: one compact row with the same button as merchant onboarding. */
+function ShieldIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z" />
+      <path d="M9 12l2 2 4-4" />
+    </svg>
+  );
+}
+
+/** Shown in the card once the buyer is verified. */
+export function WorldIdVerifiedRow() {
+  return (
+    <div className="wcc-gate">
+      <span className="wcc-verified">
+        <ShieldIcon /> Verified buyer
+      </span>
+      <span className="wcc-text">Verified with World ID</span>
+    </div>
+  );
+}
+
+/** Verified buyers with World ID: one compact row inside the checkout card with a small "Verify with World ID" button. */
 export function WorldIdBuyerCheck({ sessionId, required, onVerified }: { sessionId: string; required: boolean; onVerified: () => void }) {
   const [request, setRequest] = useState<WorldIdRequest | null>(null);
   const [open, setOpen] = useState(false);
@@ -42,24 +60,28 @@ export function WorldIdBuyerCheck({ sessionId, required, onVerified }: { session
     }
   }
 
+  // Rendered inside the WhitechainCheckout card, so it uses the widget's own classes and theme.
   return (
-    <div className="mb-3 rounded-lg border bg-card px-4 py-3 text-sm">
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <div className="font-medium">{required ? "Verify you're human to pay" : "Get the Verified buyer badge"}</div>
-          <div className="text-xs text-muted-foreground">{required ? "This store only takes payments from real people." : "Optional. The store sees it on your order."}</div>
+    <div>
+      <div className="wcc-gate">
+        <div>
+          <p className="wcc-title">{required ? "Verify you're human to pay" : "Get the Verified buyer badge"}</p>
+          <p className="wcc-text">{required ? "This store only takes payments from real people." : "Optional. The store sees it on your order."}</p>
         </div>
-        <Button size="sm" onClick={start} disabled={busy || open} className="shrink-0">
-          {busy ? <Spinner /> : <Icon name="shield" />} Verify with World ID
-        </Button>
+        <button type="button" className="wcc-btn wcc-btn-sm" onClick={start} disabled={busy || open} data-busy={busy}>
+          <ShieldIcon /> {busy ? "Opening…" : "Verify with World ID"}
+        </button>
       </div>
       {request?.environment === "staging" && (
-        <a href="https://simulator.worldcoin.org" target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs text-muted-foreground underline underline-offset-4">
-          Testing? Open the World ID simulator
-        </a>
+        <p className="wcc-note">
+          Testing?{" "}
+          <a href="https://simulator.worldcoin.org" target="_blank" rel="noreferrer">
+            Open the World ID simulator
+          </a>
+        </p>
       )}
       {error && (
-        <p className="mt-2 text-xs text-destructive" role="alert">
+        <p className="wcc-note" data-kind="error" role="alert">
           {error}
         </p>
       )}

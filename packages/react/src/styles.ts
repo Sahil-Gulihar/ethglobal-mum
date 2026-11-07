@@ -75,6 +75,15 @@ transition:background .15s,transform .1s,opacity .15s;text-decoration:none!impor
 .wcc-btn:disabled{opacity:.55;cursor:default}
 .wcc-btn[data-busy=true]:disabled{opacity:.88;cursor:progress}
 .wcc-btn:focus-visible,.wcc-wallet:focus-visible,.wcc-btn-ghost:focus-visible{outline:2px solid var(--wcc-accent);outline-offset:2px}
+.wcc-btn.wcc-btn-sm{display:inline-flex;width:auto;height:32px;padding:0 12px;font-size:13px;border-radius:6px;flex-shrink:0}
+.wcc-buyer{padding:16px 28px 0}
+.wcc-gate{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.wcc-gate .wcc-title{font-size:14px;margin:0 0 2px}
+.wcc-gate .wcc-text{margin:0;font-size:12px}
+.wcc-note{margin:8px 0 0;font-size:12px;color:var(--wcc-muted)}
+.wcc-note a{color:inherit;text-decoration:underline}
+.wcc-note[data-kind=error]{color:var(--wcc-danger)}
+.wcc-verified{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--wcc-success-soft);color:var(--wcc-success);font-size:12px;font-weight:600}
 .wcc-btn-ghost{display:block;width:100%;margin-top:8px;padding:10px;border:0;border-radius:8px;background:none;cursor:pointer;
 color:var(--wcc-muted)!important;font-size:13px;font-weight:500;text-align:center}
 .wcc-btn-ghost:hover{background:var(--wcc-soft);text-decoration:none!important}
@@ -106,7 +115,7 @@ background:var(--wcc-bg);font-size:11.5px;color:var(--wcc-faint)}
 @keyframes wcc-shim{0%{background-position:100% 0}100%{background-position:-100% 0}}
 @keyframes wcc-draw{to{stroke-dashoffset:0}}
 @keyframes wcc-pop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
-@media (max-width:440px){.wcc-root{border-radius:8px}.wcc-head{padding:24px 22px 0}.wcc-amount{padding:28px 22px 22px}.wcc-body{padding:20px 22px 24px}.wcc-divider{margin:0 22px}.wcc-amount-value{font-size:36px}}
+@media (max-width:440px){.wcc-root{border-radius:8px}.wcc-head{padding:24px 22px 0}.wcc-amount{padding:28px 22px 22px}.wcc-body{padding:20px 22px 24px}.wcc-divider{margin:0 22px}.wcc-buyer{padding:16px 22px 0}.wcc-amount-value{font-size:36px}}
 @media (prefers-reduced-motion:reduce){.wcc-root *:not(.wcc-spin){animation-duration:.01ms!important;transition:none!important}}
 .wcc-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 `;
