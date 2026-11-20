@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 112" role="img" aria-label="White Money">
+  <rect width="400" height="112" rx="20" fill="#000"/>
+  <path transform="translate(13 10) scale(.073)" fill="#fff" d="M123 430H244L317 649 410 430H488L571 649 661 430H779L887 590 1002 430H1128V824H1007V622L883 796 731 574 633 824H521L444 634 365 824H261Z"/>
+  <text x="112" y="71" fill="#fff" font-family="Helvetica, Arial, sans-serif" font-size="47" font-weight="700" letter-spacing="-1.7">White Money</text>
+</svg>
